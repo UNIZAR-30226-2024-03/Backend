@@ -1,0 +1,4 @@
+Instalación de Express, sequelize y conector con basee de datos Postgres.
+    npm install express pg pg-hstore sequelize --save
+Arrancar el proyecto 
+    node .\app\index.js
