@@ -1,0 +1,111 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Usuario {
+  idUsuario     Int      @id @default(autoincrement())
+  email         String   @unique
+  nombreUsuario String  
+  esAdmin       Boolean  @default(false)
+  contrasegna   String?
+  imgPerfil     String?
+  idUltimoAudio Int?
+  segFinAudio   Int?
+
+  Listas        SigueLista[]
+  Audios        Audio[]
+  Escuchas      Escucha[]
+  Seguidores    Seguir[] @relation("Seguidor")
+  Seguidos      Seguir[] @relation("Seguido")
+} 
+
+model Seguir {
+  seguidorId Int
+  seguidoId  Int
+  @@id([seguidorId, seguidoId])
+  
+  seguidor   Usuario @relation("Seguidor", fields: [seguidorId], references: [idUsuario])
+  seguido    Usuario @relation("Seguido", fields: [seguidoId], references: [idUsuario])
+}
+
+model SigueLista {
+  idUsuario     Int
+  idLista       Int
+  ultimaEscucha DateTime @default(now())
+  @@id([idUsuario, idLista])
+  
+  Usuario       Usuario @relation(fields: [idUsuario], references: [idUsuario])
+  Lista         Lista   @relation(fields: [idLista], references: [idLista])
+}
+
+model Lista {
+  idLista       Int      @id @default(autoincrement())
+  nombre        String
+  esAlbum       Boolean  @default(false)
+  esPrivada     Boolean  @default(false)
+  fecha         DateTime @default(now())
+  tipoLista     TipoLista 
+  imgLista      String?
+  descripcion   String?
+
+  Seguidores    SigueLista[]
+  Audios        Audio[]
+}
+
+model Audio {
+  idAudio       Int      @id @default(autoincrement())
+  titulo        String
+  path          String
+  duracionSeg   Int
+  fechaLanz     DateTime @default(now())
+  esAlbum       String?
+  imgAudio      String?
+
+  Artistas      Usuario[]
+  Lista         Lista[]
+  Escuchas      Escucha[]
+  EtiquetasPodcast     EtiquetaPodcast[]
+  EtiquetasCancion     EtiquetaCancion[]
+}
+
+model Escucha {
+  idUsuario     Int
+  idAudio       Int
+  fecha         DateTime @default(now())
+  @@id([idUsuario, idAudio])
+  
+  Usuario       Usuario @relation(fields: [idUsuario], references: [idUsuario])
+  Audio         Audio   @relation(fields: [idAudio], references: [idAudio])
+}
+
+model EtiquetaPodcast {
+  idEtiqueta    Int      @id @default(autoincrement())
+  nombre        String   
+
+  Audios        Audio[]
+}
+
+model EtiquetaCancion {
+  idEtiqueta    Int      @id @default(autoincrement())
+  nombre        String   
+
+  Audios        Audio[]
+}
+
+enum TipoLista {
+  MIS_AUDIOS
+  MIS_FAVORITOS
+  MIS_PODCAST
+  NORMAL  
+}

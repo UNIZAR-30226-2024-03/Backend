@@ -1,25 +1,25 @@
-const { Sequelize, DataTypes, Model } = require('sequelize');
-const sequelize = new Sequelize('sqlite::memory:');
+const { Model, DataTypes } = require('sequelize');
 
 class Usuario extends Model {
     // aqui podemos poner metodos y propiedades de la clase
-    getFullName() {
-        return this.nombreUsuario;
-    }
 }
 
 Usuario.init({
+    idUsuario: {
+        type: DataTypes.INTEGER,
+        autoIncrement: true,
+        primaryKey: true,
+    },
     email: {
         type: DataTypes.STRING,
         allowNull: false,
         unique: true,
-        validate: {
-            isEmail: true
-        }
+        validate: { isEmail: true }
     },
     nombreUsuario: {
         type: DataTypes.STRING,
-        allowNull: false
+        allowNull: false,
+        unique: true
     },
     contrasegna: {
         type: DataTypes.STRING,
@@ -42,3 +42,5 @@ Usuario.init({
         
     }
 });
+
+export default Usuario;
