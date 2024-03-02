@@ -5,6 +5,7 @@ import dotenv from "dotenv";
 import { routes } from "./routes/routesExport";
 
 import bodyParser from 'body-parser';
+import { loginRouter } from "./routes/loginRoutes";
 
 
 const app: Express = express();
@@ -17,8 +18,6 @@ dotenv.config();
 
 // Routes
 app.use(routes);
-
-
 app.listen(port, () => {
   console.log(`[server]: Server is running at http://localhost:${port}`);
 });
