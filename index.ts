@@ -5,7 +5,6 @@ import dotenv from "dotenv";
 import { routes } from "./routes/routesExport";
 
 import bodyParser from 'body-parser';
-import { loginRouter } from "./routes/loginRoutes";
 
 
 const app: Express = express();

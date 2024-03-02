@@ -1,6 +1,6 @@
 import express, { Express, Request, Response } from "express";
 import passport from "passport";
-import "../middlewares/google.js";
+import "../controllers/authController.js";
 import { Router } from "express";
 
 export const loginRouter = express.Router();
