@@ -18,7 +18,6 @@ model Usuario {
   email         String  @unique
   nombreUsuario String
   esAdmin       Boolean @default(false)
-  googleLogin   Boolean @default(false)
   contrasegna   String?
   imgPerfil     String?
   idUltimoAudio Int?
