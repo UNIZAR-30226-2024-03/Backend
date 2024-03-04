@@ -14,10 +14,11 @@ datasource db {
 }
 
 model Usuario {
-  idUsuario     Int      @id @default(autoincrement())
-  email         String   @unique
-  nombreUsuario String  
-  esAdmin       Boolean  @default(false)
+  idUsuario     Int     @id @default(autoincrement())
+  email         String  @unique
+  nombreUsuario String
+  esAdmin       Boolean @default(false)
+  googleLogin   Boolean @default(false)
   contrasegna   String?
   imgPerfil     String?
   idUltimoAudio Int?
@@ -27,39 +28,40 @@ model Usuario {
   ListasPropias Lista[]
   Audios        Audio[]
   Escuchas      Escucha[]
-  Seguidores    Seguir[] @relation("Seguidor")
-  Seguidos      Seguir[] @relation("Seguido")
-} 
+  Seguidores    Seguir[]     @relation("Seguidor")
+  Seguidos      Seguir[]     @relation("Seguido")
+}
 
 model Seguir {
   seguidorId Int
   seguidoId  Int
+
+  seguidor Usuario @relation("Seguidor", fields: [seguidorId], references: [idUsuario])
+  seguido  Usuario @relation("Seguido", fields: [seguidoId], references: [idUsuario])
+
   @@id([seguidorId, seguidoId])
-  
-  seguidor   Usuario @relation("Seguidor", fields: [seguidorId], references: [idUsuario])
-  seguido    Usuario @relation("Seguido", fields: [seguidoId], references: [idUsuario])
 }
 
 model SigueLista {
   idUsuario     Int
   idLista       Int
   ultimaEscucha DateTime @default(now())
+
+  Usuario Usuario @relation(fields: [idUsuario], references: [idUsuario])
+  Lista   Lista   @relation(fields: [idLista], references: [idLista])
+
   @@id([idUsuario, idLista])
-  
-  Usuario       Usuario @relation(fields: [idUsuario], references: [idUsuario])
-  Lista         Lista   @relation(fields: [idLista], references: [idLista])
 }
 
-
 model Lista {
-  idLista       Int      @id @default(autoincrement())
-  nombre        String
-  esAlbum       Boolean  @default(false)
-  esPrivada     Boolean  @default(false)
-  fecha         DateTime @default(now())
-  tipoLista     TipoLista 
-  imgLista      String?
-  descripcion   String?
+  idLista     Int       @id @default(autoincrement())
+  nombre      String
+  esAlbum     Boolean   @default(false)
+  esPrivada   Boolean   @default(false)
+  fecha       DateTime  @default(now())
+  tipoLista   TipoLista
+  imgLista    String?
+  descripcion String?
 
   Seguidores    SigueLista[]
   Propiertarios Usuario[]
@@ -67,48 +69,49 @@ model Lista {
 }
 
 model Audio {
-  idAudio       Int      @id @default(autoincrement())
-  titulo        String
-  path          String
-  duracionSeg   Int
-  fechaLanz     DateTime @default(now())
-  esAlbum       String?
-  imgAudio      String?
+  idAudio     Int      @id @default(autoincrement())
+  titulo      String
+  path        String
+  duracionSeg Int
+  fechaLanz   DateTime @default(now())
+  esAlbum     String?
+  imgAudio    String?
 
-  Artistas      Usuario[]
-  Lista         Lista[]
-  Escuchas      Escucha[]
-  EtiquetasPodcast     EtiquetaPodcast[]
-  EtiquetasCancion     EtiquetaCancion[]
+  Artistas         Usuario[]
+  Lista            Lista[]
+  Escuchas         Escucha[]
+  EtiquetasPodcast EtiquetaPodcast[]
+  EtiquetasCancion EtiquetaCancion[]
 }
 
 model Escucha {
-  idUsuario     Int
-  idAudio       Int
-  fecha         DateTime @default(now())
+  idUsuario Int
+  idAudio   Int
+  fecha     DateTime @default(now())
+
+  Usuario Usuario @relation(fields: [idUsuario], references: [idUsuario])
+  Audio   Audio   @relation(fields: [idAudio], references: [idAudio])
+
   @@id([idUsuario, idAudio, fecha])
-  
-  Usuario       Usuario @relation(fields: [idUsuario], references: [idUsuario])
-  Audio         Audio   @relation(fields: [idAudio], references: [idAudio])
 }
 
 model EtiquetaPodcast {
-  idEtiqueta    Int      @id @default(autoincrement())
-  nombre        String   
+  idEtiqueta Int    @id @default(autoincrement())
+  nombre     String
 
-  Audios        Audio[]
+  Audios Audio[]
 }
 
 model EtiquetaCancion {
-  idEtiqueta    Int      @id @default(autoincrement())
-  nombre        String   
+  idEtiqueta Int    @id @default(autoincrement())
+  nombre     String
 
-  Audios        Audio[]
+  Audios Audio[]
 }
 
 enum TipoLista {
   MIS_AUDIOS
   MIS_FAVORITOS
   MIS_PODCAST
-  NORMAL  
+  NORMAL
 }
