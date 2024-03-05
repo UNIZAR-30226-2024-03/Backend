@@ -24,7 +24,7 @@ perfiles de amigos
 
 
 -AUDIO ----> Alain
-------[POST]/audio/ : Sube un audio a la base de datos.
+------[POST]/audio/upload : Sube un audio a la base de datos.
 ------[DELETE]/audio/<idAudio>/ : Borra un audio de la base de datos.
 ------[PUT]/audio/<idAudio>/ : Edita un audio de la base de datos.
 ------/audio/<idAudio>/ : Devuelve la información de un audio (autor y etiquetas incluidos)
