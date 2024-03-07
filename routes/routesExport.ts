@@ -7,4 +7,4 @@ export const routes = express.Router();
 
 routes.use(defaultRouter);
 routes.use(listaRouter);
-routes.use(loginRouter)
+routes.use(loginRouter);
