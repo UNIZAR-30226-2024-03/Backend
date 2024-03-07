@@ -1,8 +1,7 @@
 import express from 'express';
-import { defaultRouter } from './defaultRoute';
-import { listaRouter } from './listaRoutes';
-import { loginRouter } from './loginRoutes';
-import { audioRouter } from './audioRoutes';
+import { defaultRouter } from './defaultRoute.js';
+import { listaRouter } from './listaRoutes.js';
+import { audioRouter } from './audioRoutes.js';
 
 export const routes = express.Router();
 

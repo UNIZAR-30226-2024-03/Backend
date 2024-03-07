@@ -9,6 +9,9 @@ import { PrismaClient } from '@prisma/client';
 
 // Librearía para subir archivos de audio
 import multer from 'multer';
+import path from 'path';//Variable para manejar rutas de archivos
+import fs from 'fs'; //Variable para manejar archivos, leer, escribir, etc
+import mediaserver from 'mediaserver'; //Variable para manejar archivos de audio, usa chunks para enviar el archivo
 
 export const audioRouter = express.Router();
 
@@ -19,9 +22,6 @@ interface MulterRequest extends Request {
 
 const prisma = new PrismaClient();
 const projectRootPath = process.cwd(); // Devuelve el directorio raíz del proyecto y se almacena en una constante
-var path = require('path'); //Variable para manejar rutas de archivos
-var fs = require('fs'); //Variable para manejar archivos, leer, escribir, etc
-var mediaserver = require('mediaserver'); //Variable para manejar archivos de audio, usa chunks para enviar el archivo
 var opciones = multer.diskStorage({ //Opciones para subir archivos
     destination: function(req: Request, file: any, cb: any) { 
         cb(null, path.join(projectRootPath,'audios')); //Se almacenan en la carpeta audios desde la raiz del proyecto
