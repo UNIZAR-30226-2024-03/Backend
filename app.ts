@@ -21,6 +21,8 @@ app.get("/", function (_req, res) {
     return res.send("Backend for Playbeat.");
 });
 
+
+
 // app.use(authErrorHandler, prismaErrorHandler, generalErrorHandler);
 
 export default app;
