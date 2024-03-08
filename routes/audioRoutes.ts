@@ -45,7 +45,7 @@ var upload = multer(
 
 //PRE: Se recibe un id de audio correcto en la URL
 //POST: Sube obtiene información de un audio con formato JSON
-audioRouter.get('/audio/:idaudio', async function(req, res: Response) {
+audioRouter.get('/:idaudio', async function(req, res: Response) {
     const id = Number(req.params.idaudio);
     try {
         const audio = await prisma.audio.findUnique({
@@ -65,7 +65,7 @@ audioRouter.get('/audio/:idaudio', async function(req, res: Response) {
 
 //PRE: Se recibe un id de audio correcto en la URL
 //POST: Se devuelve el archivo de audio en chunks
-audioRouter.get('/audio/play/:idaudio', function(req, res) {
+audioRouter.get('/play/:idaudio', function(req, res) {
     var cancion = path.join(projectRootPath,'audios',req.params.idaudio);
     mediaserver.pipe(req, res, cancion);
 });
@@ -73,7 +73,7 @@ audioRouter.get('/audio/play/:idaudio', function(req, res) {
 
 //PRE: Se recibe un audio en formato .mp3 o .wav
 //POST: Se sube el archivo a la base de datos
-audioRouter.post('/audio/upload', upload.single('cancion'), async function(req: MulterRequest, res: Response) {
+audioRouter.post('/upload', upload.single('cancion'), async function(req: MulterRequest, res: Response) {
     try {
         const audioData = {
             titulo: req.body.titulo,
@@ -99,7 +99,7 @@ audioRouter.post('/audio/upload', upload.single('cancion'), async function(req: 
 
 //PRE: Se recibe un id de audio correcto en la URL
 //POST: Se elimina el registro de BBDD y la canción del servidor
-audioRouter.get('/audio/delete/:idaudio', async function(req, res: Response) {
+audioRouter.get('/delete/:idaudio', async function(req, res: Response) {
     const id = Number(req.params.idaudio);
 
     try {
@@ -132,7 +132,7 @@ audioRouter.get('/audio/delete/:idaudio', async function(req, res: Response) {
 
 //PRE: Se recibe un id de audio correcto en la URL
 //POST: Se edita el registro de BBDD y la canción del servidor
-audioRouter.put('/audio/:idaudio', upload.single('cancion'), async function(req: MulterRequest, res: Response) {
+audioRouter.put('/:idaudio', upload.single('cancion'), async function(req: MulterRequest, res: Response) {
     const id = Number(req.params.idaudio);
     try {
         const audio = await prisma.audio.update({
