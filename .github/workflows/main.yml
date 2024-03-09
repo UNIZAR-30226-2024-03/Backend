@@ -1,7 +1,7 @@
 name: Despliegue a Azure y ejecución de test
 
 on:
-  pull_request: 
+  pull_request:
     branches:
       - main
   push:
@@ -13,19 +13,19 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    #- name: Checkout código
-    #  uses: actions/checkout@v2
+    - name: Checkout código
+      uses: actions/checkout@v2
 
-    #- name: Configurar Node.js
-    #  uses: actions/setup-node@v3
-    #  with:
-    #    node-version: '20'
+    - name: Configurar Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '14'
 
-    #- name: Instalar dependencias
-    #  run: npm install
+    - name: Instalar dependencias
+      run: npm install
 
-    #- name: Construir la aplicación
-    #  run: npm start  # Asegúrate de ajustar esto según tus necesidades
+    - name: Construir la aplicación
+      run: npm start  
 
     - name: Desplegar a Azure
       run: |
