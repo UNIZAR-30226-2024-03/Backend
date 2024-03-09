@@ -16,8 +16,8 @@ jobs:
         PRIVATE_KEY: ${{ secrets.AZURE }}
 
     steps:
-    - name: Checkout código
-      uses: actions/checkout@v2
+    #- name: Checkout código
+    #  uses: actions/checkout@v2
 
     - name: Configurar Node.js
       uses: actions/setup-node@v4
