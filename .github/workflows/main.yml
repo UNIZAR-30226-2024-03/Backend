@@ -12,14 +12,14 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
 
-    #steps:
+    steps:
     #- name: Checkout código
     #  uses: actions/checkout@v2
 
-    - name: Configurar Node.js
-      uses: actions/setup-node@v3
-      with:
-        node-version: '20'
+    #- name: Configurar Node.js
+    #  uses: actions/setup-node@v3
+    #  with:
+    #    node-version: '20'
 
     #- name: Instalar dependencias
     #  run: npm install
