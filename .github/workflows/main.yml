@@ -27,11 +27,15 @@ jobs:
       - name: Crear directorio .ssh
         run: mkdir -p ~/.ssh
 
+      - name: Imprimir Contenido de la Clave Privada
+        run: echo "$PRIVATE_KEY"
+
+      - name: Configurar Permisos de la Clave Privada
+        run: echo "$PRIVATE_KEY" > ~/.ssh/private_key.pem && chmod 600 ~/.ssh/private_key.pem
+
       - name: Agregar clave del host a known_hosts
         run: ssh-keyscan -t rsa playbeat.uksouth.cloudapp.azure.com >> ~/.ssh/known_hosts
 
       - name: Desplegar a Azure
         run: |
-          echo "$PRIVATE_KEY" > private_key.pem
-          chmod 600 private_key.pem
-          ssh -i private_key.pem azureuser@playbeat.uksouth.cloudapp.azure.com "cd playbeat/Backend && git pull origin main && npm install && npm restart"
+          ssh -i ~/.ssh/private_key.pem azureuser@playbeat.uksouth.cloudapp.azure.com "cd playbeat/Backend && git pull origin main && npm install && npm restart"
