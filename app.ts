@@ -25,7 +25,7 @@ app.use("/api/usuario", usuarioRouter);
 // app.use("/api/login", loginRouter);
 
 app.get("/", function (_req, res) {
-    return res.send("Backend for Playbeat.");
+    return res.send("Backend for Playbeat. Test");
 });
 
 
