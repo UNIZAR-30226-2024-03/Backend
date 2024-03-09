@@ -2,6 +2,8 @@ import express from "express";
 import dotenv from "dotenv";
 import cors from 'cors'; //middleware para permitir solicitudes desde cualquier origen
 
+const app = express();
+
 
 //import usuarioRouter from './routes/usuarioRouter.js'
 // AQUI IMPORTAIS
@@ -9,7 +11,6 @@ import cors from 'cors'; //middleware para permitir solicitudes desde cualquier 
 // import loginRouter from "./routes/loginRoutes.js";
 import { audioRouter } from "./routes/audioRoutes.js";
 
-const app = express();
 dotenv.config();
 
 // Allows parsing of json in the body of the request.
@@ -32,6 +33,10 @@ app.use("/audio", audioRouter);
 app.get("/", function (_req, res) {
     return res.send("Backend for Playbeat.");
 });
+
+
+
+
 
 
 
