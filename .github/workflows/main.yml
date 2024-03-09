@@ -13,20 +13,25 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
-        PRIVATE_KEY: ${{ secrets.AZURE }}
+      PRIVATE_KEY: ${{ secrets.AZURE }}
 
     steps:
-    #- name: Checkout código
-    #  uses: actions/checkout@v2
+      - name: Checkout código
+        uses: actions/checkout@v2
 
-    - name: Configurar Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: '20'
-
-    - name: Desplegar a Azure
-      run: |
-        echo "$PRIVATE_KEY" > private_key.pem
-        chmod 600 private_key.pem
-        ssh -i private_key.pem azureuser@playbeat.uksouth.cloudapp.azure.com "cd playbeat/Backend && git pull origin main && npm install && npm restart"
+      - name: Configurar Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20'
       
+      - name: Crear directorio .ssh
+        run: mkdir -p ~/.ssh
+
+      - name: Agregar clave del host a known_hosts
+        run: ssh-keyscan -t rsa playbeat.uksouth.cloudapp.azure.com >> ~/.ssh/known_hosts
+
+      - name: Desplegar a Azure
+        run: |
+          echo "$PRIVATE_KEY" > private_key.pem
+          chmod 600 private_key.pem
+          ssh -i private_key.pem azureuser@playbeat.uksouth.cloudapp.azure.com "cd playbeat/Backend && git pull origin main && npm install && npm restart"
