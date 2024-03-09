@@ -34,5 +34,5 @@ jobs:
       run: |
         echo "$PRIVATE_KEY" > private_key.pem
         chmod 600 private_key.pem
-        ssh -i private_key.pem azureuser@playbeat.uksouth.cloudapp.azure.com "cd playbeat/Backend && git pull origin main && npm install && npm restart"
+        ssh -i private_key.pem azureuser@playbeat.uksouth.cloudapp.azure.com "mkdir prueba"
       
