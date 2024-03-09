@@ -19,7 +19,7 @@ jobs:
     - name: Configurar Node.js
       uses: actions/setup-node@v3
       with:
-        node-version: '14'
+        node-version: '20'
 
     - name: Instalar dependencias
       run: npm install
@@ -33,4 +33,4 @@ jobs:
         chmod 600 private_key.pem
         ssh -i private_key.pem azureuser@playbeat.uksouth.cloudapp.azure.com "cd playbeat/Backend && git pull origin main && npm install && npm restart"
       env:
-        PRIVATE_KEY: ${{ secrets.azure }}
+        PRIVATE_KEY: ${{ secrets.AZURE }}

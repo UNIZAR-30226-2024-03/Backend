@@ -25,7 +25,7 @@ app.use(express.json());
 // app.use("/api/login", loginRouter);
 
 app.get("/", function (_req, res) {
-    return res.send("Backend for Playbeat. Test3");
+    return res.send("Backend for Playbeat. Test4");
 });
 
 
