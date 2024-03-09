@@ -23,7 +23,12 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: '20'
+
       - name: executing remote ssh commands using key
-        run: |
-          echo "$PRIVATE_KEY" > private_key.pem
-          ssh -i private_key.pem ${{ secrets.USERNAME }}@${{ secrets.HOST }} "cd playbeat/Backend && git pull origin main && npm install && npm restart"
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          key: ${{ secrets.AZURE }}
+          port: ${{ secrets.PORT }}
+          script: whoami
