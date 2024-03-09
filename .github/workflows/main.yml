@@ -30,4 +30,4 @@ jobs:
           username: ${{ secrets.USERNAME }}
           key: ${{ secrets.AZURE}}
           port: ${{ secrets.PORT }}
-          script: cd playbeat/Backend && git pull origin main && npm install && npm restart
+          script: whoami
