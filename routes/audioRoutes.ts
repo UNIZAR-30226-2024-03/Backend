@@ -16,8 +16,10 @@ import mediaserver from 'mediaserver'; //Variable para manejar archivos de audio
 export const audioRouter = express.Router();
 
 // Interfaz para poder acceder a la propiedad file en el request a la hora de subir un archivo
+
 interface MulterRequest extends Request {
     file?: Express.Multer.File; // file puede ser undefined si no se sube ningún archivo
+    audioConsulta?: any; // Propiedad para almacenar el audio consultado en el middleware a la hora de actualizar
 }
 
 const prisma = new PrismaClient();
@@ -45,7 +47,7 @@ var upload = multer(
 
 //PRE: Se recibe un id de audio correcto en la URL
 //POST: Sube obtiene información de un audio con formato JSON
-audioRouter.get('/audio/:idaudio', async function(req, res: Response) {
+audioRouter.get('/:idaudio', async function(req, res: Response) {
     const id = Number(req.params.idaudio);
     try {
         const audio = await prisma.audio.findUnique({
@@ -65,21 +67,27 @@ audioRouter.get('/audio/:idaudio', async function(req, res: Response) {
 
 //PRE: Se recibe un id de audio correcto en la URL
 //POST: Se devuelve el archivo de audio en chunks
-audioRouter.get('/audio/play/:idaudio', function(req, res) {
+audioRouter.get('/play/:idaudio', function(req, res) {
     var cancion = path.join(projectRootPath,'audios',req.params.idaudio);
     mediaserver.pipe(req, res, cancion);
 });
 
 
-//PRE: Se recibe un audio en formato .mp3 o .wav
+//PRE: Se recibe un audio en formato .mp3 o .wav, con un título, duración y fecha de lanzamiento en formato ISO-8601
 //POST: Se sube el archivo a la base de datos
-audioRouter.post('/audio/upload', upload.single('cancion'), async function(req: MulterRequest, res: Response) {
+audioRouter.post('/upload', upload.single('cancion'), async function(req: MulterRequest, res: Response) {
     try {
+        if (!req.file) {
+            return res.status(400).json({ message: 'No audio file uploaded' });
+        }
+        const fechaLanz = new Date(req.body.fechaLanz);
+        const fechaFormateada = fechaLanz.toISOString();
+
         const audioData = {
             titulo: req.body.titulo,
-            path: req.body.path,
-            duracionSeg: req.body.duracionSeg,
-            fechaLanz: req.body.fechaLanz,
+            path: req.file.originalname,
+            duracionSeg: parseInt(req.body.duracionSeg, 10),
+            fechaLanz: fechaFormateada,
             esAlbum: req.body.esAlbum,
         };
 
@@ -90,16 +98,33 @@ audioRouter.post('/audio/upload', upload.single('cancion'), async function(req: 
 
         res.json( { message: 'Audio added successfully' } );
     } catch (error) {
+        if (error instanceof Error) {
+            console.error(`Error: ${error.message}`);
+            if (error.stack) {
+                console.error(`Stack trace: ${error.stack}`);
+            }
+        }
         res.status(500).send(error);
+
     }
 
 
 });
 
 
+function deleteFile(filePath: string) {
+    try {
+        fs.unlinkSync(filePath); // Borra el archivo del servidor
+    } catch (error) {
+        throw new Error('Error, audio no eliminando, no encontrado en el servidor local');
+    }
+}
+
+
+//FALTA LÓGICA DE VERIRICACIÓN DE PERMISOS DE USUARIO
 //PRE: Se recibe un id de audio correcto en la URL
 //POST: Se elimina el registro de BBDD y la canción del servidor
-audioRouter.get('/audio/delete/:idaudio', async function(req, res: Response) {
+audioRouter.get('/delete/:idaudio', async function(req, res: Response) {
     const id = Number(req.params.idaudio);
 
     try {
@@ -118,10 +143,9 @@ audioRouter.get('/audio/delete/:idaudio', async function(req, res: Response) {
             },
         });
         try{
-            fs.unlinkSync(path.join(projectRootPath,audioRuta.path)); //Borra el archivo del servidor
-        }
-        catch (error){
-            res.json({ Error: 'Error, audio no encontrado en el servidor local' });
+            deleteFile(path.join(projectRootPath,audioRuta.path));
+        }catch (error){
+            return res.json({ Error: 'Error, audio no encontrado en el servidor local' });
         }
         res.json({ message: 'Audio deleted successfully' });
     } catch (error) {
@@ -129,20 +153,67 @@ audioRouter.get('/audio/delete/:idaudio', async function(req, res: Response) {
     }
 });
 
-
 //PRE: Se recibe un id de audio correcto en la URL
 //POST: Se edita el registro de BBDD y la canción del servidor
-audioRouter.put('/audio/:idaudio', upload.single('cancion'), async function(req: MulterRequest, res: Response) {
-    const id = Number(req.params.idaudio);
+audioRouter.put('/update/:idaudio', async function(req: MulterRequest, res: Response, next) {
     try {
-        const audio = await prisma.audio.update({
+        const audioConsulta = await prisma.audio.findUnique({
             where: {
-                idAudio: id,
+                idAudio: Number(req.params.idaudio),
             },
-            data: req.body,
         });
+        if (!audioConsulta) {
+            return res.json({ Error: 'Error, audio no encontrado en el servidor local' });
+        }
+
+        req.audioConsulta = audioConsulta; // Adjuntar audioConsulta al objeto req
+
+        next(); // Pasar al siguiente middleware si audioConsulta existe
+    } catch (error) {
+        if (error instanceof Error) {
+            console.error(`Error: ${error.message}`);
+            if (error.stack) {
+                console.error(`Stack trace: ${error.stack}`);
+            }
+            res.status(500).send(error);
+        }
+    }
+}, upload.single('cancion'), async function(req: MulterRequest, res: Response) { // Subir archivo de audio y ejecutar lógica de actualización
+    try {
+        let audioData: any = {};
+
+        if (req.file){
+            audioData.path = "/audios/"+req.file.originalname;
+            deleteFile(path.join(projectRootPath,req.audioConsulta.path)); // Acceder a audioConsulta desde req
+        }
+
+        if (req.body.titulo) {
+            audioData.titulo = req.body.titulo;
+        }
+        if (req.body.duracionSeg) {
+            audioData.duracionSeg = parseInt(req.body.duracionSeg, 10);
+        }
+        if (req.body.fechaLanz) {
+            const fechaLanz = new Date(req.body.fechaLanz);
+            audioData.fechaLanz = fechaLanz.toISOString();
+        }
+        if (req.body.esAlbum) {
+            audioData.esAlbum = req.body.esAlbum;
+        }
+
+        const audio = await prisma.audio.update({
+            where: { idAudio: Number(req.params.idaudio) },
+            data: audioData,
+        });
+
         res.json( { message: 'Audio updated successfully' } );
     } catch (error) {
-        res.status(500).send(error);
+        if (error instanceof Error) {
+            console.error(`Error: ${error.message}`);
+            if (error.stack) {
+                console.error(`Stack trace: ${error.stack}`);
+            }
+            res.status(500).send(error);
+        }
     }
 });
