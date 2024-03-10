@@ -4,8 +4,8 @@
 
 import express, { Express, Request, Response } from "express";
 
-import { PrismaClient } from '@prisma/client';
-
+//elemento prisma para acceder a la base de datos declarado en el archivo index.ts de la carpeta prisma
+import prisma  from "../prisma/index.js";
 
 // Librearía para subir archivos de audio
 import multer from 'multer';
@@ -22,7 +22,6 @@ interface MulterRequest extends Request {
     audioConsulta?: any; // Propiedad para almacenar el audio consultado en el middleware a la hora de actualizar
 }
 
-const prisma = new PrismaClient();
 const projectRootPath = process.cwd(); // Devuelve el directorio raíz del proyecto y se almacena en una constante
 var opciones = multer.diskStorage({ //Opciones para subir archivos
     destination: function(req: Request, file: any, cb: any) { 
@@ -75,27 +74,68 @@ audioRouter.get('/play/:idaudio', function(req, res) {
 
 //PRE: Se recibe un audio en formato .mp3 o .wav, con un título, duración y fecha de lanzamiento en formato ISO-8601
 //POST: Se sube el archivo a la base de datos
-audioRouter.post('/upload', upload.single('cancion'), async function(req: MulterRequest, res: Response) {
+audioRouter.post('/upload', upload.single('cancion'), async function(req: Request, res: Response, next){ //se verifica la existencia de los usuarios
+    try {
+        console.log(req.body);
+        const idsUsuarios = req.body.idsUsuarios.split(',').map(Number);
+        console.log(idsUsuarios);
+        for (const idUsuario of idsUsuarios) {
+            const usuario = await prisma.usuario.findUnique({
+                where: {
+                    idUsuario: idUsuario,
+                },
+            });
+            if (!usuario) {
+                if (req.file){
+                    deleteFile(path.join(projectRootPath,"audios",req.file.originalname));
+                }
+                return res.json({ Error: '1', message: `Error, usuario con ID ${idUsuario} no existe en la base de datos` });
+            }
+        }
+        console.log('usuarios verificados');
+        next();
+    }catch (error) {
+        if (req.file){
+            deleteFile(path.join(projectRootPath,"audios",req.file.originalname));
+        }
+        return res.json({ Error: '1', message: `Error, usuario con ID no existe en la base de datos` });
+    }
+    
+}, async function(req: MulterRequest, res: Response) { // Subir archivo de audio y ejecutar lógica de creación
     try {
         if (!req.file) {
             return res.status(400).json({ message: 'No audio file uploaded' });
         }
         const fechaLanz = new Date(req.body.fechaLanz);
         const fechaFormateada = fechaLanz.toISOString();
-
+        const idsUsuarios2 = req.body.idsUsuarios.split(',').map(Number);
+        console.log(idsUsuarios2);
         const audioData = {
             titulo: req.body.titulo,
             path: req.file.originalname,
             duracionSeg: parseInt(req.body.duracionSeg, 10),
             fechaLanz: fechaFormateada,
             esAlbum: req.body.esAlbum,
+            Artistas:{
+                connect: idsUsuarios2.map((idUsuario:Number) => ({ idUsuario })),
+
+            }
         };
-
-        console.log(audioData);
         const audio = await prisma.audio.create({
-            data: audioData,
+            data: audioData
         });
-
+        for (const idUsuario of idsUsuarios2) {
+            const usuario = await prisma.usuario.update({
+                where: {
+                    idUsuario: idUsuario,
+                },
+                data: {
+                    Audios: {
+                        connect: { idAudio: audio.idAudio },
+                    },
+                },
+            });
+        }
         res.json( { message: 'Audio added successfully' } );
     } catch (error) {
         if (error instanceof Error) {
@@ -104,11 +144,12 @@ audioRouter.post('/upload', upload.single('cancion'), async function(req: Multer
                 console.error(`Stack trace: ${error.stack}`);
             }
         }
+        if (req.file){
+            deleteFile(path.join(projectRootPath,"audios",req.file.originalname));
+        }
         res.status(500).send(error);
 
     }
-
-
 });
 
 
