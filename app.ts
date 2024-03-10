@@ -2,14 +2,13 @@ import express from "express";
 import dotenv from "dotenv";
 import cors from 'cors'; //middleware para permitir solicitudes desde cualquier origen
 
-const app = express();
-
 
 //import usuarioRouter from './routes/usuarioRouter.js'
 // AQUI IMPORTAIS
 // import listaRouter from "./routes/listaRoutes.js";
 // import loginRouter from "./routes/loginRoutes.js";
 import { audioRouter } from "./routes/audioRoutes.js";
+const app = express();
 
 dotenv.config();
 
