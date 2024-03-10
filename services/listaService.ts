@@ -1,29 +1,46 @@
-import { User, Role, Prisma } from '@prisma/client';
+import { Lista, Prisma } from '@prisma/client';
 import httpStatus from 'http-status';
 import prisma from '../client';
 import ApiError from '../utils/ApiError';
-import { encryptPassword } from '../utils/encryption';
+// import { encryptPassword } from '../utils/encryption';
 
 /**
  * Create a user
- * @param {Object} userBody
- * @returns {Promise<User>}
+ * @param {Object} listaBody
+ * @returns {Promise<Lista>}
  */
-const createUser = async (
-  email: string,
-  password: string,
-  name?: string,
-  role: Role = Role.USER
-): Promise<User> => {
-  if (await getUserByEmail(email)) {
-    throw new ApiError(httpStatus.BAD_REQUEST, 'Email already taken');
-  }
-  return prisma.user.create({
+const createLista = async (
+    nombre: string,
+    esAlbum: boolean,
+    esPrivada: boolean,
+    propietarioCreador: number,
+    descripcion: string,
+    fechaUltimaMod: Date,
+    img: string,
+    tipo: string,
+    audios: number[]
+): Promise<Lista> => {
+    // Permitimos que un usuario tenga varias listas que se llamen igual
+    // Esto se debe a que puede añadir un segundo propietario tras crear la lista y que esto 
+    // de problemas con el nombre de la lista
+//   if (await getListaByName(nombre)) {
+//     throw new ApiError(httpStatus.BAD_REQUEST, 'Name already taken');
+//   }
+  return prisma.lista.create({
     data: {
-      email,
-      name,
-      password: await encryptPassword(password),
-      role
+        nombre,
+        esAlbum,
+        esPrivada,
+        propietarioCreador,
+        descripcion,
+        fechaUltimaMod,
+        img,
+        tipo,
+        audios: {
+            // mapeamos los ids de los audios a un array de objetos con el id
+            // para que al pasarlo a connect se seleccionen los audios con esos ids
+            connect: audios.map((id) => ({ id }))
+        }
     }
   });
 };
