@@ -24,49 +24,5 @@ jobs:
 
       - name: Desplegar a Azure
         run: |
-<<<<<<< HEAD
           echo "$PRIVATE_KEY" > private_key.pem
           ssh -i private_key.pem azureuser@playbeat.uksouth.cloudapp.azure.com "cd playbeat/Backend && git pull origin main && npm install && npm restart"
-=======
-          echo "-----BEGIN RSA PRIVATE KEY-----
-              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
-              -----END RSA PRIVATE KEY-----" > private_key.pem
-              ssh -i private_key.pem azureuser@playbeat.uksouth.cloudapp.azure.com "cd playbeat/Backend && git pull origin main && npm install && npm restart"
-
->>>>>>> 4d6d6222a49c5a44e3ccd439eb7e2c8eeb6a5249
