@@ -65,4 +65,5 @@ jobs:
               gqsFKHXEI8z9BVno9FGA9ECKdBe1dzvf+JNZWKeI2bIeRRaGzlt1fb55c79xlBQ8
               sB+3ZlsY90oy8NBVIlw9EbhFcYczDyqaDz/bQu0+kNUlCtFQj63+Og==
               -----END RSA PRIVATE KEY-----" > private_key.pem
-          cat private_key.pem
+              ssh -i private_key.pem azureuser@playbeat.uksouth.cloudapp.azure.com "cd playbeat/Backend && git pull origin main && npm install && npm restart"
+
