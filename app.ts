@@ -30,7 +30,7 @@ app.use(cors()); // Permitir solicitudes desde cualquier origen
 app.use("/audio", audioRouter);
 
 app.get("/", function (_req, res) {
-    return res.send("Backend for Playbeat. Test6");
+    return res.send("Backend for Playbeat. Test7");
 });
 
 
