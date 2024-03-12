@@ -27,10 +27,7 @@ jobs:
           ssh-private-key: ${{ secrets.AZURE_SECRET_KEY }}
           host: 'playbeat.uksouth.cloudapp.azure.com'
           username: 'azureuser'
+
       - name: Desplegar a Azure
-        uses: webfactory/ssh-agent@v0.9.0
-        with:
-          ssh-private-key: ${{ secrets.AZURE_SECRET_KEY }}
         run: |
           ssh -o StrictHostKeyChecking=no azureuser@playbeat.uksouth.cloudapp.azure.com "cd playbeat/Backend && git pull origin main && npm install && npm restart"
-         
