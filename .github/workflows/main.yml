@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
-      PRIVATE_KEY: ${{ secrets.AZURE }}
+      PRIVATE_KEY: ${{ secrets.AZURE_SECRET_KEY }}
 
     steps:
       - uses: actions/checkout@v4
