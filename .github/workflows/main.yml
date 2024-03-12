@@ -8,10 +8,6 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-
-    env:
-      PRIVATE_KEY: ${{ secrets.AZURE_SECRET_KEY }}
-
     steps:
       - uses: actions/checkout@v4
       - name: Use Node.js
@@ -30,5 +26,6 @@ jobs:
 
       - name: Desplegar a Azure
         run: |
-          ssh -o StrictHostKeyChecking=no -t azureuser@playbeat.uksouth.cloudapp.azure.com "cd playbeat/Backend && git pull origin main && docker stop playbeat_container && 
-          docker build -t playbeat:latest . && docker run -d --name playbeat_container -p 3000:3000 playbeat:latest"
+          ssh -o StrictHostKeyChecking=no -t azureuser@playbeat.uksouth.cloudapp.azure.com "cd playbeat/Backend && git pull origin main && 
+          docker stop playbeat_container && docker rm playbeat_container && docker rmi playbeat && docker build -t playbeat:latest . && 
+          docker run -d --name playbeat_container -p 3000:3000 playbeat:latest"
