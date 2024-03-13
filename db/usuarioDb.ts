@@ -1,6 +1,26 @@
 import { Usuario } from "@prisma/client";
 import prisma from "../prisma/client.js";
 
+export async function usuarioExistPrisma(
+  idUsuario: number | null = null,
+  email: string | null = null,
+  nombreUsuario: string | null = null,
+): Promise<boolean> {
+  if (!idUsuario && !email && !nombreUsuario) throw new Error("Provide at least one parameter");
+
+  // {} idUsuario: 1, email: null, nombreUsuario: 'John' } -> { idUsuario: 1, nombreUsuario: 'John' }
+  const conditions = { idUsuario, email, nombreUsuario };
+  const query = Object.entries(conditions)
+    .filter(([, value]) => value !== null)
+    .reduce((acc, [key, value]) => ({ ...acc, [key]: value }), {});
+
+  const usuario = await prisma.usuario.findFirst({
+    where: query,
+  });
+
+  return Boolean(usuario);
+}
+
 export async function usuarioGetPrisma(
   idUsuario: number,
   rrss: boolean = false,
@@ -24,7 +44,6 @@ export async function usuarioGetEmailPrisma(
   rrss: boolean = false,
   listas: boolean = false,
 ): Promise<Usuario | null> {
-  console.log(email);
   if (!email) return null;
   const usuario = await prisma.usuario.findUnique({
     where: { email: email },
@@ -75,7 +94,7 @@ export async function usuarioFollowPrisma(
     },
     include: {
       seguidor: true,
-      seguido: true
+      seguido: true,
     },
   });
 }

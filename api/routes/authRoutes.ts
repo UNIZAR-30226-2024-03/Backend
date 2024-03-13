@@ -33,8 +33,16 @@ router.get("/google-login", (req, res) => {
 
 router.get("/google-web", controller.authGoogleLogin);
 
-router.get("/login", validate(authValidatorJs.authLoginSchema), controller.authLogin);
+router.get(
+  "/login",
+  validate(authValidatorJs.authLoginSchema),
+  controller.authLogin,
+);
 
-router.post("/signup", validate(authValidatorJs.authSignupSchema), controller.authSignup);
+router.post(
+  "/signup",
+  validate(authValidatorJs.authSignupSchema),
+  controller.authSignup,
+);
 
 export default router;

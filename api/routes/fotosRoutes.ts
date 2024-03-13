@@ -7,7 +7,17 @@ import { fotoGetSchema } from "../middleware/validator/fotosValidator.js";
 
 const router = Router();
 
-router.post("/", auth.authenticate, fotosCon.fotoUploadOne, fotosCon.fotoTransformSave);
-router.get("/:id", auth.authenticate, validate(fotoGetSchema), fotosCon.fotoGet);
+router.post(
+  "/",
+  auth.authenticate,
+  fotosCon.fotoUploadOne,
+  fotosCon.fotoTransformSave,
+);
+router.get(
+  "/:id",
+  auth.authenticate,
+  validate(fotoGetSchema),
+  fotosCon.fotoGet,
+);
 
 export default router;

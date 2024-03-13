@@ -2,7 +2,7 @@ import { NextFunction, Response } from "express";
 import { Request } from "express-jwt";
 import { google } from "googleapis";
 
-import * as usuarioDbJs from "../db/usuarioDb.js";
+import * as usuarioDbJs from "../../db/usuarioDb.js";
 import { compareWithHash, hashPassword } from "../utils/hashContrasegna.js";
 import { createUsuarioToken } from "../utils/auth/createUsuarioToken.js";
 
@@ -18,7 +18,6 @@ export async function authGoogleLogin(
   res: Response,
   next: NextFunction,
 ) {
-  console.log("authGoogleLogin");
   try {
     const code = req.query.code as string;
     if (!code) return res.sendStatus(400);
@@ -67,7 +66,11 @@ export async function authSignup(
   const { email, contrasegna, nombreUsuario } = req.body;
   try {
     const hashed = hashPassword(contrasegna);
-    const usuario = await usuarioDbJs.usuarioCreatePrisma(nombreUsuario, email, hashed);
+    const usuario = await usuarioDbJs.usuarioCreatePrisma(
+      nombreUsuario,
+      email,
+      hashed,
+    );
 
     const token = createUsuarioToken(usuario);
     return res.status(201).send(token);

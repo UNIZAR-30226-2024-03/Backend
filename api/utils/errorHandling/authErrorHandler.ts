@@ -13,7 +13,7 @@ export default async function authErrorHandler(
   err: Error,
   _req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) {
   if (!(err instanceof UnauthorizedError)) return next(err);
 

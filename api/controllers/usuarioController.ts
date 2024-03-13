@@ -2,7 +2,7 @@ import { NextFunction, Response } from "express";
 import { Request } from "express-jwt";
 
 import { hashPassword } from "../utils/hashContrasegna.js";
-import * as usuarioDbJs from "../db/usuarioDb.js";
+import * as usuarioDbJs from "../../db/usuarioDb.js";
 
 export async function usuarioModify(
   req: Request,
