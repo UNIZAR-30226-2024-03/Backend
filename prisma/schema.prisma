@@ -75,6 +75,7 @@ model Audio {
   fechaLanz   DateTime @default(now())
   esAlbum     String?
   imgAudio    String?
+  esPrivada   Boolean @default(false)
 
   Artistas         Usuario[]
   Lista            Lista[]
