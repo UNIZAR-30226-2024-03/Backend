@@ -1,7 +1,7 @@
 import httpStatus from 'http-status';
-import pick from '../utils/pick';
-import ApiError from '../utils/ApiError';
-import catchAsync from '../utils/catchAsync';
+import pick from '../utils/errorHandling/utils/pick';
+import ApiError from '../utils/errorHandling/utils/ApiError';
+import catchAsync from '../utils/errorHandling/utils/catchAsync';
 import { listaService } from '../services';
 import { Request, Response } from 'express';
 
