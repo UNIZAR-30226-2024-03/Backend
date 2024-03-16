@@ -15,7 +15,7 @@ export const listaRouter = express.Router();
 ///lista/add-collaborator/<idLista>/<idUsuario>/: Añade un colaborador a la lista.
 
 
-listaRouter.post("/lista/", (req: Request, res: Response) => {
+listaRouter.post("/", (req: Request, res: Response) => {
     //listaController.createList(req, res);
 });
 
@@ -41,3 +41,5 @@ listaRouter.post('/calc', (req: Request, res: Response): void => {
   // .get(auth('getUsers'), validate(userValidation.getUser), userController.getUser)
   // .patch(auth('manageUsers'), validate(userValidation.updateUser), userController.updateUser)
   // .delete(auth('manageUsers'), validate(userValidation.deleteUser), userController.deleteUser);
+
+  export default listaRouter;

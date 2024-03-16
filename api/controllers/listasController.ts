@@ -1,8 +1,7 @@
-import httpStatus from 'http-status';
+/* import httpStatus from 'http-status';
 import pick from '../utils/errorHandling/utils/pick';
 import ApiError from '../utils/errorHandling/utils/ApiError';
 import catchAsync from '../utils/errorHandling/utils/catchAsync';
-import { listaService } from '../services';
 import { Request, Response } from 'express';
 
 
@@ -46,4 +45,4 @@ export const updateUser = catchAsync(async (req : Request, res : Response) => {
 export const deleteUser = catchAsync(async (req : Request, res : Response) => {
   await listaService.deleteUserById(req.params.userId);
   res.status(httpStatus.NO_CONTENT).send();
-});
+}); */
