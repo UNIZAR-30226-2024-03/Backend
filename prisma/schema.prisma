@@ -53,14 +53,14 @@ model SigueLista {
 }
 
 model Lista {
-  idLista         Int       @id @default(autoincrement())
-  nombre          String
-  esAlbum         Boolean   @default(false)
-  esPrivada       Boolean   @default(false)
-  fechaUltimaMod  DateTime  @default(now())
-  tipoLista       TipoLista
-  imgLista        String?
-  descripcion     String?
+  idLista     Int       @id @default(autoincrement())
+  nombre      String
+  esAlbum     Boolean   @default(false)
+  esPrivada   Boolean   @default(false)
+  fecha       DateTime  @default(now())
+  tipoLista   TipoLista
+  imgLista    String?
+  descripcion String?
 
   Seguidores    SigueLista[]
   Propiertarios Usuario[]

@@ -15,8 +15,9 @@ import * as sigueListaDb from '../../db/sigueListaDb';
 //[DELETE]/lista/follow/<idLista>/<idUsuario> : Elimina la lista de las seguidas por el usuario.
 //[POST]/lista/audio/<idLista>/<idAudio> : Añade un audio a la lista.
 //[DELETE]/lista/audio/<idLista>/<idAudio> : Elimina un audio de la lista.
-///lista/add-collaborator/<idLista>/<idUsuario>/: Añade un colaborador a la lista.
-
+///[POST]lista/collaborator/<idLista>/<idUsuario>/: Añade un colaborador a la lista.
+///[DELETE]lista/collaborator/<idLista>/<idUsuario>/: Elimina un colaborador de la lista.
+///[GET]listas/seguidas/<idUsuario>/: Devuelve las listas seguidas por un usuario.
 
 
 /**
@@ -83,10 +84,104 @@ export const getListaById = catchAsync(async (req : Request, res : Response) => 
  * Añade la lista a las seguidas por el usuario.
  * @param {ObjectId} idLista
  * @param {ObjectId} idUsuario
- * @returns {Promise<Lista>}
+  * @returns {Promise<SigueLista>}
  */
 export const followLista = catchAsync(async (req : Request, res : Response) => {
-  const lista = await listasDb.followLista(parseInt(req.params.ListaId), parseInt(req.params.UserId));
+  const sigueLista = await sigueListaDb.sigueListaGetPrisma(parseInt(req.params.ListaId), parseInt(req.params.UsuarioId));
+  if (sigueLista) {
+    throw new ApiError(httpStatus.BAD_REQUEST, 'Already following this list');
+  }
+  const lista = await sigueListaDb.sigueListaCreatePrisma(parseInt(req.params.ListaId), parseInt(req.params.UsuarioId));
+  res.status(httpStatus.CREATED).send(lista);
+});
+
+
+/**
+ * Elimina la lista de las seguidas por el usuario.
+ * @param {ObjectId} idLista
+ * @param {ObjectId} idUsuario
+ * @returns {Promise<SigueLista>}
+ */
+export const unfollowLista = catchAsync(async (req : Request, res : Response) => {
+  const sigueLista = await sigueListaDb.sigueListaGetPrisma(parseInt(req.params.ListaId), parseInt(req.params.UsuarioId));
+  if (!sigueLista) {
+    throw new ApiError(httpStatus.BAD_REQUEST, 'Not following this list');
+  }
+  await sigueListaDb.sigueListaDeletePrisma(parseInt(req.params.ListaId), parseInt(req.params.UsuarioId));
+  res.status(httpStatus.NO_CONTENT).send();
+});
+
+/**
+ * Devuelve las listas seguidas por un usuario
+ * @param {ObjectId} idUsuario
+ * @returns {Promise<SigueLista[]>}
+ */
+export const getFollowedLists = catchAsync(async (req : Request, res : Response) => {
+  const sigueListas = await sigueListaDb.sigueListaGetListPrisma(parseInt(req.params.UsuarioId));
+  res.send(sigueListas);
+});
+
+
+/**
+ * Añade un audio a la lista.
+ * @param {ObjectId} idLista
+ * @param {ObjectId} idAudio
+ * @returns {Promise<AudiosLista>}
+ */
+export const addAudioToLista = catchAsync(async (req : Request, res : Response) => {
+  const audiosLista = await listasDb.addAudioToLista(parseInt(req.params.ListaId), parseInt(req.params.AudioId));
+  // Como se ha añadido un audio a la lista, se actualiza la fecha de última modificación
+  await listasDb.updateListaById(parseInt(req.params.ListaId), { fecha: new Date() });
+  res.status(httpStatus.CREATED).send(audiosLista);
+});
+
+
+/**
+ * Elimina un audio de la lista.
+ * @param {ObjectId} idLista
+ * @param {ObjectId} idAudio
+ * @returns {Promise<AudiosLista>}
+ */
+export const deleteAudioFromLista = catchAsync(async (req : Request, res : Response) => {
+  await listasDb.deleteAudioFromLista(parseInt(req.params.ListaId), parseInt(req.params.AudioId));
+  // Como se ha eliminado un audio de la lista, se actualiza la fecha de última modificación
+  await listasDb.updateListaById(parseInt(req.params.ListaId), { fecha: new Date() });
+  res.status(httpStatus.NO_CONTENT).send();
+});
+
+
+/**
+ * Añade un colaborador a la lista.
+ * @param {ObjectId} idLista
+ * @param {ObjectId} idUsuario
+ * @returns {Promise<Lista>}
+ * @throws {ApiError}
+ */
+export const addCollaboratorToLista = catchAsync(async (req : Request, res : Response) => {
+  const lista = await listasDb.addPropietarioToLista(parseInt(req.params.ListaId), parseInt(req.params.UsuarioId));
   res.send(lista);
 });
 
+
+/**
+ * Elimina un colaborador de la lista.
+ * @param {ObjectId} idLista
+ * @param {ObjectId} idUsuario
+ * @returns {Promise<Lista>}
+ * @throws {ApiError}
+ */
+export const deleteCollaboratorFromLista = catchAsync(async (req : Request, res : Response) => {
+  const lista = await listasDb.deletePropietarioFromLista(parseInt(req.params.ListaId), parseInt(req.params.UsuarioId));
+  res.send(lista);
+});
+
+
+/**
+ * Devuelve las listas creadas por un usuario
+ * @param {ObjectId} idUsuario
+ * @returns {Promise<Lista[]>}
+ */
+export const getListsByUser = catchAsync(async (req : Request, res : Response) => {
+  const listas = await listasDb.getListasByUser(parseInt(req.params.UsuarioId));
+  res.send(listas);
+});

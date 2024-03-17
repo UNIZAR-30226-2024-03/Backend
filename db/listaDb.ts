@@ -99,11 +99,115 @@ export const deleteListaById = async (id: number): Promise<Lista> => {
 
 
 
+/**
+ * Añade un audio a una lista
+ * @param {ObjectId} idLista
+ * @param {ObjectId} idAudio
+ * @returns {Promise<Lista>}
+ * @throws {ApiError}
+ */
+export const addAudioToLista = async (
+  idLista: number,
+  idAudio: number
+): Promise<Lista> => {
+  const lista = await getListaById(idLista);
+  if (!lista) {
+    throw new ApiError(httpStatus.NOT_FOUND, 'Lista not found');
+  }
+
+  return prisma.lista.update({
+    where: { idLista: lista.idLista },
+    data: {
+      Audios: {
+        connect: { idAudio }
+      }
+    }
+  });
+}
+
+
+/**
+ * Elimina un audio de una lista
+ * @param {ObjectId} idLista
+ * @param {ObjectId} idAudio
+ * @returns {Promise<Lista>}
+ * @throws {ApiError}
+ */
+export const deleteAudioFromLista = async (
+  idLista: number,
+  idAudio: number
+): Promise<Lista> => {
+  const lista = await getListaById(idLista);
+  if (!lista) {
+    throw new ApiError(httpStatus.NOT_FOUND, 'Lista not found');
+  }
+
+  return prisma.lista.update({
+    where: { idLista: lista.idLista },
+    data: {
+      Audios: {
+        // disconnect lo que hace es eliminar la relación entre el audio y la lista
+        // es decir, que el objeto Lista no tendrá el audio en su array de audios
+        disconnect: { idAudio }
+      }
+    }
+  });
+}
 
 
 
+/**
+ * Añade un usuario como propietario de una lista
+ * @param {ObjectId} idLista
+ * @param {ObjectId} idUsuario
+ * @returns {Promise<Lista>}
+ * @throws {ApiError}
+ */
+export const addPropietarioToLista = async (
+  idLista: number,
+  idUsuario: number
+): Promise<Lista> => {
+  const lista = await getListaById(idLista);
+  if (!lista) {
+    throw new ApiError(httpStatus.NOT_FOUND, 'Lista not found');
+  }
+
+  return prisma.lista.update({
+    where: { idLista: lista.idLista },
+    data: {
+      Propietarios: {
+        connect: { idUsuario }
+      }
+    }
+  });
+}
 
 
+/**
+ * Elimina un usuario como propietario de una lista
+ * @param {ObjectId} idLista
+ * @param {ObjectId} idUsuario
+ * @returns {Promise<Lista>}
+ * @throws {ApiError}
+ */
+export const deletePropietarioFromLista = async (
+  idLista: number,
+  idUsuario: number
+): Promise<Lista> => {
+  const lista = await getListaById(idLista);
+  if (!lista) {
+    throw new ApiError(httpStatus.NOT_FOUND, 'Lista not found');
+  }
+
+  return prisma.lista.update({
+    where: { idLista: lista.idLista },
+    data: {
+      Propietarios: {
+        disconnect: { idUsuario }
+      }
+    }
+  });
+}
 
 
 

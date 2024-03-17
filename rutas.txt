@@ -44,4 +44,7 @@ perfiles de amigos
 ------//[DELETE]/lista/follow/<idLista>/<idUsuario> : Elimina la lista de las seguidas por el usuario.
 ------//[POST]/lista/audio/<idLista>/<idAudio> : Añade un audio a la lista.
 ------//[DELETE]/lista/audio/<idLista>/<idAudio> : Elimina un audio de la lista.
-------///lista/add-collaborator/<idLista>/<idUsuario>/: Añade un colaborador a la lista.
+------///[POST]lista/collaborator/<idLista>/<idUsuario>/: Añade un colaborador a la lista.
+------///[DELETE]lista/collaborator/<idLista>/<idUsuario>/: Elimina un colaborador de la lista.
+------///[GET]listas/seguidas/<idUsuario>/: Devuelve las listas seguidas por un usuario.
+
