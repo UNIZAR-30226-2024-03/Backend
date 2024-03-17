@@ -4,8 +4,7 @@ import ApiError from '../utils/errorHandling/utils/ApiError';
 import catchAsync from '../utils/errorHandling/utils/catchAsync';
 import { Request, Response } from 'express';
 import * as listasDb from '../../db/listaDb';
-
-
+import * as sigueListaDb from '../../db/sigueListaDb';
 
 
 //[POST]/lista/ : Crea una lista nueva.
@@ -17,6 +16,7 @@ import * as listasDb from '../../db/listaDb';
 //[POST]/lista/audio/<idLista>/<idAudio> : Añade un audio a la lista.
 //[DELETE]/lista/audio/<idLista>/<idAudio> : Elimina un audio de la lista.
 ///lista/add-collaborator/<idLista>/<idUsuario>/: Añade un colaborador a la lista.
+
 
 
 /**
