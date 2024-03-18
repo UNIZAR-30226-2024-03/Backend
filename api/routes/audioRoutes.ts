@@ -5,7 +5,7 @@
 import express, { Express, Request, Response } from "express";
 
 //elemento prisma para acceder a la base de datos declarado en el archivo index.ts de la carpeta prisma
-import prisma  from "../prisma/index.js";
+import prisma  from "../../prisma/client.js";
 
 // Librearía para subir archivos de audio
 import multer from 'multer';
@@ -13,7 +13,7 @@ import path from 'path';//Variable para manejar rutas de archivos
 import fs from 'fs'; //Variable para manejar archivos, leer, escribir, etc
 import mediaserver from 'mediaserver'; //Variable para manejar archivos de audio, usa chunks para enviar el archivo
 
-export const audioRouter = express.Router();
+const audioRouter = express.Router();
 
 // Interfaz para poder acceder a la propiedad file en el request a la hora de subir un archivo
 
@@ -258,3 +258,5 @@ audioRouter.put('/update/:idaudio', async function(req: MulterRequest, res: Resp
         }
     }
 });
+
+export default audioRouter;
