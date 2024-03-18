@@ -25,6 +25,7 @@ export const createLista = async (
   // if (await getListaByName(nombre)) {
   //   throw new ApiError(httpStatus.BAD_REQUEST, 'Name already taken');
   // }
+  
   return prisma.lista.create({
     data: {
         nombre,
