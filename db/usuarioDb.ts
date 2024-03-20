@@ -6,7 +6,8 @@ export async function usuarioExistPrisma(
   email: string | null = null,
   nombreUsuario: string | null = null,
 ): Promise<boolean> {
-  if (!idUsuario && !email && !nombreUsuario) throw new Error("Provide at least one parameter");
+  if (!idUsuario && !email && !nombreUsuario)
+    throw new Error("Provide at least one parameter");
 
   // {} idUsuario: 1, email: null, nombreUsuario: 'John' } -> { idUsuario: 1, nombreUsuario: 'John' }
   const conditions = { idUsuario, email, nombreUsuario };
@@ -92,21 +93,23 @@ export async function usuarioFollowPrisma(
       seguidorId: idUsuario,
       seguidoId: idUsuarioSeguido,
     },
-    include: {
-      seguidor: true,
-      seguido: true,
-    },
   });
 }
 
 export async function usuarioUnfollowPrisma(
   idUsuario: number,
-  idUsuarioSeguido: number,
+  idSeguido: number,
 ): Promise<void> {
   await prisma.seguir.deleteMany({
     where: {
       seguidorId: idUsuario,
-      seguidoId: idUsuarioSeguido,
+      seguidoId: idSeguido,
     },
+  });
+}
+
+export async function usuarioDeleteEmailPrisma(email: string): Promise<void> {
+  await prisma.usuario.delete({
+    where: { email: email },
   });
 }

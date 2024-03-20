@@ -14,3 +14,9 @@ export const authLoginSchema = z.object({
     email: z.string().email(),
   }),
 });
+
+export const authGoogleSchema = z.object({
+  params: z.object({
+    credential: z.string(),
+  }),
+});

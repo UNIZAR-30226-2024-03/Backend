@@ -35,8 +35,8 @@ model Seguir {
   seguidorId Int
   seguidoId  Int
 
-  seguidor Usuario @relation("Seguidor", fields: [seguidorId], references: [idUsuario])
-  seguido  Usuario @relation("Seguido", fields: [seguidoId], references: [idUsuario])
+  seguidor Usuario @relation("Seguidor", fields: [seguidorId], references: [idUsuario], onDelete: Cascade)
+  seguido  Usuario @relation("Seguido", fields: [seguidoId], references: [idUsuario], onDelete: Cascade)
 
   @@id([seguidorId, seguidoId])
 }
@@ -46,8 +46,8 @@ model SigueLista {
   idLista       Int
   ultimaEscucha DateTime @default(now())
 
-  Usuario Usuario @relation(fields: [idUsuario], references: [idUsuario])
-  Lista   Lista   @relation(fields: [idLista], references: [idLista])
+  Usuario Usuario @relation(fields: [idUsuario], references: [idUsuario], onDelete: Cascade)
+  Lista   Lista   @relation(fields: [idLista], references: [idLista], onDelete: Cascade)
 
   @@id([idUsuario, idLista])
 }
@@ -89,8 +89,8 @@ model Escucha {
   idAudio   Int
   fecha     DateTime @default(now())
 
-  Usuario Usuario @relation(fields: [idUsuario], references: [idUsuario])
-  Audio   Audio   @relation(fields: [idAudio], references: [idAudio])
+  Usuario Usuario @relation(fields: [idUsuario], references: [idUsuario], onDelete: Cascade)
+  Audio   Audio   @relation(fields: [idAudio], references: [idAudio], onDelete: Cascade)
 
   @@id([idUsuario, idAudio, fecha])
 }

@@ -1,11 +1,11 @@
 import { NextFunction, Response } from "express";
-import { Request } from "express-jwt";
 
+import * as usuarioTypesJs from "../utils/types/usuarioTypes.js";
 import { hashPassword } from "../utils/hashContrasegna.js";
 import * as usuarioDbJs from "../../db/usuarioDb.js";
 
 export async function usuarioModify(
-  req: Request,
+  req: usuarioTypesJs.ModifyRequest,
   res: Response,
   next: NextFunction,
 ) {
@@ -36,15 +36,14 @@ export async function usuarioModify(
  * @returns void
  */
 export async function usuarioGet(
-  req: Request,
+  req: usuarioTypesJs.GetRequest,
   res: Response,
   next: NextFunction,
 ) {
   try {
-    const idUsuario =
-      Number(req.auth?.idUsuario) || Number(req.query.idUsuario);
-    const rrss = req.query.rrss === "true";
-    const listas = req.query.listas === "true";
+    const idUsuario = Number(req.auth?.idUsuario) || req.query.idUsuario;
+    const rrss = req.query.rrss;
+    const listas = req.query.listas;
 
     const currentUsuario = await usuarioDbJs.usuarioGetPrisma(
       idUsuario,
@@ -61,36 +60,40 @@ export async function usuarioGet(
 }
 
 export async function usuarioFollow(
-  req: Request,
+  req: usuarioTypesJs.FollowRequest,
   res: Response,
   next: NextFunction,
 ) {
   try {
     const idUsuario = Number(req.auth?.idUsuario);
-    const idUsuarioSeguido = Number(req.query.idUsuarioSeguido);
+    const idSeguido = req.query.seguido;
+    
+    if (!(await usuarioDbJs.usuarioExistPrisma(idSeguido)))
+      return res.sendStatus(404);
 
-    const usuario = await usuarioDbJs.usuarioFollowPrisma(
-      idUsuario,
-      idUsuarioSeguido,
-    );
-    return res.status(201).json({ usuario: usuario });
+    await usuarioDbJs.usuarioFollowPrisma(idUsuario, idSeguido);
+    console.log("Usuario followed");
+    return res.sendStatus(201);
   } catch (error) {
     return next(error);
   }
 }
 
 export async function usuarioUnfollow(
-  req: Request,
+  req: usuarioTypesJs.UnfollowRequest,
   res: Response,
   next: NextFunction,
 ) {
   try {
     const idUsuario = Number(req.auth?.idUsuario);
-    const idUsuarioSeguido = Number(req.query.idUsuarioSeguido);
+    const idSeguido = req.query.seguido;
+
+    if (!(await usuarioDbJs.usuarioExistPrisma(idSeguido)))
+      return res.sendStatus(404);
 
     const usuario = await usuarioDbJs.usuarioUnfollowPrisma(
       idUsuario,
-      idUsuarioSeguido,
+      idSeguido,
     );
     return res.status(201).json({ usuario: usuario });
   } catch (error) {
