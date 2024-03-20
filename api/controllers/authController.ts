@@ -1,17 +1,10 @@
 import { NextFunction, Response } from "express";
 import { Request } from "express-jwt";
-import { google } from "googleapis";
 
 import * as usuarioDbJs from "../../db/usuarioDb.js";
 import { compareWithHash, hashPassword } from "../utils/hashContrasegna.js";
 import { createUsuarioToken } from "../utils/auth/createUsuarioToken.js";
-
-const oauth2Client = new google.auth.OAuth2(
-  process.env.GOOGLE_CLIENT_ID,
-  process.env.GOOGLE_CLIENT_SECRET,
-  process.env.GOOGLE_REDIRECT_URI || "http://localhost:3000/api/auth/google",
-);
-const oauth2 = google.oauth2({ version: "v2", auth: oauth2Client });
+import { verify } from "../utils/auth/googleVerification.js";
 
 export async function authGoogleLogin(
   req: Request,
@@ -19,15 +12,10 @@ export async function authGoogleLogin(
   next: NextFunction,
 ) {
   try {
-    const code = req.query.code as string;
-    if (!code) return res.sendStatus(400);
+    const payload = await verify(req.params.credential);
+    if (!payload) return res.sendStatus(401);
 
-    // Exchange the authorization code for an access token
-    const { tokens } = await oauth2Client.getToken(code);
-    oauth2Client.setCredentials(tokens);
-
-    const { data } = await oauth2.userinfo.get();
-    const { email, name, picture } = data;
+    const { email, name, picture } = payload;
 
     if (!email) return res.sendStatus(401);
     const usuario = await usuarioDbJs.usuarioGetEmailPrisma(email);
