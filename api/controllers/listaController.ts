@@ -1,10 +1,10 @@
 import httpStatus from 'http-status';
 import pick from '../utils/errorHandling/utils/pick';
-import ApiError from '../utils/errorHandling/utils/ApiError';
-import catchAsync from '../utils/errorHandling/utils/catchAsync';
+import ApiError from '../utils/errorHandling/utils/ApiError.js';
+import catchAsync from '../utils/errorHandling/utils/catchAsync.js';
 import { Request, Response } from 'express';
-import * as listasDb from '../../db/listaDb';
-import * as sigueListaDb from '../../db/sigueListaDb';
+import * as listasDb from '../../db/listaDb.js';
+import * as sigueListaDb from '../../db/sigueListaDb.js';
 
 
 //[POST]/lista/ : Crea una lista nueva.
@@ -182,6 +182,6 @@ export const deleteCollaboratorFromLista = catchAsync(async (req : Request, res 
  * @returns {Promise<Lista[]>}
  */
 export const getListsByUser = catchAsync(async (req : Request, res : Response) => {
-  const listas = await listasDb.getListasByUser(parseInt(req.params.UsuarioId));
+  const listas = await listasDb.getListasByPropietario(parseInt(req.params.UsuarioId));
   res.send(listas);
 });

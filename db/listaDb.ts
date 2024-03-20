@@ -25,17 +25,17 @@ export const createLista = async (
   // if (await getListaByName(nombre)) {
   //   throw new ApiError(httpStatus.BAD_REQUEST, 'Name already taken');
   // }
-  
+
   return prisma.lista.create({
     data: {
         nombre,
         esAlbum,
         esPrivada,
-        Propietarios: {
+        Propiertarios: {
             connect: { idUsuario: idCreador }
         },
         descripcion,
-        fechaUltimaMod: new Date(), // new Date() devuelve la fecha actual
+        fecha: new Date(), // new Date() devuelve la fecha actual
         imgLista,
         tipoLista,
         Audios: {
@@ -59,6 +59,23 @@ export const getListaById = async (id: number): Promise<Lista | null> => {
   });
 }
 
+
+/**
+ * Devuelve las listas de las que un usuario es propietario
+ * @param {ObjectId} idUsuario
+  * @returns {Promise<Lista[]>}
+  */
+export const getListasByPropietario = async (idUsuario: number): Promise<Lista[]> => {
+  return prisma.lista.findMany({
+    where: {
+      Propiertarios: {
+        some: {
+          idUsuario
+        }
+      }
+    }
+  });
+}
 
 /**
  * Edita una lista
@@ -176,7 +193,7 @@ export const addPropietarioToLista = async (
   return prisma.lista.update({
     where: { idLista: lista.idLista },
     data: {
-      Propietarios: {
+      Propiertarios: {
         connect: { idUsuario }
       }
     }
@@ -203,12 +220,11 @@ export const deletePropietarioFromLista = async (
   return prisma.lista.update({
     where: { idLista: lista.idLista },
     data: {
-      Propietarios: {
+      Propiertarios: {
         disconnect: { idUsuario }
       }
     }
   });
 }
-
 
 
