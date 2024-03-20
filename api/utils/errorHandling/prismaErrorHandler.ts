@@ -17,14 +17,17 @@ export default async function prismaErrorHandler(
 ) {
   if (!(err instanceof Prisma.PrismaClientKnownRequestError)) return next(err);
 
-  console.debug(`treating PrismaKnowRequestError with code ${err.code}`);
   switch (err.code) {
     case "P2002":
       return res
-        .status(422)
+        .status(400)
         .json({ errors: [`the field ${err.meta?.target} is not unique`] });
+    case "P2003":
+      return res.status(400).json({
+        errors: [`required value in ${err.meta?.modelName} is missing`],
+      });
     case "P2025":
-      return res.status(422).json({
+      return res.status(400).json({
         errors: [`${err.meta?.cause}`],
       });
     default:

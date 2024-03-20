@@ -18,7 +18,7 @@ export default async function authErrorHandler(
   if (!(err instanceof UnauthorizedError)) return next(err);
 
   // Se why authorization failed
-  console.debug(`Authorization failed due to ${err.code}`);
+  // console.debug(`Authorization failed due to ${err.code}`);
   switch (err.code) {
     case "credentials_required":
       return res.sendStatus(401);

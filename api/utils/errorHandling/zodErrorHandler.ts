@@ -16,11 +16,5 @@ export default async function zodErrorHandler(
 ) {
   if (!(err instanceof ZodError)) return next(err);
 
-  console.debug(`Handling Zod error: ${err.message}`);
-
-  // Zod errors can contain multiple validation errors
-  const validationErrors = err.errors.map((error) => error.message);
-
-  // Send a response with the validation errors
-  return res.status(400).json({ errors: validationErrors });
+  return res.status(400).json(err.errors);
 }
