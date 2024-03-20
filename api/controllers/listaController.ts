@@ -36,7 +36,7 @@ export const createLista = catchAsync(async (req : Request, res : Response) => {
   const { nombre, descripcion, esPrivada, img, esAlbum, tipoLista, idUsuario, audios } = req.body; 
   // No se necesita Seguidores porque al crear una lista no tiene seguidores
   // No necesita fechaUltimaMod porque se crea en el momento de la creación
-  const lista = await listasDb.createLista(nombre, descripcion, esPrivada, img, esAlbum, tipoLista, idUsuario, audios);
+  const lista = await listasDb.createLista(nombre, esAlbum, esPrivada, idUsuario, descripcion, img, tipoLista, audios);
   res.status(httpStatus.CREATED).send(lista);
 });
 
