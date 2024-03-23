@@ -11,12 +11,12 @@ import ApiError from '../api/utils/errorHandling/utils/ApiError.js';
  */
 export const createLista = async (
     nombre: string,
-    esAlbum: boolean,
-    esPrivada: boolean,
-    idCreador: number,
     descripcion: string = '',
+    esPrivada: boolean,
+    esAlbum: boolean,
     imgLista: string| null = process.env.DEFAULT_PLAYLIST_PICTURE || "",
     tipoLista: TipoLista,
+    idCreador: number,
     audios: number[]
 ): Promise<Lista> => {
     // Permitimos que un usuario tenga varias listas que se llamen igual
@@ -26,8 +26,10 @@ export const createLista = async (
   //   throw new ApiError(httpStatus.BAD_REQUEST, 'Name already taken');
   // }
 
-  return prisma.lista.create({
-    data: {
+  // si el create falla, se lanzará una excepción que se capturará en el controlador
+  try {
+    return await prisma.lista.create({
+      data: {
         nombre,
         esAlbum,
         esPrivada,
@@ -35,7 +37,7 @@ export const createLista = async (
             connect: { idUsuario: idCreador }
         },
         descripcion,
-        fecha: new Date(), // new Date() devuelve la fecha actual
+        fechaUltimaMod: new Date(), // new Date() devuelve la fecha actual
         imgLista,
         tipoLista,
         Audios: {
@@ -43,8 +45,12 @@ export const createLista = async (
           // para que al pasarlo a connect se seleccionen los audios con esos ids
           connect: audios.map((idAudio) => ({ idAudio })),
         }
-    }
-  });
+      }
+    });
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
 };
 
 
@@ -54,9 +60,14 @@ export const createLista = async (
  * @returns {Promise<Lista | null>}
  */
 export const getListaById = async (id: number): Promise<Lista | null> => {
-  return prisma.lista.findUnique({
-    where: { idLista: id }
-  });
+  try {
+    return prisma.lista.findUnique({
+      where: { idLista: id }
+    });
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
 }
 
 
@@ -66,21 +77,20 @@ export const getListaById = async (id: number): Promise<Lista | null> => {
   * @returns {Promise<Lista[]>}
   */
 export const getListasByPropietario = async (idUsuario: number): Promise<Lista[]> => {
-  return prisma.lista.findMany({
-    where: {
-      Propiertarios: {
-        some: {
-          idUsuario
-        }
-      }
-    }
-  });
+  try {
+    return prisma.lista.findMany({
+      where: { Propiertarios: { some: { idUsuario } } }
+    });
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
 }
 
 /**
  * Edita una lista
  * @param {ObjectId} id
- * @param {Object} updateBody Es un objeto de la forma
+ * @param {Object} updateBody Es un objeto de la forma { nombre, descripcion, esPrivada, imgLista, tipoLista, audios }
  * @returns {Promise<Lista>}
  * @throws {ApiError}
  */
@@ -88,14 +98,30 @@ export const updateListaById = async (
   id: number,
   updateBody: Prisma.ListaUpdateInput
 ): Promise<Lista> => {
-  const lista = await getListaById(id);
-  if (!lista) {
-    throw new ApiError(httpStatus.NOT_FOUND, 'Lista not found');
+  try {
+    const lista = await getListaById(id);
+    if (!lista) {
+      throw new ApiError(httpStatus.NOT_FOUND, 'Lista not found');
+    }
+    //updateBody.Audios tiene que ser un array de objetos con el id del audio
+    console.log(updateBody);
+    updateBody.Audios = updateBody.Audios?.connect;
+
+    const propietarios = updateBody.Propiertarios?.connect;
+    updateBody.Propiertarios = propietarios ? { connect: propietarios } : {};
+
+    const seguidores = updateBody.Seguidores?.connect;
+    updateBody.Seguidores = seguidores ? { connect: seguidores } : {};
+
+    updateBody.fechaUltimaMod = new Date(); // Actualizamos la fecha de última modificación
+    return await prisma.lista.update({
+      where: { idLista: lista.idLista },
+      data: updateBody
+    });
+  } catch (error) {
+    console.log(error);
+    throw error;
   }
-  return prisma.lista.update({
-    where: { idLista: lista.idLista },
-    data: updateBody
-  });
 };
 
 
@@ -107,12 +133,14 @@ export const updateListaById = async (
  * @throws {ApiError}
  */
 export const deleteListaById = async (id: number): Promise<Lista> => {
-  const lista = await getListaById(id);
-  if (!lista) {
-    throw new ApiError(httpStatus.NOT_FOUND, 'Lista not found');
+  try {
+    return await prisma.lista.delete({
+      where: { idLista: id }
+    });
+  } catch (error) {
+    console.log(error);
+    throw error;
   }
-  await prisma.lista.delete({ where: { idLista: lista.idLista } });
-  return lista;
 }
 
 

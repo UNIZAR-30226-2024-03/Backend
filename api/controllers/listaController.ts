@@ -1,8 +1,7 @@
 import httpStatus from 'http-status';
-import pick from '../utils/errorHandling/utils/pick';
 import ApiError from '../utils/errorHandling/utils/ApiError.js';
 import catchAsync from '../utils/errorHandling/utils/catchAsync.js';
-import { Request, Response } from 'express';
+import e, { Request, Response } from 'express';
 import * as listasDb from '../../db/listaDb.js';
 import * as sigueListaDb from '../../db/sigueListaDb.js';
 
@@ -36,8 +35,15 @@ export const createLista = catchAsync(async (req : Request, res : Response) => {
   const { nombre, descripcion, esPrivada, img, esAlbum, tipoLista, idUsuario, audios } = req.body; 
   // No se necesita Seguidores porque al crear una lista no tiene seguidores
   // No necesita fechaUltimaMod porque se crea en el momento de la creación
-  const lista = await listasDb.createLista(nombre, esAlbum, esPrivada, idUsuario, descripcion, img, tipoLista, audios);
-  res.status(httpStatus.CREATED).send(lista);
+
+  // createLista puede lanzar un error si el nombre de la lista ya existe por o que se debe capturar
+  try {
+    const lista = await listasDb.createLista(nombre, descripcion, esPrivada, esAlbum, img, tipoLista, idUsuario, audios);
+    res.status(httpStatus.CREATED).send(lista);
+  } catch (error) {
+    res.status(httpStatus.BAD_REQUEST).send(error)
+  }
+
 });
 
 
@@ -47,10 +53,14 @@ export const createLista = catchAsync(async (req : Request, res : Response) => {
  * @returns {Promise<Lista>}
  */
 export const deleteLista = catchAsync(async (req : Request, res : Response) => {
-  await listasDb.deleteListaById(parseInt(req.params.ListaId));
-  res.status(httpStatus.NO_CONTENT).send();
+  try {
+    await listasDb.deleteListaById(parseInt(req.params.idLista));
+    // Devolvermos el estado 204 (NO_CONTENT) porque no hay contenido que devolver y el mensaje de que se ha borrado correctamente
+    res.status(httpStatus.NO_CONTENT).send("Lista borrada correctamente");
+  } catch (error) {
+    res.status(httpStatus.BAD_REQUEST).send(error);
+  }
 });
-
 
 /**
  * Edita una lista
@@ -60,8 +70,12 @@ export const deleteLista = catchAsync(async (req : Request, res : Response) => {
  * @throws {ApiError}
  */
 export const updateLista = catchAsync(async (req : Request, res : Response) => {
-  const lista = await listasDb.updateListaById(parseInt(req.params.ListaId), req.body);
-  res.send(lista);
+  try {
+    const lista = await listasDb.updateListaById(parseInt(req.params.idLista), req.body);
+    res.send(lista);
+  } catch (error) {
+    res.status(httpStatus.BAD_REQUEST).send(error);
+  }
 });
 
 
@@ -72,11 +86,12 @@ export const updateLista = catchAsync(async (req : Request, res : Response) => {
  * @throws {ApiError}
  */
 export const getListaById = catchAsync(async (req : Request, res : Response) => {
-  const lista = await listasDb.getListaById(parseInt(req.params.ListaId));
-  if (!lista) {
-    throw new ApiError(httpStatus.NOT_FOUND, 'Lista not found');
+  try {
+    const lista = await listasDb.getListaById(parseInt(req.params.idLista));
+    res.send(lista);
+  } catch (error) {
+    res.status(httpStatus.BAD_REQUEST).send(error);
   }
-  res.send(lista);
 });
 
 
@@ -87,11 +102,11 @@ export const getListaById = catchAsync(async (req : Request, res : Response) => 
   * @returns {Promise<SigueLista>}
  */
 export const followLista = catchAsync(async (req : Request, res : Response) => {
-  const sigueLista = await sigueListaDb.sigueListaGetPrisma(parseInt(req.params.ListaId), parseInt(req.params.UsuarioId));
+  const sigueLista = await sigueListaDb.sigueListaGetPrisma(parseInt(req.params.idLista), parseInt(req.params.UsuarioId));
   if (sigueLista) {
     throw new ApiError(httpStatus.BAD_REQUEST, 'Already following this list');
   }
-  const lista = await sigueListaDb.sigueListaCreatePrisma(parseInt(req.params.ListaId), parseInt(req.params.UsuarioId));
+  const lista = await sigueListaDb.sigueListaCreatePrisma(parseInt(req.params.idLista), parseInt(req.params.UsuarioId));
   res.status(httpStatus.CREATED).send(lista);
 });
 
@@ -103,11 +118,11 @@ export const followLista = catchAsync(async (req : Request, res : Response) => {
  * @returns {Promise<SigueLista>}
  */
 export const unfollowLista = catchAsync(async (req : Request, res : Response) => {
-  const sigueLista = await sigueListaDb.sigueListaGetPrisma(parseInt(req.params.ListaId), parseInt(req.params.UsuarioId));
+  const sigueLista = await sigueListaDb.sigueListaGetPrisma(parseInt(req.params.idLista), parseInt(req.params.UsuarioId));
   if (!sigueLista) {
     throw new ApiError(httpStatus.BAD_REQUEST, 'Not following this list');
   }
-  await sigueListaDb.sigueListaDeletePrisma(parseInt(req.params.ListaId), parseInt(req.params.UsuarioId));
+  await sigueListaDb.sigueListaDeletePrisma(parseInt(req.params.idLista), parseInt(req.params.UsuarioId));
   res.status(httpStatus.NO_CONTENT).send();
 });
 
@@ -129,9 +144,9 @@ export const getFollowedLists = catchAsync(async (req : Request, res : Response)
  * @returns {Promise<AudiosLista>}
  */
 export const addAudioToLista = catchAsync(async (req : Request, res : Response) => {
-  const audiosLista = await listasDb.addAudioToLista(parseInt(req.params.ListaId), parseInt(req.params.AudioId));
+  const audiosLista = await listasDb.addAudioToLista(parseInt(req.params.idLista), parseInt(req.params.AudioId));
   // Como se ha añadido un audio a la lista, se actualiza la fecha de última modificación
-  await listasDb.updateListaById(parseInt(req.params.ListaId), { fecha: new Date() });
+  await listasDb.updateListaById(parseInt(req.params.idLista), { fechaUltimaMod: new Date() });
   res.status(httpStatus.CREATED).send(audiosLista);
 });
 
@@ -143,9 +158,9 @@ export const addAudioToLista = catchAsync(async (req : Request, res : Response) 
  * @returns {Promise<AudiosLista>}
  */
 export const deleteAudioFromLista = catchAsync(async (req : Request, res : Response) => {
-  await listasDb.deleteAudioFromLista(parseInt(req.params.ListaId), parseInt(req.params.AudioId));
+  await listasDb.deleteAudioFromLista(parseInt(req.params.idLista), parseInt(req.params.AudioId));
   // Como se ha eliminado un audio de la lista, se actualiza la fecha de última modificación
-  await listasDb.updateListaById(parseInt(req.params.ListaId), { fecha: new Date() });
+  await listasDb.updateListaById(parseInt(req.params.idLista), { fechaUltimaMod: new Date() });
   res.status(httpStatus.NO_CONTENT).send();
 });
 
@@ -158,7 +173,7 @@ export const deleteAudioFromLista = catchAsync(async (req : Request, res : Respo
  * @throws {ApiError}
  */
 export const addCollaboratorToLista = catchAsync(async (req : Request, res : Response) => {
-  const lista = await listasDb.addPropietarioToLista(parseInt(req.params.ListaId), parseInt(req.params.UsuarioId));
+  const lista = await listasDb.addPropietarioToLista(parseInt(req.params.idLista), parseInt(req.params.UsuarioId));
   res.send(lista);
 });
 
@@ -171,7 +186,7 @@ export const addCollaboratorToLista = catchAsync(async (req : Request, res : Res
  * @throws {ApiError}
  */
 export const deleteCollaboratorFromLista = catchAsync(async (req : Request, res : Response) => {
-  const lista = await listasDb.deletePropietarioFromLista(parseInt(req.params.ListaId), parseInt(req.params.UsuarioId));
+  const lista = await listasDb.deletePropietarioFromLista(parseInt(req.params.idLista), parseInt(req.params.UsuarioId));
   res.send(lista);
 });
 

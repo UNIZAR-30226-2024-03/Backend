@@ -40,6 +40,7 @@ listaRouter.delete("/collaborator/:idLista/:idUsuario", listaController.deleteCo
 listaRouter.get("/seguidas/:idUsuario", listaController.getFollowedLists);
 
 
+
 // Ejemplo de endpoint para probar el funcionamiento de la API
 // [POST] /lista/calc
 listaRouter.post('/calc', (req: Request, res: Response): void => {
