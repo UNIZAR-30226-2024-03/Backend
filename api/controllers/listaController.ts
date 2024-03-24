@@ -96,7 +96,10 @@ export const getListaById = catchAsync(async (req : Request, res : Response) => 
   try {
     const lista = await listasDb.getListaById(parseInt(req.params.idLista));
     if (!lista) res.status(httpStatus.NOT_FOUND).send("Lista no encontrada");
-    else res.send(lista);
+    else  {
+      // Añadimos a la lista los audios que contiene
+      const audios = await listasDb.getAudiosFromLista(parseInt(req.params.idLista));
+    }
     
   } catch (error) {
     res.status(httpStatus.BAD_REQUEST).send(error);
@@ -157,10 +160,16 @@ export const getFollowedLists = catchAsync(async (req : Request, res : Response)
  * @returns {Promise<AudiosLista>}
  */
 export const addAudioToLista = catchAsync(async (req : Request, res : Response) => {
-  const audiosLista = await listasDb.addAudioToLista(parseInt(req.params.idLista), parseInt(req.params.AudioId));
-  // Como se ha añadido un audio a la lista, se actualiza la fecha de última modificación
-  await listasDb.updateListaById(parseInt(req.params.idLista), { fechaUltimaMod: new Date() });
-  res.status(httpStatus.CREATED).send(audiosLista);
+  try {
+    await listasDb.addAudioToLista(parseInt(req.params.idLista), parseInt(req.params.idAudio));
+    // Como se ha añadido un audio a la lista, se actualiza la fecha de última modificación
+    // No debería fallar porque solo se actualiza la fecha, si pudiese fallar
+    // debería hacerse una transacción con las dos operaciones
+    await listasDb.updateListaById(parseInt(req.params.idLista), { fechaUltimaMod: new Date() });
+    res.status(httpStatus.CREATED).send();
+  } catch (error) {
+    res.status(httpStatus.BAD_REQUEST).send(error);
+  }
 });
 
 
@@ -171,10 +180,14 @@ export const addAudioToLista = catchAsync(async (req : Request, res : Response) 
  * @returns {Promise<AudiosLista>}
  */
 export const deleteAudioFromLista = catchAsync(async (req : Request, res : Response) => {
-  await listasDb.deleteAudioFromLista(parseInt(req.params.idLista), parseInt(req.params.AudioId));
-  // Como se ha eliminado un audio de la lista, se actualiza la fecha de última modificación
-  await listasDb.updateListaById(parseInt(req.params.idLista), { fechaUltimaMod: new Date() });
-  res.status(httpStatus.NO_CONTENT).send();
+  try {
+    await listasDb.deleteAudioFromLista(parseInt(req.params.idLista), parseInt(req.params.idAudio));
+    // Como se ha eliminado un audio de la lista, se actualiza la fecha de última modificación
+    await listasDb.updateListaById(parseInt(req.params.idLista), { fechaUltimaMod: new Date() });
+    res.status(httpStatus.NO_CONTENT).send();
+  } catch (error) {
+    res.status(httpStatus.BAD_REQUEST).send(error);
+  }
 });
 
 
@@ -185,8 +198,12 @@ export const deleteAudioFromLista = catchAsync(async (req : Request, res : Respo
  * @returns {Promise<Lista>}
  */
 export const addCollaboratorToLista = catchAsync(async (req : Request, res : Response) => {
-  const lista = await listasDb.addPropietarioToLista(parseInt(req.params.idLista), parseInt(req.params.idUsuario));
-  res.send(lista);
+  try {
+    const lista = await listasDb.addPropietarioToLista(parseInt(req.params.idLista), parseInt(req.params.idUsuario));
+    res.send(lista);
+  } catch (error) {
+    res.status(httpStatus.BAD_REQUEST).send(error);
+  }
 });
 
 
@@ -197,8 +214,12 @@ export const addCollaboratorToLista = catchAsync(async (req : Request, res : Res
  * @returns {Promise<Lista>}
  */
 export const deleteCollaboratorFromLista = catchAsync(async (req : Request, res : Response) => {
-  const lista = await listasDb.deletePropietarioFromLista(parseInt(req.params.idLista), parseInt(req.params.idUsuario));
-  res.send(lista);
+  try {
+    const lista = await listasDb.deletePropietarioFromLista(parseInt(req.params.idLista), parseInt(req.params.idUsuario));
+    res.send(lista);
+  } catch (error) {
+    res.status(httpStatus.BAD_REQUEST).send(error);
+  }
 });
 
 
@@ -208,6 +229,10 @@ export const deleteCollaboratorFromLista = catchAsync(async (req : Request, res 
  * @returns {Promise<Lista[]>}
  */
 export const getListsByUser = catchAsync(async (req : Request, res : Response) => {
-  const listas = await listasDb.getListasByPropietario(parseInt(req.params.idUsuario));
-  res.send(listas);
+  try {
+    const listas = await listasDb.getListasByPropietario(parseInt(req.params.idUsuario));
+    res.send(listas);
+  } catch (error) {
+    res.status(httpStatus.BAD_REQUEST).send(error);
+  }
 });
