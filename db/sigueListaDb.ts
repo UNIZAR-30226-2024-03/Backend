@@ -4,13 +4,13 @@ import prisma from "../prisma/client.js";
 
 /**
  * Función que devuelve si un usuario sigue una lista
- * @param {number} idUsuario
  * @param {number} idLista
+ * @param {number} idUsuario
  * @returns {Promise<SigueLista | null>}
  */
 export async function sigueListaGetPrisma(
+    idLista: number,
   idUsuario: number,
-  idLista: number,
 ): Promise<SigueLista | null> {
     if (!idUsuario || !idLista) return null;
     const sigueLista = await prisma.sigueLista.findFirst({
@@ -22,65 +22,76 @@ export async function sigueListaGetPrisma(
 
 /**
  * Función que crea una relación sigueLista
- * @param {number} idUsuario
  * @param {number} idLista
+ * @param {number} idUsuario
  * @returns {Promise<SigueLista>}
  * 
  * @throws {Error} 
  */
 export async function sigueListaCreatePrisma(
+    idLista: number,
   idUsuario: number,
-  idLista: number,
 ): Promise<SigueLista> {
+    console.log("idUsuario: ", idUsuario);
+    console.log("idLista: ", idLista);
     if (!idUsuario || !idLista) throw new Error("Provide idUsuario and idLista");
-    const sigueLista = await prisma.sigueLista.create({
-        data: {
-            idUsuario,
-            idLista,
-        },
-    });
-    return sigueLista;
+   try {
+        return await prisma.sigueLista.create({
+            data: { idUsuario, idLista },
+        });
+    } catch (error) {
+        console.log(error);
+        throw error;
+    }
 }
 
 
 /**
  * Función que edita una relación sigueLista
- * @param {number} idUsuario
  * @param {number} idLista
+ * @param {number} idUsuario
  * @param {Date} ultimaEscucha
  * @returns {Promise<SigueLista>}
  */
 export async function sigueListaEditPrisma(
+    idLista: number,
   idUsuario: number,
-  idLista: number,
   ultimaEscucha: Date,
 ): Promise<SigueLista> {
     if (!idUsuario || !idLista || !ultimaEscucha) throw new Error("Provide idUsuario, idLista and fechaUltimaEscucha");
-    const sigueLista = await prisma.sigueLista.update({
-        where: { idUsuario_idLista: { idUsuario, idLista } },
-        data: { ultimaEscucha },
-    });
-    return sigueLista;
+    try {
+        return await prisma.sigueLista.update({
+            where: { idUsuario_idLista: { idUsuario, idLista } },
+            data: { ultimaEscucha },
+        });
+    } catch (error) {
+        console.log(error);
+        throw error;
+    }
 }
 
 
 /**
  * Función que elimina una relación sigueLista
- * @param {number} idUsuario
  * @param {number} idLista
+ * @param {number} idUsuario
  * @returns {Promise<SigueLista>}
  * 
  * @throws {Error} 
  */
 export async function sigueListaDeletePrisma(
+    idLista: number,
   idUsuario: number,
-  idLista: number,
 ): Promise<SigueLista> {
     if (!idUsuario || !idLista) throw new Error("Provide idUsuario and idLista");
-    const sigueLista = await prisma.sigueLista.delete({
-        where: { idUsuario_idLista: { idUsuario, idLista } },
-    });
-    return sigueLista;
+    try {
+        return await prisma.sigueLista.delete({
+            where: { idUsuario_idLista: { idUsuario, idLista } },
+        });
+    } catch (error) {
+        console.log(error);
+        throw error;
+    }
 }
 
 
@@ -92,11 +103,14 @@ export async function sigueListaDeletePrisma(
 export async function sigueListaGetListPrisma(
   idUsuario: number,
 ): Promise<SigueLista[]> {
-    if (!idUsuario) return [];
-    const sigueListas = await prisma.sigueLista.findMany({
-        where: { idUsuario },
-    });
-    return sigueListas;
+    try {
+        return await prisma.sigueLista.findMany({
+            where: { idUsuario },
+        });
+    } catch (error) {
+        console.log(error);
+        throw error;
+    }
 }
 
 
@@ -108,11 +122,14 @@ export async function sigueListaGetListPrisma(
 export async function sigueListaGetListByIdListaPrisma(
   idLista: number,
 ): Promise<SigueLista[]> {
-    if (!idLista) return [];
-    const sigueListas = await prisma.sigueLista.findMany({
-        where: { idLista },
-    });
-    return sigueListas;
+    try {
+        return await prisma.sigueLista.findMany({
+            where: { idLista },
+        });
+    } catch (error) {
+        console.log(error);
+        throw error;
+    }
 }
 
 
