@@ -95,7 +95,9 @@ export const updateLista = catchAsync(async (req : Request, res : Response) => {
 export const getListaById = catchAsync(async (req : Request, res : Response) => {
   try {
     const lista = await listasDb.getListaById(parseInt(req.params.idLista));
-    res.send(lista);
+    if (!lista) res.status(httpStatus.NOT_FOUND).send("Lista no encontrada");
+    else res.send(lista);
+    
   } catch (error) {
     res.status(httpStatus.BAD_REQUEST).send(error);
   }
@@ -109,12 +111,12 @@ export const getListaById = catchAsync(async (req : Request, res : Response) => 
   * @returns {Promise<SigueLista>}
  */
 export const followLista = catchAsync(async (req : Request, res : Response) => {
-  const sigueLista = await sigueListaDb.sigueListaGetPrisma(parseInt(req.params.idLista), parseInt(req.params.UsuarioId));
-  if (sigueLista) {
-    throw new ApiError(httpStatus.BAD_REQUEST, 'Already following this list');
+  try {
+    const sigueLista = await sigueListaDb.sigueListaCreatePrisma(parseInt(req.params.idLista), parseInt(req.params.idUsuario));
+    res.status(httpStatus.CREATED).send(sigueLista);
+  } catch (error) {
+    res.status(httpStatus.BAD_REQUEST).send(error);
   }
-  const lista = await sigueListaDb.sigueListaCreatePrisma(parseInt(req.params.idLista), parseInt(req.params.UsuarioId));
-  res.status(httpStatus.CREATED).send(lista);
 });
 
 
@@ -125,12 +127,12 @@ export const followLista = catchAsync(async (req : Request, res : Response) => {
  * @returns {Promise<SigueLista>}
  */
 export const unfollowLista = catchAsync(async (req : Request, res : Response) => {
-  const sigueLista = await sigueListaDb.sigueListaGetPrisma(parseInt(req.params.idLista), parseInt(req.params.UsuarioId));
-  if (!sigueLista) {
-    throw new ApiError(httpStatus.BAD_REQUEST, 'Not following this list');
+  try {
+    await sigueListaDb.sigueListaDeletePrisma(parseInt(req.params.idLista), parseInt(req.params.idUsuario));
+    res.status(httpStatus.NO_CONTENT).send();
+  } catch (error) {
+    res.status(httpStatus.BAD_REQUEST).send(error);
   }
-  await sigueListaDb.sigueListaDeletePrisma(parseInt(req.params.idLista), parseInt(req.params.UsuarioId));
-  res.status(httpStatus.NO_CONTENT).send();
 });
 
 /**
@@ -139,8 +141,12 @@ export const unfollowLista = catchAsync(async (req : Request, res : Response) =>
  * @returns {Promise<SigueLista[]>}
  */
 export const getFollowedLists = catchAsync(async (req : Request, res : Response) => {
-  const sigueListas = await sigueListaDb.sigueListaGetListPrisma(parseInt(req.params.UsuarioId));
-  res.send(sigueListas);
+  try {
+    const listas = await sigueListaDb.sigueListaGetListPrisma(parseInt(req.params.idUsuario));
+    res.send(listas);
+  } catch (error) {
+    res.status(httpStatus.BAD_REQUEST).send(error);
+  }
 });
 
 
@@ -179,7 +185,7 @@ export const deleteAudioFromLista = catchAsync(async (req : Request, res : Respo
  * @returns {Promise<Lista>}
  */
 export const addCollaboratorToLista = catchAsync(async (req : Request, res : Response) => {
-  const lista = await listasDb.addPropietarioToLista(parseInt(req.params.idLista), parseInt(req.params.UsuarioId));
+  const lista = await listasDb.addPropietarioToLista(parseInt(req.params.idLista), parseInt(req.params.idUsuario));
   res.send(lista);
 });
 
@@ -191,7 +197,7 @@ export const addCollaboratorToLista = catchAsync(async (req : Request, res : Res
  * @returns {Promise<Lista>}
  */
 export const deleteCollaboratorFromLista = catchAsync(async (req : Request, res : Response) => {
-  const lista = await listasDb.deletePropietarioFromLista(parseInt(req.params.idLista), parseInt(req.params.UsuarioId));
+  const lista = await listasDb.deletePropietarioFromLista(parseInt(req.params.idLista), parseInt(req.params.idUsuario));
   res.send(lista);
 });
 
@@ -202,6 +208,6 @@ export const deleteCollaboratorFromLista = catchAsync(async (req : Request, res 
  * @returns {Promise<Lista[]>}
  */
 export const getListsByUser = catchAsync(async (req : Request, res : Response) => {
-  const listas = await listasDb.getListasByPropietario(parseInt(req.params.UsuarioId));
+  const listas = await listasDb.getListasByPropietario(parseInt(req.params.idUsuario));
   res.send(listas);
 });
