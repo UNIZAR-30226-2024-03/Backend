@@ -65,13 +65,21 @@ export const deleteLista = catchAsync(async (req : Request, res : Response) => {
 /**
  * Edita una lista
  * @param {ObjectId} id
- * @param {Object} updateBody Es un objeto de la forma: { nombre, descripcion, esPrivada, imgLista, tipoLista, audios }
+ * @param {Object} updateBody Es un objeto de la forma: { nombre, descripcion, esPrivada, img, esAlbum, tipoLista, Audios, Propietarios }
  * @returns {Promise<Lista>}
- * @throws {ApiError}
  */
 export const updateLista = catchAsync(async (req : Request, res : Response) => {
   try {
-    const lista = await listasDb.updateListaById(parseInt(req.params.idLista), req.body);
+    const {Audios, Propietarios, Seguidores, ...resto} = req.body;
+
+    const updateObject = {
+      ...resto,
+      ...(Audios && {Audios: {connect: Audios.map((idAudio: number) => ({idAudio}))}}),
+      ...(Propietarios && {Propietarios: {connect: Propietarios.map((idUsuario: number) => ({idUsuario}))}}),
+    }
+
+
+    const lista = await listasDb.updateListaById(parseInt(req.params.idLista), updateObject);
     res.send(lista);
   } catch (error) {
     res.status(httpStatus.BAD_REQUEST).send(error);
@@ -83,7 +91,6 @@ export const updateLista = catchAsync(async (req : Request, res : Response) => {
  * Devuelve la lista con el id dado
  * @param {ObjectId} id
  * @returns {Promise<Lista | null>}
- * @throws {ApiError}
  */
 export const getListaById = catchAsync(async (req : Request, res : Response) => {
   try {
@@ -170,7 +177,6 @@ export const deleteAudioFromLista = catchAsync(async (req : Request, res : Respo
  * @param {ObjectId} idLista
  * @param {ObjectId} idUsuario
  * @returns {Promise<Lista>}
- * @throws {ApiError}
  */
 export const addCollaboratorToLista = catchAsync(async (req : Request, res : Response) => {
   const lista = await listasDb.addPropietarioToLista(parseInt(req.params.idLista), parseInt(req.params.UsuarioId));
@@ -183,7 +189,6 @@ export const addCollaboratorToLista = catchAsync(async (req : Request, res : Res
  * @param {ObjectId} idLista
  * @param {ObjectId} idUsuario
  * @returns {Promise<Lista>}
- * @throws {ApiError}
  */
 export const deleteCollaboratorFromLista = catchAsync(async (req : Request, res : Response) => {
   const lista = await listasDb.deletePropietarioFromLista(parseInt(req.params.idLista), parseInt(req.params.UsuarioId));

@@ -63,7 +63,7 @@ model Lista {
   descripcion     String?
 
   Seguidores    SigueLista[]
-  Propiertarios  Usuario[]
+  Propietarios  Usuario[]
   Audios        Audio[]
 }
 

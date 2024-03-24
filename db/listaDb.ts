@@ -33,7 +33,7 @@ export const createLista = async (
         nombre,
         esAlbum,
         esPrivada,
-        Propiertarios: {
+        Propietarios: {
             connect: { idUsuario: idCreador }
         },
         descripcion,
@@ -79,7 +79,7 @@ export const getListaById = async (id: number): Promise<Lista | null> => {
 export const getListasByPropietario = async (idUsuario: number): Promise<Lista[]> => {
   try {
     return prisma.lista.findMany({
-      where: { Propiertarios: { some: { idUsuario } } }
+      where: { Propietarios: { some: { idUsuario } } }
     });
   } catch (error) {
     console.log(error);
@@ -104,14 +104,7 @@ export const updateListaById = async (
       throw new ApiError(httpStatus.NOT_FOUND, 'Lista not found');
     }
     //updateBody.Audios tiene que ser un array de objetos con el id del audio
-    console.log(updateBody);
-    updateBody.Audios = updateBody.Audios?.connect;
-
-    const propietarios = updateBody.Propiertarios?.connect;
-    updateBody.Propiertarios = propietarios ? { connect: propietarios } : {};
-
-    const seguidores = updateBody.Seguidores?.connect;
-    updateBody.Seguidores = seguidores ? { connect: seguidores } : {};
+    console.log("updateBody: ", updateBody);
 
     updateBody.fechaUltimaMod = new Date(); // Actualizamos la fecha de última modificación
     return await prisma.lista.update({
@@ -221,7 +214,7 @@ export const addPropietarioToLista = async (
   return prisma.lista.update({
     where: { idLista: lista.idLista },
     data: {
-      Propiertarios: {
+      Propietarios: {
         connect: { idUsuario }
       }
     }
@@ -248,7 +241,7 @@ export const deletePropietarioFromLista = async (
   return prisma.lista.update({
     where: { idLista: lista.idLista },
     data: {
-      Propiertarios: {
+      Propietarios: {
         disconnect: { idUsuario }
       }
     }
