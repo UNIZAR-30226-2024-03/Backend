@@ -108,6 +108,75 @@ export const getListaById = catchAsync(async (req : Request, res : Response) => 
 
 
 /**
+ * Devuelve los audios de una lista
+ * @param {ObjectId} idLista
+ * @returns {Promise<Audio[]>}
+ */
+export const getAudiosFromLista = catchAsync(async (req : Request, res : Response) => {
+  try {
+    const audios = await listasDb.getAudiosFromLista(parseInt(req.params.idLista));
+    res.send(audios);
+  } catch (error) {
+    res.status(httpStatus.BAD_REQUEST).send(error);
+  }
+});
+
+
+/**
+ * Devuelve los propietarios de una lista
+ * @param {ObjectId} idLista
+ * @returns {Promise<Number[]>}
+ */
+export const getPropietariosFromLista = catchAsync(async (req : Request, res : Response) => {
+  try {
+    const propietarios = await listasDb.getPropietariosFromLista(parseInt(req.params.idLista));
+    res.send(propietarios);
+  } catch (error) {
+    res.status(httpStatus.BAD_REQUEST).send(error);
+  }
+});
+
+
+/**
+ * Devuelve los seguidores de una lista
+ * @param {ObjectId} idLista
+ * @returns {Promise<Number[]>}
+ */
+export const getSeguidoresFromLista = catchAsync(async (req : Request, res : Response) => {
+  try {
+    const sigueListas = await sigueListaDb.sigueListaGetListByIdListaPrisma(parseInt(req.params.idLista));
+    res.send(sigueListas.map((sigueLista) => sigueLista.idUsuario));
+  } catch (error) {
+    res.status(httpStatus.BAD_REQUEST).send(error);
+  }
+});
+
+
+/**
+ * Devuelve la información de una lista (con audios, propietarios y seguidores)
+ * @param {ObjectId} id
+ * @returns {Promise<Lista | null>}
+ */
+export const getListaByIdWithExtras = catchAsync(async (req : Request, res : Response) => {
+  try {
+    const audios = await listasDb.getAudiosFromLista(parseInt(req.params.idLista));
+    const propietarios = await listasDb.getPropietariosFromLista(parseInt(req.params.idLista));
+    const seguidores = await sigueListaDb.sigueListaGetListByIdListaPrisma(parseInt(req.params.idLista));
+    const lista = await listasDb.getListaByIdWithExtras(parseInt(req.params.idLista));
+    
+    res.send({
+      ...lista,
+      audios,
+      propietarios,
+      seguidores
+    });
+    
+  } catch (error) {
+    res.status(httpStatus.BAD_REQUEST).send(error);
+  }
+});
+
+/**
  * Añade la lista a las seguidas por el usuario.
  * @param {ObjectId} idLista
  * @param {ObjectId} idUsuario
@@ -145,7 +214,12 @@ export const unfollowLista = catchAsync(async (req : Request, res : Response) =>
  */
 export const getFollowedLists = catchAsync(async (req : Request, res : Response) => {
   try {
-    const listas = await sigueListaDb.sigueListaGetListPrisma(parseInt(req.params.idUsuario));
+    const sigueListas = await sigueListaDb.sigueListaGetListPrisma(parseInt(req.params.idUsuario));
+    
+    const listas = await Promise.all(sigueListas.map(async (sigueLista) => {
+      return await listasDb.getListaById(sigueLista.idLista);
+    }));
+    
     res.send(listas);
   } catch (error) {
     res.status(httpStatus.BAD_REQUEST).send(error);

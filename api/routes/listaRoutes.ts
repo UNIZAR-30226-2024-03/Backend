@@ -15,8 +15,20 @@ listaRouter.delete("/:idLista", listaController.deleteLista);
 //[PUT]/lista/<idLista>/ : Edita una lista.
 listaRouter.put("/:idLista", listaController.updateLista);
 
-//[GET]/lista/<idLista>/ : Devuelve la información de una lista (audios que contiene incluidos)
+//[GET]/lista/<idLista>/ : Devuelve la información de una lista (sin audios, propietarios ni seguidores)
 listaRouter.get("/:idLista", listaController.getListaById);
+
+//[GET]/lista/extra/Audios/<idLista>/ : Devuelve los audios de una lista.
+listaRouter.get("/extra/Audios/:idLista", listaController.getAudiosFromLista);
+
+//[GET]/lista/extra/Propietarios/<idLista>/ : Devuelve los propietarios de una lista.
+listaRouter.get("/extra/Propietarios/:idLista", listaController.getPropietariosFromLista);
+
+//[GET]/lista/extra/Seguidores/<idLista>/ : Devuelve los seguidores de una lista.
+listaRouter.get("/extra/Seguidores/:idLista", listaController.getSeguidoresFromLista);
+
+//[GET]/lista/extra/<idLista>/ : Devuelve la información de una lista (con audios, propietarios y seguidores)
+listaRouter.get("/extra/:idLista", listaController.getListaByIdWithExtras);
 
 //[POST]/lista/follow/<idLista>/<idUsuario> : Añade la lista a las seguidas por el usuario.
 listaRouter.post("/follow/:idLista/:idUsuario", listaController.followLista);

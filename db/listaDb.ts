@@ -72,6 +72,103 @@ export const getListaById = async (id: number): Promise<Lista | null> => {
 
 
 /**
+ * Devuelve la lista incluyendo los audios, propietarios y seguidores
+ * @param {ObjectId} id
+ * @returns {Promise<Lista | null>}
+ */
+export const getListaByIdWithExtras = async (id: number): Promise<Lista | null> => {
+  try {
+    return prisma.lista.findUnique({
+      where: { idLista: id },
+      include: {
+        Audios: true,
+        Propietarios: true,
+        Seguidores: true
+      }
+    });
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+}
+
+
+/**
+ * Devuelve los Audios de una lista
+ * @param {ObjectId} idLista
+ * @returns {Promise<Audio[]>}
+ */
+export const getAudiosFromLista = async (idLista: number): Promise<Number[]> => {
+  try {
+    return prisma.lista.findUnique({
+     select: {
+        Audios: {
+          select: {
+            idAudio: true
+          }
+        }
+      },
+      where: { idLista }
+    }).then((lista) => {
+      return lista?.Audios.map((audio) => audio.idAudio) || [];
+    }
+    );
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+}
+
+
+/**
+ * Devuelve los seguidores de una lista
+ * @param {ObjectId} idLista
+ * @returns {Promise<Number>}
+ */
+export const getPropietariosFromLista = async (idLista: number): Promise<Number[]> => {
+  try {
+    return prisma.lista.findUnique({
+      select: {
+        Propietarios: {
+          select: {
+            idUsuario: true
+          }
+        }
+      },
+      where: { idLista }
+    }).then((lista) => {
+      return lista?.Propietarios.map((usuario) => usuario.idUsuario) || [];
+    });
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+}
+
+
+/**
+ * Devuelve los seguidores de una lista
+ * @param {ObjectId} idLista
+ * @returns {Promise<Number>}
+ */
+export const getSeguidoresFromLista = async (idLista: number): Promise<Number[]> => {
+  try {
+    return prisma.sigueLista.findMany({
+      select: {
+        idUsuario: true
+      },
+      where: { idLista }
+    }).then((seguidores) => {
+      return seguidores.map((seguidor) => seguidor.idUsuario);
+    });
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+}
+
+
+/**
  * Devuelve las listas de las que un usuario es propietario
  * @param {ObjectId} idUsuario
   * @returns {Promise<Lista[]>}
@@ -150,18 +247,25 @@ export const addAudioToLista = async (
   idAudio: number
 ): Promise<Lista> => {
   const lista = await getListaById(idLista);
+  console.log("idAudio: ", idAudio);
+  console.log("idLista: ", idLista);
+  console.log("lista: ", lista);
   if (!lista) {
     throw new ApiError(httpStatus.NOT_FOUND, 'Lista not found');
   }
-
-  return prisma.lista.update({
-    where: { idLista: lista.idLista },
-    data: {
-      Audios: {
-        connect: { idAudio }
+  try {
+    return prisma.lista.update({
+      where: { idLista: lista.idLista },
+      data: {
+        Audios: {
+          connect: { idAudio }
+        }
       }
-    }
-  });
+    });
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
 }
 
 
@@ -180,17 +284,19 @@ export const deleteAudioFromLista = async (
   if (!lista) {
     throw new ApiError(httpStatus.NOT_FOUND, 'Lista not found');
   }
-
-  return prisma.lista.update({
-    where: { idLista: lista.idLista },
-    data: {
-      Audios: {
-        // disconnect lo que hace es eliminar la relación entre el audio y la lista
-        // es decir, que el objeto Lista no tendrá el audio en su array de audios
-        disconnect: { idAudio }
+  try {
+    return prisma.lista.update({
+      where: { idLista: lista.idLista },
+      data: {
+        Audios: {
+          disconnect: { idAudio }
+        }
       }
-    }
-  });
+    });
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
 }
 
 
@@ -211,14 +317,19 @@ export const addPropietarioToLista = async (
     throw new ApiError(httpStatus.NOT_FOUND, 'Lista not found');
   }
 
-  return prisma.lista.update({
-    where: { idLista: lista.idLista },
-    data: {
-      Propietarios: {
-        connect: { idUsuario }
+  try {
+    return prisma.lista.update({
+      where: { idLista: lista.idLista },
+      data: {
+        Propietarios: {
+          connect: { idUsuario }
+        }
       }
-    }
-  });
+    });
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
 }
 
 
@@ -238,14 +349,19 @@ export const deletePropietarioFromLista = async (
     throw new ApiError(httpStatus.NOT_FOUND, 'Lista not found');
   }
 
-  return prisma.lista.update({
-    where: { idLista: lista.idLista },
-    data: {
-      Propietarios: {
-        disconnect: { idUsuario }
+  try {
+    return prisma.lista.update({
+      where: { idLista: lista.idLista },
+      data: {
+        Propietarios: {
+          disconnect: { idUsuario }
+        }
       }
-    }
-  });
+    });
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
 }
 
 
