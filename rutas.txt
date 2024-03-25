@@ -39,7 +39,11 @@ perfiles de amigos
 ------//[POST]/lista/ : Crea una lista nueva.
 ------//[DELETE]/lista/<idLista>/ : Borra una lista.
 ------//[PUT]/lista/<idLista>/ : Edita una lista.
-------//[GET]/lista/<idLista>/ : Devuelve la información de una lista (audios que contiene incluidos)
+------//[GET]/lista/<idLista>/ : Devuelve la información de una lista (sin Audios, Seguidores ni Propietarios)
+------//[GET]/lista/extra/Audios/<idLista>/ : Devuelve los audios de una lista.
+------//[GET]/lista/extra/Propietarios/<idLista>/ : Devuelve los propietarios de una lista.
+------//[GET]/lista/extra/Seguidores/<idLista>/ : Devuelve los seguidores de una lista.
+------//[GET]/lista/extra/<idLista>/ : Devuelve la información de una lista (con audios, propietarios y seguidores)
 ------//[POST]/lista/follow/<idLista>/<idUsuario> : Añade la lista a las seguidas por el usuario.
 ------//[DELETE]/lista/follow/<idLista>/<idUsuario> : Elimina la lista de las seguidas por el usuario.
 ------//[POST]/lista/audio/<idLista>/<idAudio> : Añade un audio a la lista.
