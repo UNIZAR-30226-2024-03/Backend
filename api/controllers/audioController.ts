@@ -2,6 +2,7 @@ import { Request, Response , NextFunction} from "express";
 import prisma from "../../prisma/client.js";
 import path from 'path';
 import fs from 'fs';
+import * as audioDatabase from "../../db/audioDb.js";
 
 const projectRootPath = process.cwd(); // Devuelve el directorio raíz del proyecto y se almacena en una constante
 
@@ -9,7 +10,7 @@ const projectRootPath = process.cwd(); // Devuelve el directorio raíz del proye
 export async function getAudio(req: Request, res: Response) {
     const id = Number(req.params.idaudio);
     try {
-        const audio = await findAudioById(id);
+        const audio = await audioDatabase.findAudioById(id);
         if (audio) {
             res.json(audio);
         } else {
@@ -70,7 +71,7 @@ export async function createAudio(req: Request, res: Response) {
             }
         };
         console.log(audioData);
-        const audio = await createAudioDB(audioData);
+        const audio = await audioDatabase.createAudioDB(audioData);
         console.log(audio);
         for (const idUsuario of idsUsuarios2) {
             //Preguntar Alvaro si tiene esta función
@@ -107,11 +108,11 @@ export async function deleteAudio(req: Request, res: Response) {
 
     try {
 
-        const audioRuta =await findAudioById(id)
+        const audioRuta =await audioDatabase.findAudioById(id)
         if (!audioRuta) {
             return res.json({ Error: '1',message:'Error, audio no encontrado en la base de datos'})
         }
-        deleteAudioById(id);
+        audioDatabase.deleteAudioById(id);
         try{
             deleteFile(path.join(projectRootPath,audioRuta.path));
         }catch (error){
@@ -127,7 +128,7 @@ export async function verifyAudio(req: Request, res: Response, next: NextFunctio
     const id = Number(req.params.idaudio);
     
     try {
-        const audioConsulta = await findAudioById(id);
+        const audioConsulta = await audioDatabase.findAudioById(id);
         if (!audioConsulta) {
             return res.json({ Error: 'Error, audio no encontrado en el servidor local' });
         }
@@ -169,7 +170,7 @@ export async function updateAudio(req: Request, res: Response) {
             audioData.esAlbum = req.body.esAlbum;
         }
 
-        updateAudioById(Number(req.params.idaudio),audioData);
+        audioDatabase.updateAudioById(Number(req.params.idaudio),audioData);
 
         res.json( { message: 'Audio updated successfully' } );
     } catch (error) {
@@ -189,38 +190,4 @@ function deleteFile(filePath: string) {
     } catch (error) {
         throw new Error('Error, audio no eliminando, no encontrado en el servidor local');
     }
-}
-
-
-export async function findAudioById(id: number) {
-    const audioRuta = await prisma.audio.findUnique({
-        where: {
-            idAudio: id,
-        },
-    });
-    return audioRuta;
-}
-
-export async function deleteAudioById(id: number) {
-    await prisma.audio.delete({
-        where: {
-            idAudio: id,
-        },
-    });
-}
-
-export async function createAudioDB(audioData: any) {
-    const audio = await prisma.audio.create({
-        data: audioData
-    });
-    return audio;
-}
-
-//Lo campos indicados en data deben de ser los mismos que en la base de datos
-//en caso contrario, se generará un error
-export async function updateAudioById(id: number, audioData: any) {
-    await prisma.audio.update({
-        where: { idAudio: id },
-        data: audioData,
-    });
 }
