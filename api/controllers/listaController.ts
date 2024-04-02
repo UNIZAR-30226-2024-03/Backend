@@ -4,6 +4,8 @@ import e, { Request} from 'express-jwt';
 import { Response } from 'express';
 import * as listasDb from '../../db/listaDb.js';
 import * as sigueListaDb from '../../db/sigueListaDb.js';
+import * as audioDb from '../../db/audioDb.js';
+import * as usuarioDb from '../../db/usuarioDb.js';
 
 //[POST]/lista/ : Crea una lista nueva.
 //[DELETE]/lista/<idLista>/ : Borra una lista.
@@ -138,7 +140,10 @@ export const updateLista = catchAsync(async (req : Request, res : Response) => {
 export const getListaById = catchAsync(async (req : Request, res : Response) => {
   try {
     const lista = await listasDb.getListaById(parseInt(req.params.idLista));
-    if (!lista) res.status(httpStatus.NOT_FOUND).send("Lista no encontrada");
+    if (!lista){
+      res.status(httpStatus.NOT_FOUND).send("Lista no encontrada");
+      return;
+    }
     res.send(lista);
   } catch (error) {
     res.status(httpStatus.BAD_REQUEST).send(error);
@@ -233,6 +238,11 @@ export const getListaByIdWithExtras = catchAsync(async (req : Request, res : Res
  */
 export const followLista = catchAsync(async (req : Request, res : Response) => {
   try {
+    if(!await listasDb.getListaById(parseInt(req.params.idLista))) {
+      res.status(httpStatus.NOT_FOUND).send("Lista no encontrada");
+      return;
+    }
+
     const sigueLista = await sigueListaDb.sigueListaCreatePrisma(parseInt(req.params.idLista), parseInt(req.auth?.idUsuario));
     res.status(httpStatus.CREATED).send(sigueLista);
   } catch (error) {
@@ -249,6 +259,11 @@ export const followLista = catchAsync(async (req : Request, res : Response) => {
  */
 export const unfollowLista = catchAsync(async (req : Request, res : Response) => {
   try {
+    if(!await listasDb.getListaById(parseInt(req.params.idLista))) {
+      res.status(httpStatus.NOT_FOUND).send("Lista no encontrada");
+      return;
+    }
+
     await sigueListaDb.sigueListaDeletePrisma(parseInt(req.params.idLista), parseInt(req.auth?.idUsuario));
     res.status(httpStatus.NO_CONTENT).send();
   } catch (error) {
@@ -263,6 +278,11 @@ export const unfollowLista = catchAsync(async (req : Request, res : Response) =>
  */
 export const getFollowedLists = catchAsync(async (req : Request, res : Response) => {
   try {
+    if(!await usuarioDb.usuarioExistPrisma(parseInt(req.params.idUsuario))) {
+      res.status(httpStatus.NOT_FOUND).send("Usuario no encontrado");
+      return;
+    }
+
     const sigueListas = await sigueListaDb.sigueListaGetListPrisma(parseInt(req.params.idUsuario));
     
     const listas = await Promise.all(sigueListas.map(async (sigueLista) => {
@@ -284,11 +304,21 @@ export const getFollowedLists = catchAsync(async (req : Request, res : Response)
  */
 export const addAudioToLista = catchAsync(async (req : Request, res : Response) => {
   try {
+    
+    if(!await listasDb.getListaById(parseInt(req.params.idLista))) {
+      res.status(httpStatus.NOT_FOUND).send("Lista no encontrada");
+      return;
+    }
+
+    if(!await audioDb.findAudioById(parseInt(req.params.idAudio))) {
+      res.status(httpStatus.NOT_FOUND).send("Audio no encontrado");
+      return;
+    }
+
     if (!await isOwnerOrAdmin(req)) {
       res.status(httpStatus.UNAUTHORIZED).send("No tienes permisos para añadir un audio a esta lista");
       return;
     }
-
     await listasDb.addAudioToLista(parseInt(req.params.idLista), parseInt(req.params.idAudio));
     // Como se ha añadido un audio a la lista, se actualiza la fecha de última modificación
     // No debería fallar porque solo se actualiza la fecha, si pudiese fallar
@@ -296,6 +326,7 @@ export const addAudioToLista = catchAsync(async (req : Request, res : Response) 
     await listasDb.updateListaById(parseInt(req.params.idLista), { fechaUltimaMod: new Date() });
     res.status(httpStatus.CREATED).send();
   } catch (error) {
+    console.log(error);
     res.status(httpStatus.BAD_REQUEST).send(error);
   }
 });
@@ -309,8 +340,18 @@ export const addAudioToLista = catchAsync(async (req : Request, res : Response) 
  */
 export const deleteAudioFromLista = catchAsync(async (req : Request, res : Response) => {
   try {
+    if(!await listasDb.getListaById(parseInt(req.params.idLista))) {
+      res.status(httpStatus.NOT_FOUND).send("Lista no encontrada");
+      return;
+    }
+    
+    if(!await audioDb.findAudioById(parseInt(req.params.idAudio))) {
+      res.status(httpStatus.NOT_FOUND).send("Audio no encontrado");
+      return;
+    }
+
     if (!await isOwnerOrAdmin(req)) {
-      res.status(httpStatus.UNAUTHORIZED).send("No tienes permisos para eliminar un audio de esta lista");
+      res.status(httpStatus.UNAUTHORIZED).send("No tienes permisos para añadir un audio a esta lista");
       return;
     }
 
@@ -332,6 +373,16 @@ export const deleteAudioFromLista = catchAsync(async (req : Request, res : Respo
  */
 export const addCollaboratorToLista = catchAsync(async (req : Request, res : Response) => {
   try {
+    if(!await listasDb.getListaById(parseInt(req.params.idLista))) {
+      res.status(httpStatus.NOT_FOUND).send("Lista no encontrada");
+      return;
+    }
+
+    if(!await usuarioDb.usuarioExistPrisma(parseInt(req.params.idUsuario))) {
+      res.status(httpStatus.NOT_FOUND).send("Usuario no encontrado");
+      return;
+    }
+
     if (!await isOwnerOrAdmin(req)) {
       res.status(httpStatus.UNAUTHORIZED).send("No tienes permisos para añadir un colaborador a esta lista");
       return;
@@ -353,6 +404,16 @@ export const addCollaboratorToLista = catchAsync(async (req : Request, res : Res
  */
 export const deleteCollaboratorFromLista = catchAsync(async (req : Request, res : Response) => {
   try {
+    if(!await listasDb.getListaById(parseInt(req.params.idLista))) {
+      res.status(httpStatus.NOT_FOUND).send("Lista no encontrada");
+      return;
+    }
+
+    if(!await usuarioDb.usuarioExistPrisma(parseInt(req.params.idUsuario))) {
+      res.status(httpStatus.NOT_FOUND).send("Usuario no encontrado");
+      return;
+    }
+
     if (!await isOwnerOrAdmin(req)) {
       res.status(httpStatus.UNAUTHORIZED).send("No tienes permisos para eliminar un colaborador de esta lista");
       return;

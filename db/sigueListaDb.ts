@@ -32,8 +32,8 @@ export async function sigueListaCreatePrisma(
     idLista: number,
   idUsuario: number,
 ): Promise<SigueLista> {
-    console.log("idUsuario: ", idUsuario);
-    console.log("idLista: ", idLista);
+    // console.log("idUsuario: ", idUsuario);
+    // console.log("idLista: ", idLista);
     if (!idUsuario || !idLista) throw new Error("Provide idUsuario and idLista");
    try {
         return await prisma.sigueLista.create({

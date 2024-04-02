@@ -54,23 +54,4 @@ listaRouter.delete("/collaborator/:idLista/:idUsuario", auth.authenticate, lista
 listaRouter.get("/seguidas/:idUsuario", auth.authenticate, listaController.getFollowedLists);
 
 
-
-// Ejemplo de endpoint para probar el funcionamiento de la API
-// [POST] /lista/calc
-listaRouter.post('/calc', (req: Request, res: Response): void => {
-  const { a, b } = req.body;
-
-  if (a && b && typeof a === 'number' && typeof b === 'number') {
-    res.json({
-      success: true,
-      message: a + b,
-    });
-  } else {
-    res.json({
-      success: false,
-      message: 'Missing parameters',
-    });
-  }
-});
-
-  export default listaRouter;
+export default listaRouter;

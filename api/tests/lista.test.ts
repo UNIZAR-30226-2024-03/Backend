@@ -29,6 +29,7 @@ describe('Lista routes', () => {
 
   let bearer: string | undefined = undefined;
   let bearer2: string | undefined = undefined;
+  let bearer3: string | undefined = undefined;
 
  
   beforeAll(async () => {
@@ -68,9 +69,10 @@ describe('Lista routes', () => {
 
     // audioTest1_id = audioTest1.idAudio;
 
-    // Creamos un token para el usuario test1, que será el que haga las peticiones
+    // Creamos un token para cada usuario para simular la sesión de cada uno
     bearer = createUsuarioToken(userTest1); 
     bearer2 = createUsuarioToken(userTest2);
+    bearer3 = createUsuarioToken(userTest3);
     // Creamos una lista para testear
     lista = await listasDb.createLista(
       'listaTest',
@@ -99,7 +101,7 @@ describe('Lista routes', () => {
   const LISTA_FOLLOW = '/lista/follow';
   const LISTA_AUDIO = '/lista/audio';
   const LISTA_COLLABORATOR = '/lista/collaborator';
-  const LISTA_SEGUIDAS = '/listas/seguidas';
+  const LISTA_SEGUIDAS = '/lista/seguidas';
 
 
   describe(' POST /lista , createLista', () => {
@@ -296,7 +298,7 @@ describe('Lista routes', () => {
         .expect(httpStatus.BAD_REQUEST);
     });
 
-    it('returns ' + httpStatus.OK + ' when no audios', async () => {
+    it('returns ' + httpStatus.OK + ' and correct result when no audios', async () => {
       await request(app)
         .put(`${LISTA_ROUTE}/${lista?.idLista}`)
         .set('Authorization', `Bearer ${bearer}`)
@@ -308,7 +310,7 @@ describe('Lista routes', () => {
         });
     });
 
-    it('returns ' + httpStatus.OK + ' when audios != []', async () => {
+    it('returns ' + httpStatus.OK + ' and correct result when audios != []', async () => {
       await request(app)
         .put(`${LISTA_ROUTE}/${lista?.idLista}`)
         .set('Authorization', `Bearer ${bearer}`)
@@ -318,7 +320,7 @@ describe('Lista routes', () => {
         .expect(httpStatus.OK);
     });
 
-    it('returns ' + httpStatus.OK + ' when audios=[]', async () => {
+    it('returns ' + httpStatus.OK + ' and correct result when audios=[]', async () => {
       await request(app)
         .put(`${LISTA_ROUTE}/${lista?.idLista}`)
         .set('Authorization', `Bearer ${bearer}`)
@@ -330,7 +332,7 @@ describe('Lista routes', () => {
         
     });
 
-    it('returns ' + httpStatus.OK + ' when all params are ok', async () => {
+    it('returns ' + httpStatus.OK + ' and correct result when all params are ok', async () => {
       await request(app)
         .put(`${LISTA_ROUTE}/${lista?.idLista}`)
         .set('Authorization', `Bearer ${bearer}`)
@@ -364,7 +366,7 @@ describe('Lista routes', () => {
         .expect(httpStatus.NOT_FOUND);
     });
 
-    it('returns ' + httpStatus.OK + ' when all params are ok', async () => {
+    it('returns ' + httpStatus.OK + ' and correct result when all params are ok', async () => {
       await request(app)
         .get(`${LISTA_ROUTE}/${lista?.idLista}`)
         .set('Authorization', `Bearer ${bearer}`)
@@ -389,7 +391,7 @@ describe('Lista routes', () => {
         .expect(httpStatus.NOT_FOUND);
     });
 
-    it('returns ' + httpStatus.OK + ' when all params are ok', async () => {
+    it('returns ' + httpStatus.OK + ' and correct result when all params are ok', async () => {
       await request(app)
         .get(`${LISTA_EXTRA}/${lista?.idLista}`)
         .set('Authorization', `Bearer ${bearer}`)
@@ -421,7 +423,7 @@ describe('Lista routes', () => {
         .expect(httpStatus.NOT_FOUND);
     });
 
-    it('returns ' + httpStatus.OK + ' when all params are ok', async () => {
+    it('returns ' + httpStatus.OK + ' and correct result when all params are ok', async () => {
       await request(app)
         .get(`${LISTA_EXTRA}/Audios/${lista?.idLista}`)
         .set('Authorization', `Bearer ${bearer}`)
@@ -436,7 +438,7 @@ describe('Lista routes', () => {
 
 
   describe(' GET /lista/extra/Propietarios/:idLista , getPropietariosFromLista', () => {
-    it('returns ' + httpStatus.NOT_FOUND + ' when idLista not found', async () => {
+    it('returns ' + httpStatus.NOT_FOUND + 'and correct result when idLista not found', async () => {
       await request(app)
         .get(`${LISTA_EXTRA}/Propietarios/${999999}`)
         .set('Authorization', `Bearer ${bearer}`)
@@ -463,7 +465,7 @@ describe('Lista routes', () => {
         .expect(httpStatus.NOT_FOUND);
     });
 
-    it('returns ' + httpStatus.OK + ' when all params are ok', async () => {
+    it('returns ' + httpStatus.OK + ' and correct result when all params are ok', async () => {
       await request(app)
         .get(`${LISTA_EXTRA}/Seguidores/${lista?.idLista}`)
         .set('Authorization', `Bearer ${bearer}`)
@@ -474,5 +476,215 @@ describe('Lista routes', () => {
   });
 
 
-  
+
+
+  describe(' POST /lista/follow/:idLista , followLista', () => {
+    it('returns ' + httpStatus.NOT_FOUND + ' when idLista not found', async () => {
+      await request(app)
+        .post(`${LISTA_FOLLOW}/${999999}`)
+        .set('Authorization', `Bearer ${bearer}`)
+        .expect(httpStatus.NOT_FOUND);
+    });
+
+    it('returns ' + httpStatus.CREATED + ' and correct result when all params are ok', async () => {
+      await request(app)
+        .post(`${LISTA_FOLLOW}/${lista?.idLista}`)
+        .set('Authorization', `Bearer ${bearer}`)
+        .expect((res) => {
+          expect(res.body.idUsuario).toEqual(userTest1_id);
+          expect(res.body.idLista).toEqual(lista?.idLista);
+          expect(res.status).toEqual(httpStatus.CREATED);
+        });
+    });
+  });
+
+
+
+  describe(' DELETE /lista/follow/:idLista , unfollowLista', () => {
+    it('returns ' + httpStatus.NOT_FOUND + ' when idLista not found', async () => {
+      await request(app)
+        .delete(`${LISTA_FOLLOW}/${999999}`)
+        .set('Authorization', `Bearer ${bearer}`)
+        .expect(httpStatus.NOT_FOUND);
+    });
+
+    it('returns ' + httpStatus.OK + ' and correct result when all params are ok', async () => {
+      await request(app)
+        .delete(`${LISTA_FOLLOW}/${lista?.idLista}`)
+        .set('Authorization', `Bearer ${bearer}`)
+        .expect(httpStatus.NO_CONTENT);
+    });
+  });
+
+
+
+  describe(' POST /lista/audio/:idLista/:idAudio , addAudioToLista', () => {
+    it('returns ' + httpStatus.NOT_FOUND + ' when idLista not found', async () => {
+      await request(app)
+        .post(`${LISTA_AUDIO}/${999999}/${audioTest1_id}`)
+        .set('Authorization', `Bearer ${bearer}`)
+        .expect(httpStatus.NOT_FOUND);
+    });
+
+    it('returns ' + httpStatus.NOT_FOUND + ' when idAudio not found', async () => {
+      await request(app)
+        .post(`${LISTA_AUDIO}/${lista?.idLista}/${999999}`)
+        .set('Authorization', `Bearer ${bearer}`)
+        .expect(httpStatus.NOT_FOUND);
+    });
+
+    it('returns ' + httpStatus.UNAUTHORIZED + ' when user is not owner or admin', async () => {
+      await request(app)
+        .post(`${LISTA_AUDIO}/${lista?.idLista}/${audioTest1_id}`)
+        .set('Authorization', `Bearer ${bearer2}`)
+        .expect(httpStatus.UNAUTHORIZED);
+    });
+
+
+    it('returns ' + httpStatus.OK + ' and correct result when all params are ok', async () => {
+      await request(app)
+        .post(`${LISTA_AUDIO}/${lista?.idLista}/${audioTest1_id}`)
+        .set('Authorization', `Bearer ${bearer}`)
+        .expect(httpStatus.CREATED);
+    });
+  });
+
+
+
+  describe(' DELETE /lista/audio/:idLista/:idAudio , deleteAudioFromLista', () => {
+    it('returns ' + httpStatus.NOT_FOUND + ' when idLista not found', async () => {
+      await request(app)
+        .delete(`${LISTA_AUDIO}/${999999}/${audioTest1_id}`)
+        .set('Authorization', `Bearer ${bearer}`)
+        .expect(httpStatus.NOT_FOUND);
+    });
+
+    it('returns ' + httpStatus.NOT_FOUND + ' when idAudio not found', async () => {
+      await request(app)
+        .delete(`${LISTA_AUDIO}/${lista?.idLista}/${999999}`)
+        .set('Authorization', `Bearer ${bearer}`)
+        .expect(httpStatus.NOT_FOUND);
+    });
+
+    it('returns ' + httpStatus.UNAUTHORIZED + ' when user is not owner or admin', async () => {
+      await request(app)
+        .delete(`${LISTA_AUDIO}/${lista?.idLista}/${audioTest1_id}`)
+        .set('Authorization', `Bearer ${bearer2}`)
+        .expect(httpStatus.UNAUTHORIZED);
+    });
+
+    it('returns ' + httpStatus.NO_CONTENT + ' and correct result when all params are ok', async () => {
+      await request(app)
+        .delete(`${LISTA_AUDIO}/${lista?.idLista}/${audioTest1_id}`)
+        .set('Authorization', `Bearer ${bearer}`)
+        .expect(httpStatus.NO_CONTENT);
+    });
+  });
+
+
+
+  describe(' POST /lista/collaborator/:idLista/:idUsuario , addCollaboratorToLista', () => {
+    it('returns ' + httpStatus.NOT_FOUND + ' when idLista not found', async () => {
+      await request(app)
+        .post(`${LISTA_COLLABORATOR}/${999999}/${userTest2_id}`)
+        .set('Authorization', `Bearer ${bearer}`)
+        .expect(httpStatus.NOT_FOUND);
+    });
+
+    it('returns ' + httpStatus.NOT_FOUND + ' when idUsuario not found', async () => {
+      await request(app)
+        .post(`${LISTA_COLLABORATOR}/${lista?.idLista}/${999999}`)
+        .set('Authorization', `Bearer ${bearer}`)
+        .expect(httpStatus.NOT_FOUND);
+    });
+
+    it('returns ' + httpStatus.UNAUTHORIZED + ' when user is not owner or admin', async () => {
+      await request(app)
+        .post(`${LISTA_COLLABORATOR}/${lista?.idLista}/${userTest2_id}`)
+        .set('Authorization', `Bearer ${bearer2}`)
+        .expect(httpStatus.UNAUTHORIZED);
+    });
+
+    it('returns ' + httpStatus.OK + ' and correct result when all params are ok', async () => {
+      await request(app)
+        .post(`${LISTA_COLLABORATOR}/${lista?.idLista}/${userTest2_id}`)
+        .set('Authorization', `Bearer ${bearer}`)
+        .expect((res) => {
+          expect(res.body.idLista).toEqual(lista?.idLista);
+        });
+    });
+  });
+
+
+  describe(' DELETE /lista/collaborator/:idLista/:idUsuario , deleteCollaboratorFromLista', () => {
+    it('returns ' + httpStatus.NOT_FOUND + ' when idLista not found', async () => {
+      await request(app)
+        .delete(`${LISTA_COLLABORATOR}/${999999}/${userTest2_id}`)
+        .set('Authorization', `Bearer ${bearer}`)
+        .expect(httpStatus.NOT_FOUND);
+    });
+
+    it('returns ' + httpStatus.NOT_FOUND + ' when idUsuario not found', async () => {
+      await request(app)
+        .delete(`${LISTA_COLLABORATOR}/${lista?.idLista}/${999999}`)
+        .set('Authorization', `Bearer ${bearer}`)
+        .expect(httpStatus.NOT_FOUND);
+    });
+
+    it('returns ' + httpStatus.UNAUTHORIZED + ' when user is not owner or admin', async () => {
+      await request(app)
+        .delete(`${LISTA_COLLABORATOR}/${lista?.idLista}/${userTest3_id}`)
+        .set('Authorization', `Bearer ${bearer3}`)
+        .expect(httpStatus.UNAUTHORIZED);
+    });
+
+    it('returns ' + httpStatus.NO_CONTENT + ' when all params are ok', async () => {
+      await request(app)
+        .delete(`${LISTA_COLLABORATOR}/${lista?.idLista}/${userTest2_id}`)
+        .set('Authorization', `Bearer ${bearer}`)
+        .expect(httpStatus.OK);
+    });
+  });
+
+
+
+  describe(' GET /lista/seguidas/:idUsuario , getFollowedLists', () => {
+    it('returns ' + httpStatus.NOT_FOUND + ' when idUsuario not found', async () => {
+      await request(app)
+        .get(`${LISTA_SEGUIDAS}/${999999}`)
+        .set('Authorization', `Bearer ${bearer}`)
+        .expect(httpStatus.NOT_FOUND);
+    });
+
+    it('returns ' + httpStatus.OK + ' and correct result when no listas followed', async () => {
+      await request(app)
+        .get(`${LISTA_SEGUIDAS}/${userTest1_id}`)
+        .set('Authorization', `Bearer ${bearer}`)
+        .expect((res) => {
+          expect(res.body).toEqual([]);
+          expect(res.status).toEqual(httpStatus.OK);
+        });
+    });
+
+    it('returns ' + httpStatus.OK + ' and correct result when listas followed', async () => {
+      // Hacemos que el usuario 1 siga la lista
+      await request(app)
+        .post(`${LISTA_FOLLOW}/${lista?.idLista}`)
+        .set('Authorization', `Bearer ${bearer}`)
+        .expect((res) => {
+          expect(res.body.idUsuario).toEqual(userTest1_id);
+          expect(res.body.idLista).toEqual(lista?.idLista);
+          expect(res.status).toEqual(httpStatus.CREATED);
+        }
+      );
+      
+      await request(app)
+        .get(`${LISTA_SEGUIDAS}/${userTest1_id}`)
+        .set('Authorization', `Bearer ${bearer}`)
+        .expect((res) => {
+          expect(res.body[0].idLista).toEqual(lista?.idLista);
+        }
+      );
+    });
+  });
 });

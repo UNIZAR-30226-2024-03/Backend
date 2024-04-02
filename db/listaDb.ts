@@ -247,9 +247,9 @@ export const addAudioToLista = async (
   idAudio: number
 ): Promise<Lista> => {
   const lista = await getListaById(idLista);
-  console.log("idAudio: ", idAudio);
-  console.log("idLista: ", idLista);
-  console.log("lista: ", lista);
+  // console.log("idAudio: ", idAudio);
+  // console.log("idLista: ", idLista);
+  // console.log("lista: ", lista);
   if (!lista) {
     throw new ApiError(httpStatus.NOT_FOUND, 'Lista not found');
   }
