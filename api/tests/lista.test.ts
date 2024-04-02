@@ -310,7 +310,7 @@ describe('Lista routes', () => {
         });
     });
 
-    it('returns ' + httpStatus.OK + ' and correct result when audios != []', async () => {
+    it('returns ' + httpStatus.OK + ' when audios != []', async () => {
       await request(app)
         .put(`${LISTA_ROUTE}/${lista?.idLista}`)
         .set('Authorization', `Bearer ${bearer}`)
@@ -320,7 +320,7 @@ describe('Lista routes', () => {
         .expect(httpStatus.OK);
     });
 
-    it('returns ' + httpStatus.OK + ' and correct result when audios=[]', async () => {
+    it('returns ' + httpStatus.OK + ' when audios=[]', async () => {
       await request(app)
         .put(`${LISTA_ROUTE}/${lista?.idLista}`)
         .set('Authorization', `Bearer ${bearer}`)
@@ -438,7 +438,7 @@ describe('Lista routes', () => {
 
 
   describe(' GET /lista/extra/Propietarios/:idLista , getPropietariosFromLista', () => {
-    it('returns ' + httpStatus.NOT_FOUND + 'and correct result when idLista not found', async () => {
+    it('returns ' + httpStatus.NOT_FOUND + ' when idLista not found', async () => {
       await request(app)
         .get(`${LISTA_EXTRA}/Propietarios/${999999}`)
         .set('Authorization', `Bearer ${bearer}`)
@@ -508,7 +508,7 @@ describe('Lista routes', () => {
         .expect(httpStatus.NOT_FOUND);
     });
 
-    it('returns ' + httpStatus.OK + ' and correct result when all params are ok', async () => {
+    it('returns ' + httpStatus.NO_CONTENT + ' when all params are ok', async () => {
       await request(app)
         .delete(`${LISTA_FOLLOW}/${lista?.idLista}`)
         .set('Authorization', `Bearer ${bearer}`)
@@ -541,7 +541,7 @@ describe('Lista routes', () => {
     });
 
 
-    it('returns ' + httpStatus.OK + ' and correct result when all params are ok', async () => {
+    it('returns ' + httpStatus.CREATED + ' when all params are ok', async () => {
       await request(app)
         .post(`${LISTA_AUDIO}/${lista?.idLista}/${audioTest1_id}`)
         .set('Authorization', `Bearer ${bearer}`)
@@ -573,7 +573,7 @@ describe('Lista routes', () => {
         .expect(httpStatus.UNAUTHORIZED);
     });
 
-    it('returns ' + httpStatus.NO_CONTENT + ' and correct result when all params are ok', async () => {
+    it('returns ' + httpStatus.NO_CONTENT + ' when all params are ok', async () => {
       await request(app)
         .delete(`${LISTA_AUDIO}/${lista?.idLista}/${audioTest1_id}`)
         .set('Authorization', `Bearer ${bearer}`)
@@ -638,7 +638,7 @@ describe('Lista routes', () => {
         .expect(httpStatus.UNAUTHORIZED);
     });
 
-    it('returns ' + httpStatus.NO_CONTENT + ' when all params are ok', async () => {
+    it('returns ' + httpStatus.OK + ' when all params are ok', async () => {
       await request(app)
         .delete(`${LISTA_COLLABORATOR}/${lista?.idLista}/${userTest2_id}`)
         .set('Authorization', `Bearer ${bearer}`)
