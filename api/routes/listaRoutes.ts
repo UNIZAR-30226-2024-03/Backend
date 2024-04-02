@@ -11,12 +11,11 @@ import * as listaController from "../controllers/listaController.js";
 listaRouter.post("/", auth.authenticate, listaController.createLista);
 
 //[DELETE]/lista/<idLista>/ : Borra una lista.
-//! COMO VALIDO SI EL USUARIO QUE HACE LA PETICIÓN ES EL PROPIETARIO DE LA LISTA O ADMIN?
 listaRouter.delete("/:idLista", auth.authenticate, listaController.deleteLista); 
 
 //[PUT]/lista/<idLista>/ : Edita una lista.
-//! COMO VALIDO SI EL USUARIO QUE HACE LA PETICIÓN ES EL PROPIETARIO DE LA LISTA O ADMIN?
 listaRouter.put("/:idLista", auth.authenticate, listaController.updateLista);
+// listaRouter.put("/:idLista", listaController.updateLista);
 
 //[GET]/lista/<idLista>/ : Devuelve la información de una lista (sin audios, propietarios ni seguidores)
 listaRouter.get("/:idLista", auth.optionalAuthenticate, listaController.getListaById);

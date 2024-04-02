@@ -22,12 +22,16 @@ import * as sigueListaDb from '../../db/sigueListaDb.js';
  * @param {ObjectId} idUsuario
  * @param {ObjectId} idLista
  * @returns {Promise<boolean>}
+ * @throws {Error}
  */
 const isOwnerOrAdmin = async (req: Request) => {
   // Comprobamos si el usuario del jwt es propietario de la lista o admin
   if (!req.auth?.esAdmin) {
     // No es admin, buscamos si es un propietario
     const propietarios = await listasDb.getPropietariosFromLista(parseInt(req.params.idLista));
+    if (propietarios.length === 0) {
+      throw new Error("Lista no encontrada");
+    }
     if (!propietarios.includes(parseInt(req.auth?.idUsuario))) {
       return false;
     }
@@ -51,13 +55,13 @@ const isOwnerOrAdmin = async (req: Request) => {
   * @returns {Promise<Lista>}
  */
 export const createLista = catchAsync(async (req : Request, res : Response) => {
-  const { nombre, descripcion, esPrivada, img, esAlbum, tipoLista, idUsuario, audios } = req.body; 
+  const { nombre, descripcion, esPrivada, imgLista, esAlbum, tipoLista, idUsuario, audios } = req.body; 
   // No se necesita Seguidores porque al crear una lista no tiene seguidores
   // No necesita fechaUltimaMod porque se crea en el momento de la creación
 
   // createLista puede lanzar un error si el nombre de la lista ya existe por o que se debe capturar
   try {
-    const lista = await listasDb.createLista(nombre, descripcion, esPrivada, esAlbum, img, tipoLista, idUsuario, audios);
+    const lista = await listasDb.createLista(nombre, descripcion, esPrivada, esAlbum, imgLista, tipoLista, idUsuario, audios);
     res.status(httpStatus.CREATED).send(lista);
   } catch (error) {
     res.status(httpStatus.BAD_REQUEST).send(error)
@@ -75,11 +79,12 @@ export const deleteLista = catchAsync(async (req : Request, res : Response) => {
   try {
     if (!await isOwnerOrAdmin(req)) {
       res.status(httpStatus.UNAUTHORIZED).send("No tienes permisos para borrar esta lista");
-    }
-
+      return;
+    } 
     await listasDb.deleteListaById(parseInt(req.params.idLista));
     // Devolvermos el estado 204 (NO_CONTENT) porque no hay contenido que devolver y el mensaje de que se ha borrado correctamente
     res.status(httpStatus.NO_CONTENT).send("Lista borrada correctamente");
+
   } catch (error) {
     res.status(httpStatus.BAD_REQUEST).send(error);
   }
@@ -95,20 +100,27 @@ export const updateLista = catchAsync(async (req : Request, res : Response) => {
   try {
     if (!await isOwnerOrAdmin(req)) {
       res.status(httpStatus.UNAUTHORIZED).send("No tienes permisos para editar esta lista");
+      return;
     }
     
-    const {Audios, Propietarios, Seguidores, ...resto} = req.body;
+    const {audios, propietarios, seguidores, ...resto} = req.body;
 
     const updateObject = {
       ...resto,
-      ...(Audios && {Audios: {connect: Audios.map((idAudio: number) => ({idAudio}))}}),
-      ...(Propietarios && {Propietarios: {connect: Propietarios.map((idUsuario: number) => ({idUsuario}))}}),
+      audios: {connect: audios.map((idAudio: number) => ({idAudio}))},
+      propietarios: {connect: propietarios.map((idUsuario: number) => ({idUsuario}))},
+      // Seguidores: {connect: seguidores.map((idUsuario: number) => ({idUsuario}))},
+
     }
 
+    console.log("updateObject", updateObject)
 
     const lista = await listasDb.updateListaById(parseInt(req.params.idLista), updateObject);
+
+    console.log("lista", lista);
     res.send(lista);
   } catch (error) {
+    console.log("error", error)
     res.status(httpStatus.BAD_REQUEST).send(error);
   }
 });
@@ -264,6 +276,7 @@ export const addAudioToLista = catchAsync(async (req : Request, res : Response) 
   try {
     if (!await isOwnerOrAdmin(req)) {
       res.status(httpStatus.UNAUTHORIZED).send("No tienes permisos para añadir un audio a esta lista");
+      return;
     }
 
     await listasDb.addAudioToLista(parseInt(req.params.idLista), parseInt(req.params.idAudio));
@@ -288,6 +301,7 @@ export const deleteAudioFromLista = catchAsync(async (req : Request, res : Respo
   try {
     if (!await isOwnerOrAdmin(req)) {
       res.status(httpStatus.UNAUTHORIZED).send("No tienes permisos para eliminar un audio de esta lista");
+      return;
     }
 
     await listasDb.deleteAudioFromLista(parseInt(req.params.idLista), parseInt(req.params.idAudio));
@@ -310,6 +324,7 @@ export const addCollaboratorToLista = catchAsync(async (req : Request, res : Res
   try {
     if (!await isOwnerOrAdmin(req)) {
       res.status(httpStatus.UNAUTHORIZED).send("No tienes permisos para añadir un colaborador a esta lista");
+      return;
     }
 
     const lista = await listasDb.addPropietarioToLista(parseInt(req.params.idLista), parseInt(req.params.idUsuario));
@@ -330,6 +345,7 @@ export const deleteCollaboratorFromLista = catchAsync(async (req : Request, res 
   try {
     if (!await isOwnerOrAdmin(req)) {
       res.status(httpStatus.UNAUTHORIZED).send("No tienes permisos para eliminar un colaborador de esta lista");
+      return;
     }
     const lista = await listasDb.deletePropietarioFromLista(parseInt(req.params.idLista), parseInt(req.params.idUsuario));
     res.send(lista);

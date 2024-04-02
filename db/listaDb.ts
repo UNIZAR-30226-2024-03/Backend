@@ -48,7 +48,7 @@ export const createLista = async (
       }
     });
   } catch (error) {
-    console.log(error);
+    // console.log(error);
     throw error;
   }
 };
@@ -65,7 +65,7 @@ export const getListaById = async (id: number): Promise<Lista | null> => {
       where: { idLista: id }
     });
   } catch (error) {
-    console.log(error);
+    // console.log(error);
     throw error;
   }
 }
@@ -87,7 +87,7 @@ export const getListaByIdWithExtras = async (id: number): Promise<Lista | null> 
       }
     });
   } catch (error) {
-    console.log(error);
+    // console.log(error);
     throw error;
   }
 }
@@ -114,7 +114,7 @@ export const getAudiosFromLista = async (idLista: number): Promise<Number[]> => 
     }
     );
   } catch (error) {
-    console.log(error);
+    // console.log(error);
     throw error;
   }
 }
@@ -140,7 +140,7 @@ export const getPropietariosFromLista = async (idLista: number): Promise<Number[
       return lista?.Propietarios.map((usuario) => usuario.idUsuario) || [];
     });
   } catch (error) {
-    console.log(error);
+    // console.log(error);
     throw error;
   }
 }
@@ -162,7 +162,7 @@ export const getSeguidoresFromLista = async (idLista: number): Promise<Number[]>
       return seguidores.map((seguidor) => seguidor.idUsuario);
     });
   } catch (error) {
-    console.log(error);
+    // console.log(error);
     throw error;
   }
 }
@@ -179,7 +179,7 @@ export const getListasByPropietario = async (idUsuario: number): Promise<Lista[]
       where: { Propietarios: { some: { idUsuario } } }
     });
   } catch (error) {
-    console.log(error);
+    // console.log(error);
     throw error;
   }
 }
@@ -201,7 +201,7 @@ export const updateListaById = async (
       throw new ApiError(httpStatus.NOT_FOUND, 'Lista not found');
     }
     //updateBody.Audios tiene que ser un array de objetos con el id del audio
-    console.log("updateBody: ", updateBody);
+    // console.log("updateBody: ", updateBody);
 
     updateBody.fechaUltimaMod = new Date(); // Actualizamos la fecha de última modificación
     return await prisma.lista.update({
@@ -209,7 +209,7 @@ export const updateListaById = async (
       data: updateBody
     });
   } catch (error) {
-    console.log(error);
+    // console.log(error);
     throw error;
   }
 };
@@ -228,7 +228,7 @@ export const deleteListaById = async (id: number): Promise<Lista> => {
       where: { idLista: id }
     });
   } catch (error) {
-    console.log(error);
+    // console.log(error);
     throw error;
   }
 }
@@ -263,7 +263,7 @@ export const addAudioToLista = async (
       }
     });
   } catch (error) {
-    console.log(error);
+    // console.log(error);
     throw error;
   }
 }
@@ -294,7 +294,7 @@ export const deleteAudioFromLista = async (
       }
     });
   } catch (error) {
-    console.log(error);
+    // console.log(error);
     throw error;
   }
 }
@@ -327,7 +327,7 @@ export const addPropietarioToLista = async (
       }
     });
   } catch (error) {
-    console.log(error);
+    // console.log(error);
     throw error;
   }
 }
@@ -359,7 +359,7 @@ export const deletePropietarioFromLista = async (
       }
     });
   } catch (error) {
-    console.log(error);
+    // console.log(error);
     throw error;
   }
 }
