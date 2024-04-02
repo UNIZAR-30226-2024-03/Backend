@@ -13,6 +13,7 @@ export const all = async (req: Request, res: Response) => {
     } catch (error) {
       console.error(error);
       res.status(500).json({ message: "Error obteniendo etiquetas" });
+      throw new Error("Error obteniendo etiquetas");
     }
   };
   
@@ -26,6 +27,7 @@ export const songs = async (req: Request, res: Response) => {
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Error obteniendo etiquetas de canciones" });
+    throw new Error("Error obteniendo etiquetas de canciones");
   }
 };
 
@@ -38,5 +40,6 @@ export const podcast = async (req: Request, res: Response) => {
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Error obteniendo etiquetas de podcasts" });
+    throw new Error("Error obteniendo etiquetas de podcast");
   }
 };

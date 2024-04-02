@@ -27,7 +27,7 @@ app.use("/foto", fotosRouter);
 
 app.use("/audio", audioRouter);
 
-app.use(/etiquetas/, etiquetasRouter);
+app.use("/etiquetas", etiquetasRouter);
 
 app.get("/", function (_req, res) {
   return res.send("Backend for Playbeat.");
