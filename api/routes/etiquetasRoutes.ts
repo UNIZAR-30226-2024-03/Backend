@@ -9,20 +9,33 @@ const router = Router();
 
 router.get(
   "/",
-  auth.authenticate,
+  //auth.authenticate,
   etiquetas.all,
 );
 
 router.get(
     "/cancion/",
-    auth.authenticate,
+    //auth.authenticate,
     etiquetas.songs,
 );
 
 router.get(
     "/podcast/",
-    auth.authenticate,
+    //auth.authenticate,
     etiquetas.podcast,
+);
+
+// Dada una lista, que me de sus etiquetas
+router.get(
+  "/:id", 
+  //auth.authenticate,
+  etiquetas.tagsOfLista,
+);
+
+router.get(
+  "/audio/:id",
+  //auth.authenticate,
+  etiquetas.tagsOfAudio, 
 );
 
 export default router;
