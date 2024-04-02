@@ -107,20 +107,24 @@ export const updateLista = catchAsync(async (req : Request, res : Response) => {
 
     const updateObject = {
       ...resto,
-      audios: {connect: audios.map((idAudio: number) => ({idAudio}))},
-      propietarios: {connect: propietarios.map((idUsuario: number) => ({idUsuario}))},
-      // Seguidores: {connect: seguidores.map((idUsuario: number) => ({idUsuario}))},
-
     }
 
-    console.log("updateObject", updateObject)
+    if (audios) {
+      updateObject.Audios = {connect: audios.map((idAudio: number) => ({idAudio}))};
+    }
+
+    if (propietarios) {
+      updateObject.Propietarios = {connect: propietarios.map((idUsuario: number) => ({idUsuario}))};
+    }
+
+    // console.log("updateObject", updateObject)
 
     const lista = await listasDb.updateListaById(parseInt(req.params.idLista), updateObject);
 
-    console.log("lista", lista);
+    // console.log("lista", lista);
     res.send(lista);
   } catch (error) {
-    console.log("error", error)
+    // console.log("error", error)
     res.status(httpStatus.BAD_REQUEST).send(error);
   }
 });
@@ -139,7 +143,7 @@ export const getListaById = catchAsync(async (req : Request, res : Response) => 
       // Añadimos a la lista los audios que contiene
       const audios = await listasDb.getAudiosFromLista(parseInt(req.params.idLista));
     }
-    
+    res.send(lista);
   } catch (error) {
     res.status(httpStatus.BAD_REQUEST).send(error);
   }

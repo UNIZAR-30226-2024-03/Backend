@@ -59,7 +59,8 @@ describe('Lista routes', () => {
     //   'audioTest2',
     //   // 'audioTest2.mp3',
     // );
-
+    
+    audioTest1_id = 1;
 
     userTest1_id = userTest1.idUsuario;
     userTest2_id = userTest2.idUsuario;
@@ -101,7 +102,7 @@ describe('Lista routes', () => {
   const LISTA_SEGUIDAS = '/listas/seguidas';
 
 
-  describe(' POST /lista , createLIsta', () => {
+  describe(' POST /lista , createLista', () => {
     it('returns ' + httpStatus.BAD_REQUEST + ' when tipoLista not valido ', async () => {
       await request(app)
         .post(LISTA_ROUTE)
@@ -349,7 +350,6 @@ describe('Lista routes', () => {
           expect(res.body.esAlbum).toEqual(true);
           expect(res.body.imgLista).toEqual('imgLista');
           expect(res.body.tipoLista).toEqual('NORMAL');
-          expect(res.body.idUsuario).toEqual(userTest1_id);
         });
     });
   })

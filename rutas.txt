@@ -38,7 +38,7 @@ perfiles de amigos
 -LISTA---->Dani
 ------//[POST]/lista/ : Crea una lista nueva.
 ------//[DELETE]/lista/<idLista>/ : Borra una lista.
-------//[PUT]/lista/<idLista>/ : Edita una lista.
+------//[PUT]/lista/<idLista>/ : Edita una lista. Cambia la info y añade los audios y propietarios especificados. (No interactua con seguidores)
 ------//[GET]/lista/<idLista>/ : Devuelve la información de una lista (sin Audios, Seguidores ni Propietarios)
 ------//[GET]/lista/extra/Audios/<idLista>/ : Devuelve los audios de una lista.
 ------//[GET]/lista/extra/Propietarios/<idLista>/ : Devuelve los propietarios de una lista.
