@@ -6,7 +6,6 @@ import usuarioRouter from "./routes/usuarioRoutes.js";
 import authRouter from "./routes/authRoutes.js";
 import fotosRouter from "./routes/fotosRoutes.js";
 import audioRouter from "./routes/audioRoutes.js";
-import etiquetasRouter from "./routes/etiquetasRoutes.js";
 
 import prismaErrorHandler from "./utils/errorHandling/prismaErrorHandler.js";
 import generalErrorHandler from "./utils/errorHandling/generalErrorHandler.js";
@@ -26,8 +25,6 @@ app.use("/auth", authRouter);
 app.use("/foto", fotosRouter);
 
 app.use("/audio", audioRouter);
-
-app.use("/etiquetas", etiquetasRouter);
 
 app.get("/", function (_req, res) {
   return res.send("Backend for Playbeat.");
