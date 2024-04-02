@@ -432,4 +432,47 @@ describe('Lista routes', () => {
     });
 
   });
+
+
+
+  describe(' GET /lista/extra/Propietarios/:idLista , getPropietariosFromLista', () => {
+    it('returns ' + httpStatus.NOT_FOUND + ' when idLista not found', async () => {
+      await request(app)
+        .get(`${LISTA_EXTRA}/Propietarios/${999999}`)
+        .set('Authorization', `Bearer ${bearer}`)
+        .expect(httpStatus.NOT_FOUND);
+    });
+
+    it('returns ' + httpStatus.OK + ' when all params are ok', async () => {
+      await request(app)
+        .get(`${LISTA_EXTRA}/Propietarios/${lista?.idLista}`)
+        .set('Authorization', `Bearer ${bearer}`)
+        .expect((res) => {
+          expect(res.body).toEqual([userTest1_id]);
+        });
+    });
+  });
+
+
+
+  describe(' GET /lista/extra/Seguidores/:idLista , getSeguidoresFromLista', () => {
+    it('returns ' + httpStatus.NOT_FOUND + ' when idLista not found', async () => {
+      await request(app)
+        .get(`${LISTA_EXTRA}/Seguidores/${999999}`)
+        .set('Authorization', `Bearer ${bearer}`)
+        .expect(httpStatus.NOT_FOUND);
+    });
+
+    it('returns ' + httpStatus.OK + ' when all params are ok', async () => {
+      await request(app)
+        .get(`${LISTA_EXTRA}/Seguidores/${lista?.idLista}`)
+        .set('Authorization', `Bearer ${bearer}`)
+        .expect((res) => {
+          expect(res.body).toEqual([]);
+        });
+    });
+  });
+
+
+  
 });
