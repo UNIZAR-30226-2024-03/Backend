@@ -115,7 +115,7 @@ describe('Lista routes', () => {
           imgLista: 'imgLista',
           tipoLista: 'TIPO NO VALIDO',
           idUsuario: userTest1_id,
-          audios: [],
+          audios: [audioTest1_id],
         })
         .expect(httpStatus.BAD_REQUEST);
     });
@@ -169,7 +169,7 @@ describe('Lista routes', () => {
           audios: [],
         })
         .expect((res) => {
-          console.log(res.body);
+          // console.log(res.body);
           expect(res.body.nombre).toEqual('listaTest');
           expect(res.body.descripcion).toEqual('descripcion');
           expect(res.body.esPrivada).toEqual(true);
@@ -379,4 +379,57 @@ describe('Lista routes', () => {
     });
   });
 
+
+
+  describe(' GET /lista/extra/:idLista , getListaByIdWithExtras', () => {
+    it('returns ' + httpStatus.NOT_FOUND + ' when idLista not found', async () => {
+      await request(app)
+        .get(`${LISTA_EXTRA}/${999999}`)
+        .set('Authorization', `Bearer ${bearer}`)
+        .expect(httpStatus.NOT_FOUND);
+    });
+
+    it('returns ' + httpStatus.OK + ' when all params are ok', async () => {
+      await request(app)
+        .get(`${LISTA_EXTRA}/${lista?.idLista}`)
+        .set('Authorization', `Bearer ${bearer}`)
+        .expect((res) => {
+          expect(res.body.nombre).toEqual('listaTest');
+          expect(res.body.descripcion).toEqual('descripcion');
+          expect(res.body.esPrivada).toEqual(true);
+          expect(res.body.esAlbum).toEqual(true);
+          expect(res.body.imgLista).toEqual('imgLista');
+          expect(res.body.tipoLista).toEqual('NORMAL');
+          // Tiene que tener un campo Audios, Propietarios y Seguidores
+          expect(res.body.Audios).toBeDefined();
+          expect(res.body.Audios[0]).toBeDefined(); // La lista de test tiene un audio que se ha añadido al crearla
+
+          expect(res.body.Propietarios).toBeDefined();
+          expect(res.body.Seguidores).toBeDefined();
+        });
+    });
+  });
+
+
+
+
+  describe(' GET /lista/extra/Audios/:idLista , getAudiosFromLista', () => {
+    it('returns ' + httpStatus.NOT_FOUND + ' when idLista not found', async () => {
+      await request(app)
+        .get(`${LISTA_EXTRA}/Audios/${999999}`)
+        .set('Authorization', `Bearer ${bearer}`)
+        .expect(httpStatus.NOT_FOUND);
+    });
+
+    it('returns ' + httpStatus.OK + ' when all params are ok', async () => {
+      await request(app)
+        .get(`${LISTA_EXTRA}/Audios/${lista?.idLista}`)
+        .set('Authorization', `Bearer ${bearer}`)
+        .expect((res) => {
+          expect(res.body).toEqual([audioTest1_id]);
+        });
+
+    });
+
+  });
 });

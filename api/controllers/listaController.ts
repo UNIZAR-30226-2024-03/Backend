@@ -139,10 +139,6 @@ export const getListaById = catchAsync(async (req : Request, res : Response) => 
   try {
     const lista = await listasDb.getListaById(parseInt(req.params.idLista));
     if (!lista) res.status(httpStatus.NOT_FOUND).send("Lista no encontrada");
-    else  {
-      // Añadimos a la lista los audios que contiene
-      const audios = await listasDb.getAudiosFromLista(parseInt(req.params.idLista));
-    }
     res.send(lista);
   } catch (error) {
     res.status(httpStatus.BAD_REQUEST).send(error);
@@ -157,6 +153,11 @@ export const getListaById = catchAsync(async (req : Request, res : Response) => 
  */
 export const getAudiosFromLista = catchAsync(async (req : Request, res : Response) => {
   try {
+    if(!await listasDb.getListaById(parseInt(req.params.idLista))) {
+      res.status(httpStatus.NOT_FOUND).send("Lista no encontrada");
+      return;
+    }
+    
     const audios = await listasDb.getAudiosFromLista(parseInt(req.params.idLista));
     res.send(audios);
   } catch (error) {
@@ -172,6 +173,11 @@ export const getAudiosFromLista = catchAsync(async (req : Request, res : Respons
  */
 export const getPropietariosFromLista = catchAsync(async (req : Request, res : Response) => {
   try {
+    if(!await listasDb.getListaById(parseInt(req.params.idLista))) {
+      res.status(httpStatus.NOT_FOUND).send("Lista no encontrada");
+      return;
+    }
+
     const propietarios = await listasDb.getPropietariosFromLista(parseInt(req.params.idLista));
     res.send(propietarios);
   } catch (error) {
@@ -187,6 +193,11 @@ export const getPropietariosFromLista = catchAsync(async (req : Request, res : R
  */
 export const getSeguidoresFromLista = catchAsync(async (req : Request, res : Response) => {
   try {
+    if(!await listasDb.getListaById(parseInt(req.params.idLista))) {
+      res.status(httpStatus.NOT_FOUND).send("Lista no encontrada");
+      return;
+    }
+
     const sigueListas = await sigueListaDb.sigueListaGetListByIdListaPrisma(parseInt(req.params.idLista));
     res.send(sigueListas.map((sigueLista) => sigueLista.idUsuario));
   } catch (error) {
@@ -206,14 +217,9 @@ export const getListaByIdWithExtras = catchAsync(async (req : Request, res : Res
     // const propietarios = await listasDb.getPropietariosFromLista(parseInt(req.params.idLista));
     // const seguidores = await sigueListaDb.sigueListaGetListByIdListaPrisma(parseInt(req.params.idLista));
     const lista = await listasDb.getListaByIdWithExtras(parseInt(req.params.idLista));
-    
-    res.send({
-      ...lista,
-      // audios,
-      // propietarios,
-      // seguidores
-    });
-    
+    if (!lista) res.status(httpStatus.NOT_FOUND).send("Lista no encontrada");
+    else res.send(lista);
+        
   } catch (error) {
     res.status(httpStatus.BAD_REQUEST).send(error);
   }
