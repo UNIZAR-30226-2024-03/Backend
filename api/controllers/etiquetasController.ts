@@ -50,32 +50,26 @@ export const podcast = async (req: Request, res: Response) => {
 
 
 // PRE: Verdad
-// POST: Devuelve todas las etiquetas que tiene el Audio con id <id>
-export const tagsOfAudio = async (req: Request, res: Response) => {
+// POST: Devuelve todas las etiquetas que tiene el vector de Audios
+export const tagsOfAudios = async (req: Request, res: Response) => {
   try {
-    const id = parseInt(req.params.id);
-    const audioEtiquetas: any = await etiquetasDbJs.tagsOfAudio(id);
+    const { idsAudios } = req.body;
 
-    res.json(audioEtiquetas); 
+    // Verificar si "ids" es un array y no está vacío
+    if (!Array.isArray(idsAudios) || idsAudios.length === 0) {
+      return res.status(400).json({ message: 'Se requiere un array de IDs de audios en el cuerpo de la solicitud' });
+    }
+
+    // Obtener las etiquetas de los audios
+    const etiquetasAudios = await Promise.all(idsAudios.map(async (id: number) => {
+      const etiquetas = await etiquetasDbJs.tagsOfAudio(id);
+      return { idAudio: id, etiquetas };
+    }));
+
+    res.json(etiquetasAudios);
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: "Error obteniendo etiquetas del audio" });
-    throw new Error("Error obteniendo etiquetas del audio");
-  }
-};
-
-// PRE: Verdad
-// POST: Devuelve todas las etiquetas que tiene el Audio con id <id>
-export const tagsOfLista = async (req: Request, res: Response) => {
-  try {
-    const id = parseInt(req.params.id);
-    const audioLista: any = await etiquetasDbJs.tagsOfLista(id);
-
-    res.json(audioLista); 
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Error obteniendo etiquetas de la lista" });
-    throw new Error("Error obteniendo etiquetas de la lista");
+    res.status(500).json({ message: 'Error obteniendo etiquetas de los audios' });
   }
 };
 

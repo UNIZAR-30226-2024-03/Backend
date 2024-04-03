@@ -25,17 +25,11 @@ router.get(
     etiquetas.podcast,
 );
 
-// Dada una lista, que me de sus etiquetas
+// Dado un vector de id de audios me de sus etiquetas
 router.get(
-  "/:id", 
+  "/audios/", 
   //auth.authenticate,
-  etiquetas.tagsOfLista,
-);
-
-router.get(
-  "/audio/:id",
-  //auth.authenticate,
-  etiquetas.tagsOfAudio, 
+  etiquetas.tagsOfAudios,
 );
 
 export default router;
