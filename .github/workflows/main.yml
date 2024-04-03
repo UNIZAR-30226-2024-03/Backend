@@ -41,7 +41,7 @@ jobs:
   deploy_to_azure:
     needs: test_and_deploy
     runs-on: ubuntu-latest
-    if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' && github.event.pull_request.merged == true }}
+    if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' && github.event.pull_request.merged == true && job.test_and_deploy.status == 'success' }}
     steps:
       - name: webfactory/ssh-agent     
         uses: webfactory/ssh-agent@v0.9.0
