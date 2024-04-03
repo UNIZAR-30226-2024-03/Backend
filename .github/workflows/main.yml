@@ -20,13 +20,12 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-      - name: Set environment variables
+      - name: Run tests
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
           JWT_SECRET: ${{ secrets.JWT_SECRET }}
           GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
           GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
-      - name: Run tests
         run: npm test
 
       - name: Set commit status
