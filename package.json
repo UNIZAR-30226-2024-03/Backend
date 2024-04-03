@@ -12,7 +12,9 @@
     "prepare": "husky",
     "jest": "node --experimental-vm-modules node_modules/.bin/jest --run-in-band",
     "api": "node dist/server.js",
-    "ws": "node dist/ws/index.js"
+    "ws": "node dist/ws/index.js",
+    "test:lista": "npm run build && npm run jest -- --testPathPattern=lista",
+    "test:usuario": "npm run jest -- --testPathPattern=usuario"
   },
   "keywords": [],
   "author": "",
@@ -25,6 +27,7 @@
     "express": "^4.18.3",
     "express-jwt": "^8.4.1",
     "google-auth-library": "^9.7.0",
+    "http-status": "^1.7.4",
     "mediaserver": "^0.1.1",
     "multer": "^1.4.5-lts.1",
     "sharp": "^0.33.2",

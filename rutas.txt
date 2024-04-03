@@ -36,12 +36,19 @@ perfiles de amigos
 
 
 -LISTA---->Dani
-------[POST]/lista/ : Crea una lista nueva.
-------[DELETE]/lista/<idLista>/ : Borra una lista.
-------[PUT]/lista/<idLista>/ : Edita una lista.
-------[GET]/lista/<idLista>/ : Devuelve la información de una lista (audios que contiene incluidos)
-------/lista/follow/<idLista>/<idUsuario> : Añade la lista a las seguidas por el usuario.
-------/lista/unfollow/<idLista>/<idUsuario> : Elimina la lista de las seguidas por el usuario.
-------[POST]/lista/audio/<idLista>/<idAudio> : Añade un audio a la lista.
-------[DELETE]/lista/audio/<idLista>/<idAudio> : Elimina un audio de la lista.
-------/lista/add-collaborator/<idLista>/<idUsuario>/: Añade un colaborador a la lista.
+------//[POST]/lista/ : Crea una lista nueva.
+------//[DELETE]/lista/<idLista>/ : Borra una lista.
+------//[PUT]/lista/<idLista>/ : Edita una lista. Cambia la info y añade los audios y propietarios especificados. (No interactua con seguidores)
+------//[GET]/lista/<idLista>/ : Devuelve la información de una lista (sin Audios, Seguidores ni Propietarios)
+------//[GET]/lista/extra/Audios/<idLista>/ : Devuelve los audios de una lista.
+------//[GET]/lista/extra/Propietarios/<idLista>/ : Devuelve los propietarios de una lista.
+------//[GET]/lista/extra/Seguidores/<idLista>/ : Devuelve los seguidores de una lista.
+------//[GET]/lista/extra/<idLista>/ : Devuelve la información de una lista (con audios, propietarios y seguidores)
+------//[POST]/lista/follow/<idLista>/<idUsuario> : Añade la lista a las seguidas por el usuario.
+------//[DELETE]/lista/follow/<idLista>/<idUsuario> : Elimina la lista de las seguidas por el usuario.
+------//[POST]/lista/audio/<idLista>/<idAudio> : Añade un audio a la lista.
+------//[DELETE]/lista/audio/<idLista>/<idAudio> : Elimina un audio de la lista.
+------///[POST]lista/collaborator/<idLista>/<idUsuario>/: Añade un colaborador a la lista.
+------///[DELETE]lista/collaborator/<idLista>/<idUsuario>/: Elimina un colaborador de la lista.
+------///[GET]listas/seguidas/<idUsuario>/: Devuelve las listas seguidas por un usuario.
+
