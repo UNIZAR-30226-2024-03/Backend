@@ -14,6 +14,7 @@
     "api": "node dist/server.js",
     "ws": "node dist/ws/index.js",
     "test:lista": "npm run build && npm run jest -- --testPathPattern=lista",
+    "test:audio": "npm run build && npm run jest -- --testPathPattern=audio",
     "test:usuario": "npm run jest -- --testPathPattern=usuario"
   },
   "keywords": [],
