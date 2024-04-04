@@ -34,7 +34,7 @@ export async function usuarioGetPrisma(
       Seguidores: rrss,
       Seguidos: rrss,
       Listas: listas,
-      ListasPropias: listas,
+      // ListasPropias: listas,
     },
   });
   return usuario;
@@ -52,7 +52,7 @@ export async function usuarioGetEmailPrisma(
       Seguidores: rrss,
       Seguidos: rrss,
       Listas: listas,
-      ListasPropias: listas,
+      // ListasPropias: listas,
     },
   });
   return usuario;

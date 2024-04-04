@@ -11,10 +11,11 @@ export async function getAudio(req: Request, res: Response) {
     const id = Number(req.params.idaudio);
     try {
         const audio = await audioDatabase.findAudioById(id);
+        console.log(audio);
         if (audio) {
             res.json(audio);
         } else {
-            return res.status(404); // Bad request, parámetros incorrecto
+            res.status(404).send("Audio not found"); // Bad request, parámetros incorrecto
         }
     } catch (error) {
         res.status(500).send(error); // Internal server error
@@ -53,7 +54,7 @@ export async function verifyUsersList(req: Request, res: Response, next: NextFun
 export async function createAudio(req: Request, res: Response) {
     try {
         if (!req.file) {
-            return res.status(400);
+            return res.status(400).send('No file uploaded');
         }
         const fechaLanz = new Date(req.body.fechaLanz);
         const fechaFormateada = fechaLanz.toISOString();
@@ -74,7 +75,7 @@ export async function createAudio(req: Request, res: Response) {
             });
             console.log('usuario actualizado');
         }
-        res.json( { message: 'Audio added successfully' } );
+        res.json( { message: 'Audio added successfully' ,idaudio: audio.idAudio});
     } catch (error) {
         if (error instanceof Error) {
             console.error(`Error: ${error.message}`);
@@ -97,13 +98,13 @@ export async function deleteAudio(req: Request, res: Response) {
 
         const audioRuta =await audioDatabase.findAudioById(id)
         if (!audioRuta) {
-            return res.status(404);            
+            return res.status(404).send("Audio not found");            
         }
         audioDatabase.deleteAudioById(id);
         try{
             deleteFile(path.join(projectRootPath,audioRuta.path));
         }catch (error){
-            return res.status(404);            
+            return res.status(404).send("Audio file not found");            
         }
         res.json({ message: 'Audio deleted successfully' });
     } catch (error) {
@@ -117,7 +118,7 @@ export async function verifyAudio(req: Request, res: Response, next: NextFunctio
     try {
         const audioConsulta = await audioDatabase.findAudioById(id);
         if (!audioConsulta) {
-            return res.status(404);            
+            return res.status(404).send("Audio not found");            
         }
 
         req.body.audioConsulta = audioConsulta; // Adjuntar audioConsulta al objeto req

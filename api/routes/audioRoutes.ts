@@ -12,6 +12,7 @@ const router = Router();
 import multer from 'multer';
 import path from 'path';//Variable para manejar rutas de archivos
 import mediaserver from 'mediaserver'; //Variable para manejar archivos de audio, usa chunks para enviar el archivo
+import fs from 'fs';
 import * as audioController from '../controllers/audioController.js';
 
 
@@ -45,7 +46,15 @@ router.get('/:idaudio',audioController.getAudio);
 //POST: Se devuelve el archivo de audio en chunks
 router.get('/play/:idaudio', function(req, res) {
     const cancion = path.join(projectRootPath,'audios',req.params.idaudio);
-    mediaserver.pipe(req, res, cancion);
+    fs.access(cancion, fs.constants.F_OK, (err) => {
+        if (err) {
+            // File does not exist
+            res.status(404).send('File not found');
+        } else {
+            // File exists, serve it
+            mediaserver.pipe(req, res, cancion);
+        }
+    });
 });
 
 
