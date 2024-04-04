@@ -9,26 +9,26 @@ const router = Router();
 
 router.get(
   "/",
-  //auth.authenticate,
+  auth.authenticate,
   etiquetas.all,
 );
 
 router.get(
     "/cancion/",
-    //auth.authenticate,
+    auth.authenticate,
     etiquetas.songs,
 );
 
 router.get(
     "/podcast/",
-    //auth.authenticate,
+    auth.authenticate,
     etiquetas.podcast,
 );
 
 // Dado un vector de id de audios me de sus etiquetas
 router.get(
   "/audios/", 
-  //auth.authenticate,
+  auth.authenticate,
   etiquetas.tagsOfAudios,
 );
 
