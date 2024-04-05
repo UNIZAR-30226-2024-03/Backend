@@ -11,7 +11,7 @@ router.get(
   validate(authValidatorJs.authGoogleSchema),
   controller.authGoogleLogin);
 
-router.get(
+router.post(
   "/login",
   validate(authValidatorJs.authLoginSchema),
   controller.authLogin,
