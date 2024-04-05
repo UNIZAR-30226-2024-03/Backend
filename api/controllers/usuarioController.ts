@@ -41,7 +41,7 @@ export async function usuarioGet(
   next: NextFunction,
 ) {
   try {
-    const idUsuario = Number(req.auth?.idUsuario) || req.query.idUsuario;
+    const idUsuario = req.query.idUsuario || Number(req.auth?.idUsuario);
     const rrss = req.query.rrss;
     const listas = req.query.listas;
 
