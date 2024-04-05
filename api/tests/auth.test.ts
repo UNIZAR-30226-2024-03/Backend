@@ -54,10 +54,10 @@ describe("Auth routes", () => {
   });
 
   // TODO: SE HA REGISTRADO CON GOOGLE
-  describe(`GET ${LOGIN_ROUTE}`, () => {
+  describe(`POST ${LOGIN_ROUTE}`, () => {
     it("returns 400 invalid email", async () => {
       await supertest(app)
-        .get(LOGIN_ROUTE)
+        .post(LOGIN_ROUTE)
         .send({
           email: "invalid_email",
           contrasegna: "password",
@@ -65,11 +65,11 @@ describe("Auth routes", () => {
         .expect(400);
     });
     it("returns 400 missing params", async () => {
-      await supertest(app).get(LOGIN_ROUTE).send({}).expect(400);
+      await supertest(app).post(LOGIN_ROUTE).send({}).expect(400);
     });
     it("returns 404 user does not exist", async () => {
       await supertest(app)
-        .get(LOGIN_ROUTE)
+        .post(LOGIN_ROUTE)
         .send({
           email: "not_found@testing.com",
           contrasegna: "password",
@@ -78,7 +78,7 @@ describe("Auth routes", () => {
     });
     it("returns 401 incorrect password", async () => {
       await supertest(app)
-        .get(LOGIN_ROUTE)
+        .post(LOGIN_ROUTE)
         .send({
           email: "test@testing.com",
           contrasegna: "incorrect_password",
@@ -87,7 +87,7 @@ describe("Auth routes", () => {
     });
     it("returns 200 correct login", async () => {
       await supertest(app)
-        .get(LOGIN_ROUTE)
+        .post(LOGIN_ROUTE)
         .send({
           email: "test@testing.com",
           contrasegna: "password",
