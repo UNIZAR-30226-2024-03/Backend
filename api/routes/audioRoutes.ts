@@ -16,7 +16,6 @@ import fs from 'fs';
 import * as audioController from '../controllers/audioController.js';
 
 
-
 const opciones = multer.diskStorage({ //Opciones para subir archivos
     destination: function(req: Request, file: Express.Multer.File, cb: any) { 
         cb(null, path.join(projectRootPath,'audios')); //Se almacenan en la carpeta audios desde la raiz del proyecto
