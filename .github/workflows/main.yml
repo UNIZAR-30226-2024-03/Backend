@@ -40,8 +40,8 @@ jobs:
         with:
           add: "."
           message: "Tests passed"
-          author_name: "GitHub Actions"
-          author_email: "actions@github.com"
+          author_name: "Garicore01"
+          author_email: "848905@unizar.es"
           author_date: "$(date -u +%Y-%m-%dT%H:%M:%SZ)"
 
   deploy_to_azure:
