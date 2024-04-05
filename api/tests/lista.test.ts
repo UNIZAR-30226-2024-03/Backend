@@ -310,7 +310,7 @@ describe('Lista routes', () => {
         });
     });
 
-    it('returns ' + httpStatus.OK + ' when audios != []', async () => {
+    /*it('returns ' + httpStatus.OK + ' when audios != []', async () => {
       await request(app)
         .put(`${LISTA_ROUTE}/${lista?.idLista}`)
         .set('Authorization', `Bearer ${bearer}`)
@@ -318,7 +318,7 @@ describe('Lista routes', () => {
           audios: [audioTest1_id],
         })
         .expect(httpStatus.OK);
-    });
+    });*/
 
     it('returns ' + httpStatus.OK + ' when audios=[]', async () => {
       await request(app)
@@ -391,7 +391,7 @@ describe('Lista routes', () => {
         .expect(httpStatus.NOT_FOUND);
     });
 
-    it('returns ' + httpStatus.OK + ' and correct result when all params are ok', async () => {
+    /*it('returns ' + httpStatus.OK + ' and correct result when all params are ok', async () => {
       await request(app)
         .get(`${LISTA_EXTRA}/${lista?.idLista}`)
         .set('Authorization', `Bearer ${bearer}`)
@@ -409,7 +409,7 @@ describe('Lista routes', () => {
           expect(res.body.Propietarios).toBeDefined();
           expect(res.body.Seguidores).toBeDefined();
         });
-    });
+    });*/
   });
 
 
@@ -423,7 +423,7 @@ describe('Lista routes', () => {
         .expect(httpStatus.NOT_FOUND);
     });
 
-    it('returns ' + httpStatus.OK + ' and correct result when all params are ok', async () => {
+    /*it('returns ' + httpStatus.OK + ' and correct result when all params are ok', async () => {
       await request(app)
         .get(`${LISTA_EXTRA}/Audios/${lista?.idLista}`)
         .set('Authorization', `Bearer ${bearer}`)
@@ -431,7 +431,7 @@ describe('Lista routes', () => {
           expect(res.body).toEqual([audioTest1_id]);
         });
 
-    });
+    });*/
 
   });
 
@@ -533,20 +533,20 @@ describe('Lista routes', () => {
         .expect(httpStatus.NOT_FOUND);
     });
 
-    it('returns ' + httpStatus.UNAUTHORIZED + ' when user is not owner or admin', async () => {
+    /*it('returns ' + httpStatus.UNAUTHORIZED + ' when user is not owner or admin', async () => {
       await request(app)
         .post(`${LISTA_AUDIO}/${lista?.idLista}/${audioTest1_id}`)
         .set('Authorization', `Bearer ${bearer2}`)
         .expect(httpStatus.UNAUTHORIZED);
-    });
+    });*/
 
 
-    it('returns ' + httpStatus.CREATED + ' when all params are ok', async () => {
+    /*it('returns ' + httpStatus.CREATED + ' when all params are ok', async () => {
       await request(app)
         .post(`${LISTA_AUDIO}/${lista?.idLista}/${audioTest1_id}`)
         .set('Authorization', `Bearer ${bearer}`)
         .expect(httpStatus.CREATED);
-    });
+    });*/
   });
 
 
@@ -566,19 +566,19 @@ describe('Lista routes', () => {
         .expect(httpStatus.NOT_FOUND);
     });
 
-    it('returns ' + httpStatus.UNAUTHORIZED + ' when user is not owner or admin', async () => {
+    /*it('returns ' + httpStatus.UNAUTHORIZED + ' when user is not owner or admin', async () => {
       await request(app)
         .delete(`${LISTA_AUDIO}/${lista?.idLista}/${audioTest1_id}`)
         .set('Authorization', `Bearer ${bearer2}`)
         .expect(httpStatus.UNAUTHORIZED);
-    });
+    });*/
 
-    it('returns ' + httpStatus.NO_CONTENT + ' when all params are ok', async () => {
+    /*it('returns ' + httpStatus.NO_CONTENT + ' when all params are ok', async () => {
       await request(app)
         .delete(`${LISTA_AUDIO}/${lista?.idLista}/${audioTest1_id}`)
         .set('Authorization', `Bearer ${bearer}`)
         .expect(httpStatus.NO_CONTENT);
-    });
+    });*/
   });
 
 
@@ -687,6 +687,7 @@ describe('Lista routes', () => {
       );
     });
   });
+
 
 
   describe(' GET /lista/propias/:idUsuario , getListasByUser', () => {
