@@ -2,7 +2,11 @@
 name: Despliegue a Azure y ejecución de testss
 
 on:
-  push:
+  push: 
+    branches:
+      - main
+
+  pull_request: 
     branches:
       - main
 
@@ -36,17 +40,17 @@ jobs:
         with:
           add: "."
           message: "Tests passed"
-          author_name: "GitHub Actions"
-          author_email: "actions@github.com"
+          author_name: "Garicore01"
+          author_email: "848905@unizar.es"
           author_date: "$(date -u +%Y-%m-%dT%H:%M:%SZ)"
 
   deploy_to_azure:
     needs: test_and_deploy
     runs-on: ubuntu-latest
-    if: ${{needs.test_and_deploy.result == 'success' }}
+    if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' && needs.test_and_deploy.result == 'success' }}
     steps:
       - name: webfactory/ssh-agent     
-        uses: webfactory/ssh-agent@v0.9.0
+        uses: webfactory/ssh-agent@v0.9.0 
         with:
           ssh-private-key: ${{ secrets.AZURE_SECRET_KEY }}
           host: ${{ secrets.AZURE_HOST }}
