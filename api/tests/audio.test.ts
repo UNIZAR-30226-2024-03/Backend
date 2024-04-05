@@ -5,17 +5,42 @@ import fs from 'fs';
 import path from 'path';
 import util from 'util';
 const projectRootPath = process.cwd();
+import {usuarioCreatePrisma,usuarioDeleteEmailPrisma,usuarioFollowPrisma,} from "../../db/usuarioDb.js";
 const copyFile = util.promisify(fs.copyFile);
 
 describe('Audio Endpoints', () => {
     let audio1_id: number;
     let audio2_id: number;
     let audio3_id: number;
-
+    let user1_id: number;
+    let user2_id: number;
+    let user3_id: number;
     beforeAll(async () => {
-        const audio1 = await audioDatabase.createAudioDB('Test Audio', 'pruebaTest1.mp3', 120, new Date('2022-01-01').toISOString(), 'Album', false, [9, 10]);
-        const audio2 = await audioDatabase.createAudioDB('Test Audio 2', 'pruebaTest2.mp3', 120, new Date('2022-01-01').toISOString(), 'Album', false, [9, 10]);
-        const audio3 = await audioDatabase.createAudioDB('Test Audio 3', 'pruebaTest3.mp3', 120, new Date('2022-01-01').toISOString(), 'Album', false, [9, 10]);
+
+        const user1 = await usuarioCreatePrisma(
+            "audio1",
+            "audio1@testingaudio.com",
+            "password",
+          );
+          const user2 = await usuarioCreatePrisma(
+            "audio2",
+            "audio2@testingaudio.com",
+            "password",
+          );
+          const user3 = await usuarioCreatePrisma(
+            "audio3",
+            "audio3@testingaudio.com",
+            "password",
+          );
+        
+        user1_id = user1.idUsuario;
+        user2_id = user2.idUsuario;
+        user3_id = user3.idUsuario;
+
+        const audio1 = await audioDatabase.createAudioDB('Test Audio', 'pruebaTest1.mp3', 120, new Date('2022-01-01').toISOString(), 'Album', false, [user1_id, user1_id]);
+        const audio2 = await audioDatabase.createAudioDB('Test Audio 2', 'pruebaTest2.mp3', 120, new Date('2022-01-01').toISOString(), 'Album', false, [user1_id, user1_id]);
+        const audio3 = await audioDatabase.createAudioDB('Test Audio 3', 'pruebaTest3.mp3', 120, new Date('2022-01-01').toISOString(), 'Album', false, [user1_id, user1_id]);
+        
         audio1_id = audio1.idAudio;
         audio2_id = audio2.idAudio;
         audio3_id = audio3.idAudio;
@@ -29,6 +54,10 @@ describe('Audio Endpoints', () => {
         await audioDatabase.deleteAudioById(audio1_id);
         await audioDatabase.deleteAudioById(audio2_id);
         await audioDatabase.deleteAudioById(audio3_id);
+        await usuarioDeleteEmailPrisma("audio1@testingaudio.com");
+        await usuarioDeleteEmailPrisma("audio2@testingaudio.com");
+        await usuarioDeleteEmailPrisma("audio3@testingaudio.com");
+        
     });
 
 
@@ -40,7 +69,7 @@ describe('Audio Endpoints', () => {
 
     it('returns 404 not found', async () => {
         const res = await supertest(app)
-            .get('/audio/2');
+            .get('/audio/0');
         expect(res.statusCode).toEqual(404);
     },15000);
 
@@ -66,7 +95,7 @@ describe('Audio Endpoints', () => {
             .field('fechaLanz', new Date('2022-01-01').toISOString())
             .field('esAlbum', 'Si')
             .field('esPrivada', false)
-            .field('idsUsuarios', '9,10');
+            .field('idsUsuarios', `${user1_id},${user2_id}`);
         expect(res.statusCode).toEqual(200);
         audio_id_created = res.body.idaudio;
     },15000);
