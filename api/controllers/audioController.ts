@@ -1,8 +1,13 @@
-import { Request, Response , NextFunction} from "express";
+import { Response , NextFunction} from "express";
+import { Request } from 'express-jwt';
+
 import prisma from "../../prisma/client.js";
 import path from 'path';
 import fs from 'fs';
+import mediaserver from 'mediaserver'; //Variable para manejar archivos de audio, usa chunks para enviar el archivo
+
 import * as audioDatabase from "../../db/audioDb.js";
+import { promisify } from 'util';
 
 const projectRootPath = process.cwd(); // Devuelve el directorio raíz del proyecto y se almacena en una constante
 
@@ -13,7 +18,11 @@ export async function getAudio(req: Request, res: Response) {
         const audio = await audioDatabase.findAudioById(id);
         console.log(audio);
         if (audio) {
-            res.json(audio);
+            if (audio.esPrivada && !await isOwnerOrAdmin(req)) { //Falta lógica de verificación de usarios
+                res.status(403).send("Unauthorized");
+            }else{
+                res.json(audio);
+            }
         } else {
             res.status(404).send("Audio not found"); // Bad request, parámetros incorrecto
         }
@@ -59,6 +68,7 @@ export async function createAudio(req: Request, res: Response) {
         const fechaLanz = new Date(req.body.fechaLanz);
         const fechaFormateada = fechaLanz.toISOString();
         const idsUsuarios2 = req.body.idsUsuarios.split(',').map(Number);
+        idsUsuarios2.push(req.auth?.idUsuario);
         const audio = await audioDatabase.createAudioDB(req.body.titulo, req.file.originalname, parseInt(req.body.duracionSeg, 10), fechaFormateada, req.body.esAlbum, Boolean(req.body.esPrivada), idsUsuarios2);
         console.log(audio);
         for (const idUsuario of idsUsuarios2) {
@@ -73,8 +83,10 @@ export async function createAudio(req: Request, res: Response) {
                     },
                 },
             });
+            await audioDatabase.addPropietariosToAudio(audio.idAudio, idsUsuarios2);
             console.log('usuario actualizado');
         }
+
         res.json( { message: 'Audio added successfully' ,idaudio: audio.idAudio});
     } catch (error) {
         if (error instanceof Error) {
@@ -95,10 +107,13 @@ export async function deleteAudio(req: Request, res: Response) {
     const id = Number(req.params.idaudio);
 
     try {
-
+        
         const audioRuta =await audioDatabase.findAudioById(id)
         if (!audioRuta) {
             return res.status(404).send("Audio not found");            
+        }
+        if (!await isOwnerOrAdmin(req)){
+            return res.status(403).send("Unauthorized");
         }
         audioDatabase.deleteAudioById(id);
         try{
@@ -137,6 +152,9 @@ export async function verifyAudio(req: Request, res: Response, next: NextFunctio
 
 export async function updateAudio(req: Request, res: Response) {
     try {
+        if (!await isOwnerOrAdmin(req)){
+            return res.status(403).send("Unauthorized");
+        }
         let audioData: any = {};
 
         if (req.file){
@@ -172,10 +190,45 @@ export async function updateAudio(req: Request, res: Response) {
     }
 }
 
+
+export async function playAudio(req: Request, res: Response) {
+    try {
+        const Audiopath = await audioDatabase.getPathById(Number(req.params.idaudio));
+        if (!Audiopath) {
+            return res.status(404).send("Audio not found");            
+        }
+        const cancion = path.join(projectRootPath, Audiopath);
+        const access = promisify(fs.access);
+        await access(cancion, fs.constants.F_OK);
+        if (await isOwnerOrAdmin(req)){
+            mediaserver.pipe(req, res, cancion);
+        }else{
+            return res.status(403).send("Unauthorized");
+        }
+    } catch (err) {
+        res.status(404).send('File not found');
+    }
+}
+
+
 function deleteFile(filePath: string) {
     try {
         fs.unlinkSync(filePath); // Borra el archivo del servidor
     } catch (error) {
         throw new Error('Error, audio no eliminando, no encontrado en el servidor local');
     }
+}
+
+async function isOwnerOrAdmin(req: Request){
+        if (!req.auth?.esAdmin) {
+            const propietarios = await audioDatabase.getArtistaAudioById(parseInt(req.params.idaudio));
+
+            if (propietarios === null) {
+                throw new Error("Audio no encontrado");
+            }
+            if (!propietarios.some(propietario => propietario.Artistas.some(artista => artista.idUsuario === parseInt(req.auth?.idUsuario)))) {
+                return false;
+            }
+        }
+        return true;
 }

@@ -4,6 +4,7 @@
 const projectRootPath = process.cwd(); // Devuelve el directorio raíz del proyecto y se almacena en una constante
 
 import { Router , Request} from "express";
+import * as auth from "../middleware/authenticator.js";
 
 const router = Router();
 
@@ -11,7 +12,6 @@ const router = Router();
 // Librearía para subir archivos de audio
 import multer from 'multer';
 import path from 'path';//Variable para manejar rutas de archivos
-import mediaserver from 'mediaserver'; //Variable para manejar archivos de audio, usa chunks para enviar el archivo
 import fs from 'fs';
 import * as audioController from '../controllers/audioController.js';
 
@@ -38,36 +38,25 @@ const upload = multer(
 
 //PRE: Se recibe un id de audio correcto en la URL
 //POST: Sube obtiene información de un audio con formato JSON
-router.get('/:idaudio',audioController.getAudio);
+router.get('/:idaudio',auth.authenticate,audioController.getAudio);
 
 //PRE: Se recibe un id de audio correcto en la URL
 //POST: Se devuelve el archivo de audio en chunks
-router.get('/play/:idaudio', function(req, res) {
-    const cancion = path.join(projectRootPath,'audios',req.params.idaudio);
-    fs.access(cancion, fs.constants.F_OK, (err) => {
-        if (err) {
-            // File does not exist
-            res.status(404).send('File not found');
-        } else {
-            // File exists, serve it
-            mediaserver.pipe(req, res, cancion);
-        }
-    });
-});
+router.get('/play/:idaudio', auth.authenticate, audioController.playAudio);
 
 
 //PRE: Se recibe un audio en formato .mp3 o .wav, con un título, duración y fecha de lanzamiento en formato ISO-8601
 //POST: Se sube el archivo a la base de datos
-router.post('/upload', upload.single('cancion'), audioController.verifyUsersList, audioController.createAudio);
+router.post('/upload', upload.single('cancion'),auth.authenticate, audioController.verifyUsersList, audioController.createAudio);
 
 
 //FALTA LÓGICA DE VERIRICACIÓN DE PERMISOS DE USUARIO
 //PRE: Se recibe un id de audio correcto en la URL
 //POST: Se elimina el registro de BBDD y la canción del servidor
-router.get('/delete/:idaudio', audioController.deleteAudio);
+router.get('/delete/:idaudio', auth.authenticate,audioController.deleteAudio);
 
 //PRE: Se recibe un id de audio correcto en la URL
 //POST: Se edita el registro de BBDD y la canción del servidor
-router.put('/update/:idaudio', audioController.verifyAudio, upload.single('cancion'), audioController.updateAudio);
+router.put('/update/:idaudio', auth.authenticate,audioController.verifyAudio, upload.single('cancion'), audioController.updateAudio);
 
 export default router;

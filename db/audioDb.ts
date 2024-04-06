@@ -47,7 +47,7 @@ export async function updateAudioById(id: number, audioData: any) {
 
 
 export async function getArtistaAudioById(id: number) {
-    const audio = await prisma.audio.findUnique({
+    const audio = await prisma.audio.findMany({
         where: {
             idAudio: id,
         },
@@ -56,4 +56,24 @@ export async function getArtistaAudioById(id: number) {
         },
     });
     return audio;
+}
+
+export async function addPropietariosToAudio(id: number, idUsuarios: number[]) {
+    await prisma.audio.update({
+        where: { idAudio: id },
+        data: {
+            Artistas: {
+                connect: idUsuarios.map(idUsuario => ({ idUsuario })),
+            },
+        },
+    });
+}
+
+export async function getPathById(id: number) {
+    const audio = await prisma.audio.findUnique({
+        where: {
+            idAudio: id,
+        },
+    });
+    return audio?.path;
 }

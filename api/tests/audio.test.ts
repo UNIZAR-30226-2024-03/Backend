@@ -5,7 +5,9 @@ import fs from 'fs';
 import path from 'path';
 import util from 'util';
 const projectRootPath = process.cwd();
-import {usuarioCreatePrisma,usuarioDeleteEmailPrisma,usuarioFollowPrisma,} from "../../db/usuarioDb.js";
+import {usuarioCreatePrisma,usuarioDeleteEmailPrisma} from "../../db/usuarioDb.js";
+import { createUsuarioToken } from '../utils/auth/createUsuarioToken.js';
+
 const copyFile = util.promisify(fs.copyFile);
 
 describe('Audio Endpoints', () => {
@@ -15,6 +17,9 @@ describe('Audio Endpoints', () => {
     let user1_id: number;
     let user2_id: number;
     let user3_id: number;
+    let bearer1: string;
+    let bearer2: string;
+    let bearer3: string;
     beforeAll(async () => {
 
         const user1 = await usuarioCreatePrisma(
@@ -36,10 +41,14 @@ describe('Audio Endpoints', () => {
         user1_id = user1.idUsuario;
         user2_id = user2.idUsuario;
         user3_id = user3.idUsuario;
+        bearer1 = createUsuarioToken(user1);
+        bearer2 = createUsuarioToken(user2);
+        bearer3 = createUsuarioToken(user3); 
 
-        const audio1 = await audioDatabase.createAudioDB('Test Audio', 'pruebaTest1.mp3', 120, new Date('2022-01-01').toISOString(), 'Album', false, [user1_id, user1_id]);
-        const audio2 = await audioDatabase.createAudioDB('Test Audio 2', 'pruebaTest2.mp3', 120, new Date('2022-01-01').toISOString(), 'Album', false, [user1_id, user1_id]);
-        const audio3 = await audioDatabase.createAudioDB('Test Audio 3', 'pruebaTest3.mp3', 120, new Date('2022-01-01').toISOString(), 'Album', false, [user1_id, user1_id]);
+
+        const audio1 = await audioDatabase.createAudioDB('Test Audio', 'pruebaTest1.mp3', 120, new Date('2022-01-01').toISOString(), 'Album', false, [user1_id, user2_id]);
+        const audio2 = await audioDatabase.createAudioDB('Test Audio 2', 'pruebaTest2.mp3', 120, new Date('2022-01-01').toISOString(), 'Album', false, [user1_id, user2_id]);
+        const audio3 = await audioDatabase.createAudioDB('Test Audio 3', 'pruebaTest3.mp3', 120, new Date('2022-01-01').toISOString(), 'Album', true, [user1_id, user2_id]);
         
         audio1_id = audio1.idAudio;
         audio2_id = audio2.idAudio;
@@ -63,25 +72,59 @@ describe('Audio Endpoints', () => {
 
     it('should get an audio by id', async () => {
         const res = await supertest(app)
-            .get(`/audio/${audio1_id}`);
+            .get(`/audio/${audio1_id}`)
+            .set('Authorization', `Bearer ${bearer1}`);
         expect(res.statusCode).toEqual(200);
+    },15000);
+
+    it('should get an audio by id', async () => {
+        const res = await supertest(app)
+            .get(`/audio/${audio1_id}`)
+            .set('Authorization', `Bearer ${bearer3}`);
+        expect(res.statusCode).toEqual(200);
+    },15000);
+
+    it('returns a 403 error, Auth failed', async () => {
+        const res = await supertest(app)
+            .get(`/audio/${audio3_id}`)
+            .set('Authorization', `Bearer ${bearer3}`);
+        expect(res.statusCode).toEqual(403);
     },15000);
 
     it('returns 404 not found', async () => {
         const res = await supertest(app)
-            .get('/audio/0');
+            .get('/audio/0')
+            .set('Authorization', `Bearer ${bearer1}`);
+
         expect(res.statusCode).toEqual(404);
     },15000);
 
     it('should get an audio by id', async () => {
         const res = await supertest(app)
-            .get('/audio/play/pruebaTest1.mp3');
+            .get(`/audio/play/${audio1_id}`)
+            .set('Authorization', `Bearer ${bearer1}`);
         expect(res.statusCode).toEqual(200);
+    },15000);
+
+    it('should get an audio by id', async () => {
+        const res = await supertest(app)
+            .get(`/audio/play/${audio3_id}`)
+            .set('Authorization', `Bearer ${bearer1}`);
+        expect(res.statusCode).toEqual(200);
+    },15000);
+
+    it('returns a 403, auth failed', async () => {
+        const res = await supertest(app)
+            .get(`/audio/play/${audio3_id}`)
+            .set('Authorization', `Bearer ${bearer3}`);
+        expect(res.statusCode).toEqual(403);
     },15000);
 
     it('returns 404 not found', async () => {
         const res = await supertest(app)
-            .get('/audio/play/0');
+            .get('/audio/play/0')
+            .set('Authorization', `Bearer ${bearer1}`);
+
         expect(res.statusCode).toEqual(404);
     },15000);
 
@@ -89,6 +132,7 @@ describe('Audio Endpoints', () => {
     it('should create a new audio', async () => {
         const res = await supertest(app)
             .post('/audio/upload')
+            .set('Authorization', `Bearer ${bearer1}`)
             .attach('cancion', 'api/tests/pruebasUnitarias.mp3')
             .field('titulo', 'Test Audio new')
             .field('duracionSeg', 120)
@@ -100,20 +144,32 @@ describe('Audio Endpoints', () => {
         audio_id_created = res.body.idaudio;
     },15000);
 
+    it('returns a 403, auth failed', async () => {
+        console.log('audio_id_created es:');
+        console.log(audio_id_created);
+        const res = await supertest(app)
+            .get(`/audio/delete/${audio_id_created}`)
+            .set('Authorization', `Bearer ${bearer3}`);
 
+        expect(res.statusCode).toEqual(403);
+    },15000);
     
     it('should delete an audio by id', async () => {
         console.log('audio_id_created es:');
         console.log(audio_id_created);
         const res = await supertest(app)
-            .get(`/audio/delete/${audio_id_created}`);
+            .get(`/audio/delete/${audio_id_created}`)
+            .set('Authorization', `Bearer ${bearer1}`);
+
         expect(res.statusCode).toEqual(200);
     },15000);
 
 
     it('returns 404 not found', async () => {
         const res = await supertest(app)
-            .get('/audio/delete/0');
+            .get('/audio/delete/0')
+            .set('Authorization', `Bearer ${bearer1}`);
+
         expect(res.statusCode).toEqual(404);
     },15000);
 
@@ -121,6 +177,7 @@ describe('Audio Endpoints', () => {
     it('should update an audio by id', async () => {
         const res = await supertest(app)
             .put(`/audio/update/${audio2_id}`)
+            .set('Authorization', `Bearer ${bearer1}`)
             .send({
                 titulo: 'Updated Audio'
             });
@@ -131,6 +188,7 @@ describe('Audio Endpoints', () => {
     it('returns 404 not found', async () => {
         const res = await supertest(app)
             .put(`/audio/update/0`)
+            .set('Authorization', `Bearer ${bearer1}`)
             .send({
                 titulo: 'Updated Audio'
             });
