@@ -46,9 +46,9 @@ describe('Audio Endpoints', () => {
         bearer3 = createUsuarioToken(user3); 
 
 
-        const audio1 = await audioDatabase.createAudioDB('Test Audio', 'pruebaTest1.mp3', 120, new Date('2022-01-01').toISOString(), 'Album', false, [user1_id, user2_id]);
-        const audio2 = await audioDatabase.createAudioDB('Test Audio 2', 'pruebaTest2.mp3', 120, new Date('2022-01-01').toISOString(), 'Album', false, [user1_id, user2_id]);
-        const audio3 = await audioDatabase.createAudioDB('Test Audio 3', 'pruebaTest3.mp3', 120, new Date('2022-01-01').toISOString(), 'Album', true, [user1_id, user2_id]);
+        const audio1 = await audioDatabase.createAudioDB('Test Audio', 'pruebaTest1.mp3', 120, new Date('2022-01-01').toISOString(), false, false, [user1_id, user2_id],"prueba");
+        const audio2 = await audioDatabase.createAudioDB('Test Audio 2', 'pruebaTest2.mp3', 120, new Date('2022-01-01').toISOString(), false, false, [user1_id, user2_id],"prueba");
+        const audio3 = await audioDatabase.createAudioDB('Test Audio 3', 'pruebaTest3.mp3', 120, new Date('2022-01-01').toISOString(), false, true, [user1_id, user2_id],"prueba");
         
         audio1_id = audio1.idAudio;
         audio2_id = audio2.idAudio;
@@ -128,25 +128,40 @@ describe('Audio Endpoints', () => {
         expect(res.statusCode).toEqual(404);
     },15000);
 
-    let audio_id_created: any;
+    let audio_id_created: number;
     it('should create a new audio', async () => {
         const res = await supertest(app)
             .post('/audio/upload')
             .set('Authorization', `Bearer ${bearer1}`)
             .attach('cancion', 'api/tests/pruebasUnitarias.mp3')
-            .field('titulo', 'Test Audio new')
+            .field('titulo', 'Test Audio correct')
             .field('duracionSeg', 120)
             .field('fechaLanz', new Date('2022-01-01').toISOString())
-            .field('esAlbum', 'Si')
+            .field('esAlbum', false)
             .field('esPrivada', false)
-            .field('idsUsuarios', `${user1_id},${user2_id}`);
-        expect(res.statusCode).toEqual(200);
+            .field('idsUsuarios', `${user1_id},${user2_id}`)
+            .field('img', 'prueba');
         audio_id_created = res.body.idaudio;
+        expect(res.statusCode).toEqual(200);
+    },15000);
+
+    it('returns a 400, bad parameters', async () => {
+        const res = await supertest(app)
+            .post('/audio/upload')
+            .set('Authorization', `Bearer ${bearer1}`)
+            .attach('cancion', 'api/tests/pruebasUnitarias.mp3')
+            .field('titulo', 'Test Audio new')
+            .field('dur', 120)
+            .field('fechaLanz', new Date('2022-01-01').toISOString())
+            .field('esAlbum',false)
+            .field('b', false)
+            .field('idsUsuarios', `${user1_id},${user2_id}`)
+            .field('img', 'prueba');
+        expect(res.statusCode).toEqual(400);
     },15000);
 
     it('returns a 403, auth failed', async () => {
-        console.log('audio_id_created es:');
-        console.log(audio_id_created);
+
         const res = await supertest(app)
             .get(`/audio/delete/${audio_id_created}`)
             .set('Authorization', `Bearer ${bearer3}`);
@@ -155,8 +170,7 @@ describe('Audio Endpoints', () => {
     },15000);
     
     it('should delete an audio by id', async () => {
-        console.log('audio_id_created es:');
-        console.log(audio_id_created);
+
         const res = await supertest(app)
             .get(`/audio/delete/${audio_id_created}`)
             .set('Authorization', `Bearer ${bearer1}`);
@@ -184,7 +198,6 @@ describe('Audio Endpoints', () => {
         expect(res.statusCode).toEqual(200);
     },15000);
 
-
     it('returns 404 not found', async () => {
         const res = await supertest(app)
             .put(`/audio/update/0`)
@@ -196,4 +209,7 @@ describe('Audio Endpoints', () => {
     },15000);
 
 
+
+
 });
+

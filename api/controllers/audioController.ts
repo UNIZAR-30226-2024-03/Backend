@@ -12,11 +12,16 @@ import { promisify } from 'util';
 const projectRootPath = process.cwd(); // Devuelve el directorio raíz del proyecto y se almacena en una constante
 
 
+
+//PRE: Se recibe un id de audio correcto en la URL
+//POST: Sube obtiene información de un audio con formato JSON
 export async function getAudio(req: Request, res: Response) {
-    const id = Number(req.params.idaudio);
     try {
+        if (!req.params.idaudio) {
+            return res.status(400).send('Bad Parameters');
+        }
+        const id = Number(req.params.idaudio);
         const audio = await audioDatabase.findAudioById(id);
-        console.log(audio);
         if (audio) {
             if (audio.esPrivada && !await isOwnerOrAdmin(req)) { //Falta lógica de verificación de usarios
                 res.status(403).send("Unauthorized");
@@ -31,11 +36,10 @@ export async function getAudio(req: Request, res: Response) {
     }
 }
 
+
 export async function verifyUsersList(req: Request, res: Response, next: NextFunction) {
     try {
-        console.log(req.body);
         const idsUsuarios = req.body.idsUsuarios.split(',').map(Number);
-        console.log(idsUsuarios);
         for (const idUsuario of idsUsuarios) {
             //Preguntar Alvaro si tiene esta función
             const usuario = await prisma.usuario.findUnique({
@@ -50,7 +54,6 @@ export async function verifyUsersList(req: Request, res: Response, next: NextFun
                 return res.status(404);            
             }
         }
-        console.log('usuarios verificados');
         next();
     }catch (error) {
         if (req.file){
@@ -65,12 +68,20 @@ export async function createAudio(req: Request, res: Response) {
         if (!req.file) {
             return res.status(400).send('No file uploaded');
         }
+        if (!req.body.titulo        ||
+            !req.body.duracionSeg   ||
+            !req.body.fechaLanz     || 
+            !req.body.esAlbum       ||
+            !req.body.esPrivada     ||
+            !req.body.img               ) {
+                return res.status(400).send('Bad Parameters');
+        }
         const fechaLanz = new Date(req.body.fechaLanz);
         const fechaFormateada = fechaLanz.toISOString();
         const idsUsuarios2 = req.body.idsUsuarios.split(',').map(Number);
         idsUsuarios2.push(req.auth?.idUsuario);
-        const audio = await audioDatabase.createAudioDB(req.body.titulo, req.file.originalname, parseInt(req.body.duracionSeg, 10), fechaFormateada, req.body.esAlbum, Boolean(req.body.esPrivada), idsUsuarios2);
-        console.log(audio);
+        const img = req.body.img;
+        const audio = await audioDatabase.createAudioDB(req.body.titulo, req.file.filename, parseInt(req.body.duracionSeg, 10), fechaFormateada, Boolean(req.body.esAlbum), Boolean(req.body.esPrivada), idsUsuarios2,img);
         for (const idUsuario of idsUsuarios2) {
             //Preguntar Alvaro si tiene esta función
             await prisma.usuario.update({
@@ -84,7 +95,6 @@ export async function createAudio(req: Request, res: Response) {
                 },
             });
             await audioDatabase.addPropietariosToAudio(audio.idAudio, idsUsuarios2);
-            console.log('usuario actualizado');
         }
 
         res.json( { message: 'Audio added successfully' ,idaudio: audio.idAudio});
@@ -104,10 +114,12 @@ export async function createAudio(req: Request, res: Response) {
 
 
 export async function deleteAudio(req: Request, res: Response) {
-    const id = Number(req.params.idaudio);
 
     try {
-        
+        if (!req.params.idaudio) {
+            return res.status(400).send('Bad Parameters');
+        }
+        const id = Number(req.params.idaudio);
         const audioRuta =await audioDatabase.findAudioById(id)
         if (!audioRuta) {
             return res.status(404).send("Audio not found");            
@@ -128,9 +140,12 @@ export async function deleteAudio(req: Request, res: Response) {
 }
 
 export async function verifyAudio(req: Request, res: Response, next: NextFunction) {
-    const id = Number(req.params.idaudio);
     
     try {
+        if (!req.params.idaudio) {
+            return res.status(400).send('Bad Parameters');
+        }
+        const id = Number(req.params.idaudio);
         const audioConsulta = await audioDatabase.findAudioById(id);
         if (!audioConsulta) {
             return res.status(404).send("Audio not found");            
@@ -152,13 +167,16 @@ export async function verifyAudio(req: Request, res: Response, next: NextFunctio
 
 export async function updateAudio(req: Request, res: Response) {
     try {
+        if (!req.params.idaudio) {
+            return res.status(400).send('Bad Parameters');
+        }
         if (!await isOwnerOrAdmin(req)){
             return res.status(403).send("Unauthorized");
         }
         let audioData: any = {};
 
         if (req.file){
-            audioData.path = "/audios/"+req.file.originalname;
+            audioData.path = "/audios/"+req.file.filename;
             deleteFile(path.join(projectRootPath,req.body.audioConsulta.path)); // Acceder a audioConsulta desde req
         }
 
@@ -174,6 +192,14 @@ export async function updateAudio(req: Request, res: Response) {
         }
         if (req.body.esAlbum) {
             audioData.esAlbum = req.body.esAlbum;
+        }
+
+        if (req.body.esPrivada) {
+            audioData.esPrivada = Boolean(req.body.esPrivada);
+        }
+        if (req.body.img) {
+            audioData.imgAudio = req.body.img;
+            
         }
 
         audioDatabase.updateAudioById(Number(req.params.idaudio),audioData);
@@ -193,6 +219,9 @@ export async function updateAudio(req: Request, res: Response) {
 
 export async function playAudio(req: Request, res: Response) {
     try {
+        if (!req.params.idaudio) {
+            return res.status(400).send('Bad Parameters');
+        }
         const Audiopath = await audioDatabase.getPathById(Number(req.params.idaudio));
         if (!Audiopath) {
             return res.status(404).send("Audio not found");            

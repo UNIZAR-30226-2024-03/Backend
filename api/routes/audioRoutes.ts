@@ -1,30 +1,28 @@
-// -AUDIO ----> Alain
-// ------/audio/delete/<idAudio> : Borra un audio de la base de datos.
-// ------[PUT]/audio/<idAudio>/ : Edita un audio de la base de datos.
 const projectRootPath = process.cwd(); // Devuelve el directorio raíz del proyecto y se almacena en una constante
 
 import { Router , Request} from "express";
 import * as auth from "../middleware/authenticator.js";
-
+import crypto from 'crypto';
+import multer from 'multer';
+import path from 'path';//Variable para manejar rutas de archivos
+import * as audioController from '../controllers/audioController.js';
 const router = Router();
 
 //elemento prisma para acceder a la base de datos declarado en el archivo index.ts de la carpeta prisma
-// Librearía para subir archivos de audio
-import multer from 'multer';
-import path from 'path';//Variable para manejar rutas de archivos
-import fs from 'fs';
-import * as audioController from '../controllers/audioController.js';
+// Librería para subir archivos de audio
 
-
+//Configuración de multer
 const opciones = multer.diskStorage({ //Opciones para subir archivos
     destination: function(req: Request, file: Express.Multer.File, cb: any) { 
         cb(null, path.join(projectRootPath,'audios')); //Se almacenan en la carpeta audios desde la raiz del proyecto
     },
     filename: function(req: Request, file: Express.Multer.File, cb: any) { 
-        cb(null, file.originalname); //Cambiar esto, no puede ser el nombre original
+        const now = Date.now().toString(); // Salt
+        const hash = crypto.createHash('sha1').update(file.originalname + now).digest('hex'); // Hash
+        const extension = path.extname(file.originalname);
+        cb(null, `${hash}${extension}`); 
     }
 });
-
 const upload = multer(
     {storage: opciones,
     fileFilter: function (req, file, cb) { //Filtro para aceptar solo archivos de audio
@@ -50,7 +48,6 @@ router.get('/play/:idaudio', auth.authenticate, audioController.playAudio);
 router.post('/upload', upload.single('cancion'),auth.authenticate, audioController.verifyUsersList, audioController.createAudio);
 
 
-//FALTA LÓGICA DE VERIRICACIÓN DE PERMISOS DE USUARIO
 //PRE: Se recibe un id de audio correcto en la URL
 //POST: Se elimina el registro de BBDD y la canción del servidor
 router.get('/delete/:idaudio', auth.authenticate,audioController.deleteAudio);
