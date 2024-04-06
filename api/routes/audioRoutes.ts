@@ -65,8 +65,9 @@ router.post('/upload', upload.single('cancion'), audioController.verifyUsersList
 //POST: Se elimina el registro de BBDD y la canción del servidor
 router.get('/delete/:idaudio', audioController.deleteAudio);
 
-//PRE: Se recibe un id de audio correcto en la URL
+//PRE: Se recibe el id de audio correcto en la URL
 //POST: Se edita el registro de BBDD y la canción del servidor
 router.put('/update/:idaudio', audioController.verifyAudio, upload.single('cancion'), audioController.updateAudio);
+
 
 export default router;
