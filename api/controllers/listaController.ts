@@ -431,11 +431,19 @@ export const deleteCollaboratorFromLista = catchAsync(async (req : Request, res 
  * @param {ObjectId} idUsuario
  * @returns {Promise<Lista[]>}
  */
-export const getListsByUser = catchAsync(async (req : Request, res : Response) => {
+export const getListasByUser = catchAsync(async (req : Request, res : Response) => {
   try {
+    if(!await usuarioDb.usuarioExistPrisma(parseInt(req.params.idUsuario))) {
+      res.status(httpStatus.NOT_FOUND).send("Usuario no encontrado");
+      return;
+    }
+
     const listas = await listasDb.getListasByPropietario(parseInt(req.params.idUsuario));
     res.send(listas);
   } catch (error) {
+    console.log(error);
     res.status(httpStatus.BAD_REQUEST).send(error);
   }
 });
+
+

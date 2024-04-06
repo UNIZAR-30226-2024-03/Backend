@@ -53,5 +53,8 @@ listaRouter.delete("/collaborator/:idLista/:idUsuario", auth.authenticate, lista
 //[GET]listas/seguidas/<idUsuario>/: Devuelve las listas seguidas por un usuario.
 listaRouter.get("/seguidas/:idUsuario", auth.authenticate, listaController.getFollowedLists);
 
+//[GET]listas/propias/<idUsuario>/: Devuelve las listas de las que un usuario es propietario.
+listaRouter.get("/owned/:idUsuario", auth.authenticate, listaController.getListasByUser);
+
 
 export default listaRouter;

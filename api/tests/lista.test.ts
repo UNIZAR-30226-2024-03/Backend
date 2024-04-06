@@ -687,4 +687,35 @@ describe('Lista routes', () => {
       );
     });
   });
+
+
+
+  describe(' GET /lista/propias/:idUsuario , getListasByUser', () => {
+    it('returns ' + httpStatus.NOT_FOUND + ' when idUsuario not found', async () => {
+      await request(app)
+        .get(`${LISTA_SEGUIDAS}/${999999}`)
+        .set('Authorization', `Bearer ${bearer}`)
+        .expect(httpStatus.NOT_FOUND);
+    });
+
+    it('returns ' + httpStatus.OK + ' and correct result when no listas owned', async () => {
+      await request(app)
+        .get(`${LISTA_SEGUIDAS}/${userTest2_id}`)
+        .set('Authorization', `Bearer ${bearer2}`)
+        .expect((res) => {
+          expect(res.body).toEqual([]);
+          expect(res.status).toEqual(httpStatus.OK);
+        });
+    });
+
+    it('returns ' + httpStatus.OK + ' and correct result when listas owned', async () => {
+      await request(app)
+        .get(`${LISTA_SEGUIDAS}/${userTest1_id}`)
+        .set('Authorization', `Bearer ${bearer}`)
+        .expect((res) => {
+          expect(res.body[0].idLista).toEqual(lista?.idLista);
+          expect(res.status).toEqual(httpStatus.OK);
+        });
+    });
+  });
 });
