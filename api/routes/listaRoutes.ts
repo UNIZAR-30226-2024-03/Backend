@@ -6,6 +6,10 @@ import * as listaController from "../controllers/listaController.js";
 
 
 
+// CUALQUIER PETICIÓN DE CONSULTA DE INFORMACIÓN DEVOLVERÁ EL RESULTADO SOBRE LA INFORMACIÓN
+// A LA QUE EL USUARIO TENGA ACCESO, ES DECIR, SI EL USUARIO NO ES PROPIETARIO O ADMIN SOLO 
+// PODRÁ ACCEDER A LA INFORMACIÓN PÚBLICA
+
 
 //[POST]/lista/ : Crea una lista nueva.
 listaRouter.post("/", auth.authenticate, listaController.createLista);
@@ -18,10 +22,10 @@ listaRouter.put("/:idLista", auth.authenticate, listaController.updateLista);
 // listaRouter.put("/:idLista", listaController.updateLista);
 
 //[GET]/lista/<idLista>/ : Devuelve la información de una lista (sin audios, propietarios ni seguidores)
-listaRouter.get("/:idLista", auth.optionalAuthenticate, listaController.getListaById);
+listaRouter.get("/:idLista", auth.authenticate, listaController.getListaById);
 
 //[GET]/lista/extra/Audios/<idLista>/ : Devuelve los audios de una lista.
-listaRouter.get("/extra/Audios/:idLista", auth.optionalAuthenticate, listaController.getAudiosFromLista);
+listaRouter.get("/extra/Audios/:idLista", auth.authenticate, listaController.getAudiosFromLista);
 
 //[GET]/lista/extra/Propietarios/<idLista>/ : Devuelve los propietarios de una lista.
 listaRouter.get("/extra/Propietarios/:idLista", auth.authenticate, listaController.getPropietariosFromLista);
@@ -30,7 +34,7 @@ listaRouter.get("/extra/Propietarios/:idLista", auth.authenticate, listaControll
 listaRouter.get("/extra/Seguidores/:idLista", auth.authenticate, listaController.getSeguidoresFromLista);
 
 //[GET]/lista/extra/<idLista>/ : Devuelve la información de una lista (con audios, propietarios y seguidores)
-listaRouter.get("/extra/:idLista", auth.optionalAuthenticate, listaController.getListaByIdWithExtras);
+listaRouter.get("/extra/:idLista", auth.authenticate, listaController.getListaByIdWithExtras);
 
 //[POST]/lista/follow/<idLista>/ : Añade la lista a las seguidas por el usuario del jwt.
 listaRouter.post("/follow/:idLista/", auth.authenticate, listaController.followLista);
@@ -53,7 +57,7 @@ listaRouter.delete("/collaborator/:idLista/:idUsuario", auth.authenticate, lista
 //[GET]listas/seguidas/<idUsuario>/: Devuelve las listas seguidas por un usuario.
 listaRouter.get("/seguidas/:idUsuario", auth.authenticate, listaController.getFollowedLists);
 
-//[GET]listas/propias/<idUsuario>/: Devuelve las listas de las que un usuario es propietario.
+//[GET]listas/owned/<idUsuario>/: Devuelve las listas de las que un usuario es propietario.
 listaRouter.get("/owned/:idUsuario", auth.authenticate, listaController.getListasByUser);
 
 
