@@ -1,4 +1,4 @@
-import { Lista, Prisma, TipoLista } from '@prisma/client';
+import { Audio, Lista, Prisma, SigueLista, TipoLista, Usuario } from '@prisma/client';
 import httpStatus from 'http-status';
 import prisma from '../prisma/client.js';
 import ApiError from '../api/utils/errorHandling/utils/ApiError.js';
@@ -72,11 +72,12 @@ export const getListaById = async (id: number): Promise<Lista | null> => {
 
 
 /**
- * Devuelve la lista incluyendo los audios, propietarios y seguidores
+ * Devuelve la lista incluyendo los audios, y los usuarios que son propietarios y seguidores
+ * Con la siguiente forma:{idLista, nombre, esAlbum, esPrivada, descripcion, imgLista, tipoLista, fechaUltimaMod, Audios, Propietarios, Seguidores}
  * @param {ObjectId} id
- * @returns {Promise<Lista | null>}
+ * @returns {Promise<{idLista, nombre, esAlbum, esPrivada, descripcion, imgLista, tipoLista, fechaUltimaMod, Audios, Propietarios, Seguidores}> | null}
  */
-export const getListaByIdWithExtras = async (id: number): Promise<Lista | null> => {
+export const getListaByIdWithExtras = async (id: number): Promise<any> => {
   try {
     return prisma.lista.findUnique({
       where: { idLista: id },
@@ -87,7 +88,7 @@ export const getListaByIdWithExtras = async (id: number): Promise<Lista | null> 
       }
     });
   } catch (error) {
-    // console.log(error);
+    console.log(error);
     throw error;
   }
 }
@@ -98,21 +99,14 @@ export const getListaByIdWithExtras = async (id: number): Promise<Lista | null> 
  * @param {ObjectId} idLista
  * @returns {Promise<Audio[]>}
  */
-export const getAudiosFromLista = async (idLista: number): Promise<Number[]> => {
+export const getAudiosFromLista = async (idLista: number): Promise<Audio[]> => {
   try {
     return prisma.lista.findUnique({
-     select: {
-        Audios: {
-          select: {
-            idAudio: true
-          }
-        }
+      select: {
+        Audios: true
       },
       where: { idLista }
-    }).then((lista) => {
-      return lista?.Audios.map((audio) => audio.idAudio) || [];
-    }
-    );
+    }).then((lista) => lista?.Audios || []);
   } catch (error) {
     // console.log(error);
     throw error;
@@ -121,7 +115,7 @@ export const getAudiosFromLista = async (idLista: number): Promise<Number[]> => 
 
 
 /**
- * Devuelve los seguidores de una lista
+ * Devuelve los idUsuario de los seguidores de una lista
  * @param {ObjectId} idLista
  * @returns {Promise<Number>}
  */
