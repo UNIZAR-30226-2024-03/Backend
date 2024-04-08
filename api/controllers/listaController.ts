@@ -20,7 +20,7 @@ import * as usuarioDb from '../../db/usuarioDb.js';
 ///[GET]listas/seguidas/<idUsuario>/: Devuelve las listas seguidas por un usuario.
 
 /**
- * Función que devuelve true si el usuario es propietario de la lista o administrador
+ * Función que devuelve true si el idUsuario del jwt es propietario de la lista o administrador
  * @param {ObjectId} idUsuario
  * @param {ObjectId} idLista
  * @returns {Promise<boolean>}
@@ -144,6 +144,12 @@ export const getListaById = catchAsync(async (req : Request, res : Response) => 
       res.status(httpStatus.NOT_FOUND).send("Lista no encontrada");
       return;
     }
+
+    if (lista.esPrivada && !await isOwnerOrAdmin(req)) {
+      res.status(httpStatus.UNAUTHORIZED).send("No tienes permisos para interactuar con esta lista");
+      return;
+    }
+    
     res.send(lista);
   } catch (error) {
     res.status(httpStatus.BAD_REQUEST).send(error);
@@ -158,8 +164,14 @@ export const getListaById = catchAsync(async (req : Request, res : Response) => 
  */
 export const getAudiosFromLista = catchAsync(async (req : Request, res : Response) => {
   try {
-    if(!await listasDb.getListaById(parseInt(req.params.idLista))) {
+    const lista = await listasDb.getListaById(parseInt(req.params.idLista));
+    if(!lista) {
       res.status(httpStatus.NOT_FOUND).send("Lista no encontrada");
+      return;
+    }
+
+    if (lista.esPrivada && !await isOwnerOrAdmin(req)) {
+      res.status(httpStatus.UNAUTHORIZED).send("No tienes permisos para interactuar con esta lista");
       return;
     }
     
@@ -178,8 +190,14 @@ export const getAudiosFromLista = catchAsync(async (req : Request, res : Respons
  */
 export const getPropietariosFromLista = catchAsync(async (req : Request, res : Response) => {
   try {
-    if(!await listasDb.getListaById(parseInt(req.params.idLista))) {
+    const lista = await listasDb.getListaById(parseInt(req.params.idLista));
+    if(!lista) {
       res.status(httpStatus.NOT_FOUND).send("Lista no encontrada");
+      return;
+    }
+
+    if (lista.esPrivada && !await isOwnerOrAdmin(req)) {
+      res.status(httpStatus.UNAUTHORIZED).send("No tienes permisos para interactuar con esta lista");
       return;
     }
 
@@ -198,6 +216,7 @@ export const getPropietariosFromLista = catchAsync(async (req : Request, res : R
  */
 export const getSeguidoresFromLista = catchAsync(async (req : Request, res : Response) => {
   try {
+    const lista = await listasDb.getListaById(parseInt(req.params.idLista));
     if(!await listasDb.getListaById(parseInt(req.params.idLista))) {
       res.status(httpStatus.NOT_FOUND).send("Lista no encontrada");
       return;
