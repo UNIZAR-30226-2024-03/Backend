@@ -15,7 +15,7 @@ export async function authGoogleLogin(
     const payload = await verify(req.params.credential);
     if (!payload) return res.sendStatus(401);
 
-    const { email, name, picture } = payload;
+    const { email, name } = payload;
 
     if (!email) return res.sendStatus(401);
     const usuario = await usuarioDbJs.usuarioGetEmailPrisma(email);
@@ -28,7 +28,6 @@ export async function authGoogleLogin(
         nombreUsuario,
         email,
         null,
-        picture,
       );
 
       const token = createUsuarioToken(usuario);
