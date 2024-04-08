@@ -1,9 +1,66 @@
+/**
+ * @swagger
+ * components:
+ *  schemas:
+ *      Lista:
+ *          type: object
+ *          required:
+ *             - nombre
+ *             - esAlbum
+ *             - esPrivada
+ *             - tipoLista
+ *             - idUsuario
+ *          properties:
+ *              idLista:
+ *                  type: number
+ *                  description: Identificador de la lista
+ *              nombre:
+ *                  type: string
+ *                  description: Nombre de la lista
+ *              esAlbum:
+ *                  type: boolean
+ *                  description: Indica si la lista es un album
+ *              esPrivada:
+ *                  type: boolean
+ *                  description: Indica si la lista es privada
+ *              descripcion:
+ *                  type: string
+ *                  description: Descripción de la lista
+ *              imgLista:
+ *                  type: string
+ *                  description: uri de la imagen de la lista
+ *              tipoLista:
+ *                  type: string
+ *                  description: Tipo de lista
+ *                  enum: ["MIS_AUDIOS", "MIS_FAVORITOS", "MIS_PODCAST", "NORMAL"]
+ *              idUsuario:
+ *                  type: number
+ *                  description: Id del usuario creador de de la lista, será el primer propietario.
+ *              fechaUltimaMod:
+ *                  type: string
+ *                  description: Fecha de última modificación de la lista
+ *          example:
+ *              idLista: 1
+ *              nombre: "Lista de ejemplo"
+ *              esAlbum: false
+ *              esPrivada: false
+ *              descripcion: "Descripción de la lista"
+ *              imgLista: "adsfas-asdfaijlk-a"
+ *              tipoLista: "NORMAL"
+ *              idUsuario: 1
+ *              fechaUltimaMod: "2021-06-01T12:00:00Z"
+ *      TipoLista:
+ *          type: string
+ *          enum: ["MIS_AUDIOS", "MIS_FAVORITOS", "MIS_PODCAST", "NORMAL"]
+ *          description: Tipo de lista, "MIS_AUDIOS", "MIS_FAVORITOS", "MIS_PODCAST" están reservados para las listas creadas por defecto para un usuario al crear su cuenta.
+ * 
+ * 
+ */
 import express, { Express, Request, Response } from "express";
 export const listaRouter = express.Router();
 import * as auth from "../middleware/authenticator.js";
 
 import * as listaController from "../controllers/listaController.js";
-
 
 
 // CUALQUIER PETICIÓN DE CONSULTA DE INFORMACIÓN DEVOLVERÁ EL RESULTADO SOBRE LA INFORMACIÓN
@@ -12,6 +69,59 @@ import * as listaController from "../controllers/listaController.js";
 
 
 //[POST]/lista/ : Crea una lista nueva.
+/**
+ * @swagger
+ * /lista/:
+ *  post:
+ *      summary: Crea una lista nueva.
+ *      description: Crea una lista nueva.
+ *  parameters:
+ *     - in: body
+ *      nombre:
+ *         type: string
+ *         required: true
+ *      esAlbum:
+ *          type: boolean
+ *          required: true
+ *      esPrivada:
+ *          type: boolean
+ *          required: true
+ *      descripcion:
+ *          type: string
+ *          required: false
+ *      imgLista:
+ *          type: string
+ *          required: false
+ *          description: uri de la imagen de la lista
+ *      tipoLista:
+ *          type: TipoLista (enum) -> ["MIS_AUDIOS", "MIS_FAVORITOS", "MIS_PODCAST", "NORMAL"]
+ *          required: true
+ *      idUsuario:
+ *          type: number
+ *          required: true
+ *          description: Id del usuario creador de de la lista, será el primer propietario.
+ *      audios:
+ *          type: array de number
+ *          required: false
+ *          description: Array de ids de audios que se añadirán a la lista. Estos audios tienen que estar creados previamente.
+ *  responses:
+ *      200:
+ *         description: Lista creada correctamente.
+ *         content:
+ *            application/json:
+ *               schema:
+ *                  $ref: '#/components/schemas/Lista'
+ *      400:
+ *         description: Error en la petición.
+ *      404:
+ *         description: No se ha encontrado el usuario.
+ *
+ *           
+ *
+ * 
+ * 
+ * 
+ */
 listaRouter.post("/", auth.authenticate, listaController.createLista);
 
 //[DELETE]/lista/<idLista>/ : Borra una lista.

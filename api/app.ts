@@ -33,7 +33,8 @@ const swaggerOptions = {
       }
     ],
   },
-  apis: ['./src/routes/*.js']
+  apis: ['./src/routes/*.js'],
+  explorer: true,
 };
 
 const swaggerDocs = swaggerjsdoc(swaggerOptions);
