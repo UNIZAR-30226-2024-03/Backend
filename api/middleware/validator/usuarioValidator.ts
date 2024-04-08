@@ -3,7 +3,7 @@ import { z } from "zod";
 export const usuarioModifySchema = z.object({
   body: z.object({
     contrasegna: z.string().optional(),
-    imgPerfil: z.string().url().optional(),
+    imgPerfil: z.string().uuid().optional(),
     idUltimoAudio: z.coerce.number().int().optional().transform(Number),
     segFinAudio: z.coerce.number().int().optional().transform(Number),
   }),

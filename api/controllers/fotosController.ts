@@ -34,15 +34,15 @@ export const fotoTransformSave = async (
     if (!fs.existsSync(uploadsDir)) {
       fs.mkdirSync(uploadsDir, { recursive: true });
     }
-
-    const newFilename = `${uuidv4()}.jpeg`;
+    const idFoto = uuidv4()
+    const newFilename = `${idFoto}.jpeg`;
     await sharp(req.file.buffer)
       .resize(500, 500)
       .toFormat("jpeg")
       .jpeg({ quality: 80 })
       .toFile(path.join(IMAGES_PATH, newFilename));
 
-    res.status(201).json({ filename: newFilename });
+    res.status(201).json({ id: newFilename });
   } catch (error) {
     return next(error);
   }
