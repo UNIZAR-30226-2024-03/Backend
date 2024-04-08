@@ -13,6 +13,8 @@ on:
 jobs:
   test_and_deploy:
     runs-on: ubuntu-latest
+    permissions:
+          contents: write
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -61,4 +63,5 @@ jobs:
           ssh -o StrictHostKeyChecking=no -t ${{ secrets.AZURE_USER }}@${{ secrets.AZURE_HOST }} "cd playbeat/Backend && git pull origin main && 
           docker stop playbeat_container && docker rm playbeat_container && docker rmi playbeat && docker build -t playbeat:latest . && 
           docker run -d --name playbeat_container -p 3000:3000 playbeat:latest"
+
 
