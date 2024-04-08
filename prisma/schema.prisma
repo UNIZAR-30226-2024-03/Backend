@@ -73,7 +73,7 @@ model Audio {
   path        String
   duracionSeg Int
   fechaLanz   DateTime @default(now())
-  esAlbum     String?
+  esAlbum     Boolean @default(false)
   imgAudio    String?
   esPrivada   Boolean @default(false)
 
