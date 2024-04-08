@@ -13,7 +13,9 @@ on:
 jobs:
   test_and_deploy:
     runs-on: ubuntu-latest
-    
+    permissions:
+          contents: read
+          pages: write  
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
