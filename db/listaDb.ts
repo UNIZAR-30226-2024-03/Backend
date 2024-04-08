@@ -179,7 +179,7 @@ export const getListasByPropietario = async (idUsuario: number): Promise<Lista[]
       where: { Propietarios: { some: { idUsuario } } }
     });
   } catch (error) {
-    // console.log(error);
+     console.log(error);
     throw error;
   }
 }
