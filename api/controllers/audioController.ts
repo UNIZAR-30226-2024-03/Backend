@@ -37,7 +37,7 @@ export async function getAudio(req: Request, res: Response) {
     }
 }
 
-
+//Se encarga de verificar que los usuarios existan en la base de datos
 export async function verifyUsersList(req: Request, res: Response, next: NextFunction) {
     try {
         const idsUsuarios = req.body.idsUsuarios.split(',').map(Number);
