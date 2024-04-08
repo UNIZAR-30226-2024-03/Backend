@@ -64,3 +64,4 @@ jobs:
           docker stop playbeat_container && docker rm playbeat_container && docker rmi playbeat && docker build -t playbeat:latest . && 
           docker run -d --name playbeat_container -p 3000:3000 playbeat:latest"
 
+
