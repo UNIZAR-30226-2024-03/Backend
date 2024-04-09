@@ -53,9 +53,9 @@ describe('Audio Endpoints', () => {
         audio1_id = audio1.idAudio;
         audio2_id = audio2.idAudio;
         audio3_id = audio3.idAudio;
-        await copyFile(path.join(projectRootPath,'api','tests','pruebasUnitarias.mp3'), path.join(projectRootPath,'audios','pruebaTest1.mp3'));
-        await copyFile(path.join(projectRootPath,'api','tests','pruebasUnitarias.mp3'), path.join(projectRootPath,'audios','pruebaTest2.mp3'));
-        await copyFile(path.join(projectRootPath,'api','tests','pruebasUnitarias.mp3'), path.join(projectRootPath,'audios','pruebaTest3.mp3'));
+        await copyFile(path.join(projectRootPath,'audios','pruebasUnitarias.mp3'), path.join(projectRootPath,'audios','pruebaTest1.mp3'));
+        await copyFile(path.join(projectRootPath,'audios','pruebasUnitarias.mp3'), path.join(projectRootPath,'audios','pruebaTest2.mp3'));
+        await copyFile(path.join(projectRootPath,'audios','pruebasUnitarias.mp3'), path.join(projectRootPath,'audios','pruebaTest3.mp3'));
 
     });
  
@@ -133,7 +133,7 @@ describe('Audio Endpoints', () => {
         const res = await supertest(app)
             .post('/audio/upload')
             .set('Authorization', `Bearer ${bearer1}`)
-            .attach('cancion', 'api/tests/pruebasUnitarias.mp3')
+            .attach('cancion', 'audios/pruebasUnitarias.mp3')
             .field('titulo', 'Test Audio correct')
             .field('duracionSeg', 120)
             .field('fechaLanz', new Date('2022-01-01').toISOString())
@@ -149,7 +149,7 @@ describe('Audio Endpoints', () => {
         const res = await supertest(app)
             .post('/audio/upload')
             .set('Authorization', `Bearer ${bearer1}`)
-            .attach('cancion', 'api/tests/pruebasUnitarias.mp3')
+            .attach('cancion', 'audios/pruebasUnitarias.mp3')
             .field('titulo', 'Test Audio new')
             .field('dur', 120)
             .field('fechaLanz', new Date('2022-01-01').toISOString())
