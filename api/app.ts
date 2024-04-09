@@ -25,15 +25,15 @@ const swaggerOptions = {
     info: {
       title: 'Playbeat API',
       description: 'Playbeat API Information',
-      version: '1.0.0', // Add the version property
+      version: '6.2.8', // Version of the API
     },
     servers: [
       {
-        url: 'http://localhost:3000'
+        url: 'https://playbeat.uksouth.cloudapp.azure.com/'
       }
     ],
   },
-  apis: ['./src/routes/*.js'],
+  apis: ['./routes/*.js'],
   explorer: true,
 };
 

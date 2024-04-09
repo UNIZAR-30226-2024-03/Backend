@@ -66,43 +66,49 @@ import * as listaController from "../controllers/listaController.js";
 // CUALQUIER PETICIÓN DE CONSULTA DE INFORMACIÓN DEVOLVERÁ EL RESULTADO SOBRE LA INFORMACIÓN
 // A LA QUE EL USUARIO TENGA ACCESO, ES DECIR, SI EL USUARIO NO ES PROPIETARIO O ADMIN SOLO 
 // PODRÁ ACCEDER A LA INFORMACIÓN PÚBLICA
-
+/**
+ * @swagger
+ * /users:
+ *   get:
+ *     summary: Retrieve a list of JSONPlaceholder users
+ *     description: Retrieve a list of users from JSONPlaceholder. Can be used to populate a list of fake users when prototyping or testing an API.
+*/
 
 //[POST]/lista/ : Crea una lista nueva.
 /**
  * @swagger
  * /lista/:
- *  post:
- *      summary: Crea una lista nueva.
- *      description: Crea una lista nueva.
- *  parameters:
+ *   post:
+ *     summary: Crea una lista nueva.
+ *     description: Crea una lista nueva.
+ *   parameters:
  *     - in: body
- *      nombre:
+ *       nombre:
  *         type: string
  *         required: true
- *      esAlbum:
- *          type: boolean
- *          required: true
- *      esPrivada:
- *          type: boolean
- *          required: true
- *      descripcion:
- *          type: string
- *          required: false
- *      imgLista:
- *          type: string
- *          required: false
- *          description: uri de la imagen de la lista
- *      tipoLista:
- *          type: TipoLista (enum) -> ["MIS_AUDIOS", "MIS_FAVORITOS", "MIS_PODCAST", "NORMAL"]
- *          required: true
- *      idUsuario:
- *          type: number
- *          required: true
- *          description: Id del usuario creador de de la lista, será el primer propietario.
- *      audios:
- *          type: array de number
- *          required: false
+ *       esAlbum:
+ *         type: boolean
+ *         required: true
+ *       esPrivada:
+ *         type: boolean
+ *         required: true
+ *       descripcion:
+ *         type: string
+ *         required: false
+ *       imgLista:
+ *         type: string
+ *         required: false
+ *         description: uri de la imagen de la lista
+ *       tipoLista:
+ *         type: TipoLista (enum) -> ["MIS_AUDIOS", "MIS_FAVORITOS", "MIS_PODCAST", "NORMAL"]
+ *         required: true
+ *       idUsuario:
+ *         type: number
+ *         required: true
+ *         description: Id del usuario creador de de la lista, será el primer propietario.
+ *       audios:
+ *         type: array de number
+ *         required: false
  *          description: Array de ids de audios que se añadirán a la lista. Estos audios tienen que estar creados previamente.
  *  responses:
  *      200:
