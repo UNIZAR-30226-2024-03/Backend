@@ -103,37 +103,37 @@ describe('Audio Endpoints', () => {
     });
 
     
-    // describe('GET /audio/play', () => {
-    //     it('should get an audio by id', async () => {
-    //         await supertest(app)
-    //             .get(`/audio/play/${audio1_id}`)
-    //             .set('Authorization', `Bearer ${bearer1}`)
-    //             .expect(200);
-    //     },15000);
+    describe('GET /audio/play', () => {
+        it('should get an audio by id', async () => {
+            await supertest(app)
+                .get(`/audio/play/${audio1_id}`)
+                .set('Authorization', `Bearer ${bearer1}`)
+                .expect(200);
+        },15000);
     
-    //     it('should get an audio by id', async () => {
-    //         await supertest(app)
-    //             .get(`/audio/play/${audio3_id}`)
-    //             .set('Authorization', `Bearer ${bearer1}`)
-    //             .expect(200);
-    //     },15000);
+        it('should get an audio by id', async () => {
+            await supertest(app)
+                .get(`/audio/play/${audio3_id}`)
+                .set('Authorization', `Bearer ${bearer1}`)
+                .expect(200);
+        },15000);
     
-    //     it('returns a 403, auth failed', async () => {
-    //         await supertest(app)
-    //             .get(`/audio/play/${audio3_id}`)
-    //             .set('Authorization', `Bearer ${bearer3}`)
-    //             .expect(403);
-    //     },15000);
+        it('returns a 403, auth failed', async () => {
+            await supertest(app)
+                .get(`/audio/play/${audio3_id}`)
+                .set('Authorization', `Bearer ${bearer3}`)
+                .expect(403);
+        },15000);
     
-    //     it('returns 404 not found', async () => {
-    //         await supertest(app)
-    //             .get('/audio/play/0')
-    //             .set('Authorization', `Bearer ${bearer1}`)
-    //             .expect(404);
-    //     },15000);
+        it('returns 404 not found', async () => {
+            await supertest(app)
+                .get('/audio/play/0')
+                .set('Authorization', `Bearer ${bearer1}`)
+                .expect(404);
+        },15000);
+    });
 
-
-    // });
+    
     // describe('GET /audio/upload', () => {
             
     //     it('should create a new audio', async () => {
