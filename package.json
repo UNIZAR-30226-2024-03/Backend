@@ -33,6 +33,7 @@
     "sharp": "^0.33.2",
     "swagger-jsdoc": "5.0.1",
     "swagger-ui-express": "^5.0.0",
+    "socket.io": "^4.7.5",
     "uuid": "^9.0.1",
     "ws": "^8.16.0",
     "zod": "^3.22.4"
