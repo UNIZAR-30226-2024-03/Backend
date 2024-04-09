@@ -42,7 +42,7 @@ export const fotoTransformSave = async (
       .jpeg({ quality: 80 })
       .toFile(path.join(IMAGES_PATH, newFilename));
 
-    res.status(201).json({ id: newFilename });
+    res.status(201).json({ id: idFoto });
   } catch (error) {
     return next(error);
   }

@@ -7,34 +7,25 @@ import * as sigueListaDb from '../../db/sigueListaDb.js';
 import * as audioDb from '../../db/audioDb.js';
 import * as usuarioDb from '../../db/usuarioDb.js';
 
-//[POST]/lista/ : Crea una lista nueva.
-//[DELETE]/lista/<idLista>/ : Borra una lista.
-//[PUT]/lista/<idLista>/ : Edita una lista.
-//[GET]/lista/<idLista>/ : Devuelve la información de una lista (audios que contiene incluidos)
-//[POST]/lista/follow/<idLista>/<idUsuario> : Añade la lista a las seguidas por el usuario.
-//[DELETE]/lista/follow/<idLista>/<idUsuario> : Elimina la lista de las seguidas por el usuario.
-//[POST]/lista/audio/<idLista>/<idAudio> : Añade un audio a la lista.
-//[DELETE]/lista/audio/<idLista>/<idAudio> : Elimina un audio de la lista.
-///[POST]lista/collaborator/<idLista>/<idUsuario>/: Añade un colaborador a la lista.
-///[DELETE]lista/collaborator/<idLista>/<idUsuario>/: Elimina un colaborador de la lista.
-///[GET]listas/seguidas/<idUsuario>/: Devuelve las listas seguidas por un usuario.
 
 /**
- * Función que devuelve true si el idUsuario del jwt es propietario de la lista o administrador
- * @param {ObjectId} idUsuario
- * @param {ObjectId} idLista
+ * Función que devuelve true si el idUsuario es propietario de la lista o administrador
+  * @param {number} idLista
+  * @param {number} idUsuario
+  * @param {boolean} esAdmin
  * @returns {Promise<boolean>}
  * @throws {Error}
  */
-const isOwnerOrAdmin = async (req: Request) => {
+const isOwnerOrAdmin = async (idLista : number, idUsuario : number, esAdmin : Boolean) => {
   // Comprobamos si el usuario del jwt es propietario de la lista o admin
-  if (!req.auth?.esAdmin) {
+  if (!esAdmin) {
     // No es admin, buscamos si es un propietario
-    const propietarios = await listasDb.getPropietariosFromLista(parseInt(req.params.idLista));
-    if (propietarios.length === 0) {
-      throw new Error("Lista no encontrada");
-    }
-    if (!propietarios.includes(parseInt(req.auth?.idUsuario))) {
+    const propietarios = await listasDb.getPropietariosFromLista(idLista);
+    // if (propietarios.length === 0) {
+    //   // console.log("Propietarios en isOwnerOrAdmin", propietarios)
+    //   throw new Error("Lista no encontrada");
+    // }
+    if (!propietarios.includes(idUsuario)) {
       return false;
     }
   }
@@ -73,13 +64,18 @@ export const createLista = catchAsync(async (req : Request, res : Response) => {
 
 
 /**
- * Elimina una lista
+ * Elimina una lista si el usuario es propietario o administrador
  * @param {ObjectId} id
  * @returns {Promise<Lista>}
  */
 export const deleteLista = catchAsync(async (req : Request, res : Response) => {
   try {
-    if (!await isOwnerOrAdmin(req)) {
+    if (!await listasDb.getListaById(parseInt(req.params.idLista))) {
+      res.status(httpStatus.NOT_FOUND).send("Lista no encontrada");
+      return;
+    }
+
+    if (!await isOwnerOrAdmin(parseInt(req.params.idLista), req.auth?.idUsuario, req.auth?.esAdmin)) {
       res.status(httpStatus.UNAUTHORIZED).send("No tienes permisos para borrar esta lista");
       return;
     } 
@@ -93,14 +89,19 @@ export const deleteLista = catchAsync(async (req : Request, res : Response) => {
 });
 
 /**
- * Edita una lista
+ * Edita una lista si el usuario es propietario o administrador
  * @param {ObjectId} id
  * @param {Object} updateBody Es un objeto de la forma: { nombre, descripcion, esPrivada, img, esAlbum, tipoLista, Audios, Propietarios }
  * @returns {Promise<Lista>}
  */
 export const updateLista = catchAsync(async (req : Request, res : Response) => {
   try {
-    if (!await isOwnerOrAdmin(req)) {
+    if (!await listasDb.getListaById(parseInt(req.params.idLista))) {
+      res.status(httpStatus.NOT_FOUND).send("Lista no encontrada");
+      return;
+    }
+
+    if (!await isOwnerOrAdmin(parseInt(req.params.idLista), req.auth?.idUsuario, req.auth?.esAdmin)) {
       res.status(httpStatus.UNAUTHORIZED).send("No tienes permisos para editar esta lista");
       return;
     }
@@ -133,7 +134,7 @@ export const updateLista = catchAsync(async (req : Request, res : Response) => {
 
 
 /**
- * Devuelve la lista con el id dado
+ * Devuelve la lista con el id dado si es pública o si el usuario es propietario o administrador
  * @param {ObjectId} id
  * @returns {Promise<Lista | null>}
  */
@@ -145,7 +146,7 @@ export const getListaById = catchAsync(async (req : Request, res : Response) => 
       return;
     }
 
-    if (lista.esPrivada && !await isOwnerOrAdmin(req)) {
+    if (lista.esPrivada && !await isOwnerOrAdmin(parseInt(req.params.idLista), req.auth?.idUsuario, req.auth?.esAdmin)) {
       res.status(httpStatus.UNAUTHORIZED).send("No tienes permisos para interactuar con esta lista");
       return;
     }
@@ -158,7 +159,8 @@ export const getListaById = catchAsync(async (req : Request, res : Response) => 
 
 
 /**
- * Devuelve los audios de una lista
+ * Devuelve los audios de una lista si es pública o si el usuario es propietario o administrador
+ * Devolverá solo los audios públicos o los privados si el usuario es propietario o administrador
  * @param {ObjectId} idLista
  * @returns {Promise<Audio[]>}
  */
@@ -170,12 +172,14 @@ export const getAudiosFromLista = catchAsync(async (req : Request, res : Respons
       return;
     }
 
-    if (lista.esPrivada && !await isOwnerOrAdmin(req)) {
+    if (lista.esPrivada && !await isOwnerOrAdmin(parseInt(req.params.idLista), req.auth?.idUsuario, req.auth?.esAdmin)) {
       res.status(httpStatus.UNAUTHORIZED).send("No tienes permisos para interactuar con esta lista");
       return;
     }
     
     const audios = await listasDb.getAudiosFromLista(parseInt(req.params.idLista));
+    const isOwner = await isOwnerOrAdmin(parseInt(req.params.idLista), req.auth?.idUsuario, req.auth?.esAdmin);
+    audios.filter((audio) => !audio.esPrivada || isOwner);
     res.send(audios);
   } catch (error) {
     res.status(httpStatus.BAD_REQUEST).send(error);
@@ -184,7 +188,7 @@ export const getAudiosFromLista = catchAsync(async (req : Request, res : Respons
 
 
 /**
- * Devuelve los propietarios de una lista
+ * Devuelve los propietarios de una lista si es pública o si el usuario es propietario o administrador
  * @param {ObjectId} idLista
  * @returns {Promise<Number[]>}
  */
@@ -196,7 +200,7 @@ export const getPropietariosFromLista = catchAsync(async (req : Request, res : R
       return;
     }
 
-    if (lista.esPrivada && !await isOwnerOrAdmin(req)) {
+    if (lista.esPrivada && !await isOwnerOrAdmin(parseInt(req.params.idLista), req.auth?.idUsuario, req.auth?.esAdmin)) {
       res.status(httpStatus.UNAUTHORIZED).send("No tienes permisos para interactuar con esta lista");
       return;
     }
@@ -210,15 +214,20 @@ export const getPropietariosFromLista = catchAsync(async (req : Request, res : R
 
 
 /**
- * Devuelve los seguidores de una lista
+ * Devuelve los seguidores de una lista si es pública o si el usuario es propietario o administrador
  * @param {ObjectId} idLista
  * @returns {Promise<Number[]>}
  */
 export const getSeguidoresFromLista = catchAsync(async (req : Request, res : Response) => {
   try {
     const lista = await listasDb.getListaById(parseInt(req.params.idLista));
-    if(!await listasDb.getListaById(parseInt(req.params.idLista))) {
+    if(!lista) {
       res.status(httpStatus.NOT_FOUND).send("Lista no encontrada");
+      return;
+    }
+    
+    if (lista.esPrivada && !await isOwnerOrAdmin(parseInt(req.params.idLista), req.auth?.idUsuario, req.auth?.esAdmin)) {
+      res.status(httpStatus.UNAUTHORIZED).send("No tienes permisos para interactuar con esta lista");
       return;
     }
 
@@ -237,14 +246,28 @@ export const getSeguidoresFromLista = catchAsync(async (req : Request, res : Res
  */
 export const getListaByIdWithExtras = catchAsync(async (req : Request, res : Response) => {
   try {
-    // const audios = await listasDb.getAudiosFromLista(parseInt(req.params.idLista));
-    // const propietarios = await listasDb.getPropietariosFromLista(parseInt(req.params.idLista));
-    // const seguidores = await sigueListaDb.sigueListaGetListByIdListaPrisma(parseInt(req.params.idLista));
+    // const idsAudios = await listasDb.getAudiosFromLista(parseInt(req.params.idLista));
+    // const idsPropietarios = await listasDb.getPropietariosFromLista(parseInt(req.params.idLista));
+    // const idsSeguidores = await sigueListaDb.sigueListaGetListByIdListaPrisma(parseInt(req.params.idLista));
     const lista = await listasDb.getListaByIdWithExtras(parseInt(req.params.idLista));
-    if (!lista) res.status(httpStatus.NOT_FOUND).send("Lista no encontrada");
-    else res.send(lista);
+    if (!lista) {
+      res.status(httpStatus.NOT_FOUND).send("Lista no encontrada");
+      return;
+    }
+    
+    if (lista.esPrivada && !await isOwnerOrAdmin(parseInt(req.params.idLista), req.auth?.idUsuario, req.auth?.esAdmin)) {
+      res.status(httpStatus.UNAUTHORIZED).send("No tienes permisos para interactuar con esta lista");
+      return;
+    }
+
+    // console.log("lista", lista);
+    const isOwner = await isOwnerOrAdmin(parseInt(req.params.idLista), req.auth?.idUsuario, req.auth?.esAdmin);
+    lista.Audios.filter((audio: { esPrivada: any; }) => !audio.esPrivada || isOwner);
+    
+    res.send(lista);
         
   } catch (error) {
+    // console.log(error);
     res.status(httpStatus.BAD_REQUEST).send(error);
   }
 });
@@ -257,8 +280,14 @@ export const getListaByIdWithExtras = catchAsync(async (req : Request, res : Res
  */
 export const followLista = catchAsync(async (req : Request, res : Response) => {
   try {
-    if(!await listasDb.getListaById(parseInt(req.params.idLista))) {
+    const lista = await listasDb.getListaById(parseInt(req.params.idLista));
+    if(!lista) {
       res.status(httpStatus.NOT_FOUND).send("Lista no encontrada");
+      return;
+    }
+
+    if (lista.esPrivada && !await isOwnerOrAdmin(parseInt(req.params.idLista), req.auth?.idUsuario, req.auth?.esAdmin)) {
+      res.status(httpStatus.UNAUTHORIZED).send("No tienes permisos para interactuar con esta lista");
       return;
     }
 
@@ -278,11 +307,18 @@ export const followLista = catchAsync(async (req : Request, res : Response) => {
  */
 export const unfollowLista = catchAsync(async (req : Request, res : Response) => {
   try {
-    if(!await listasDb.getListaById(parseInt(req.params.idLista))) {
+    const lista = await listasDb.getListaById(parseInt(req.params.idLista));
+    if(!lista) {
       res.status(httpStatus.NOT_FOUND).send("Lista no encontrada");
       return;
     }
 
+    // Tienes que poder dejar de seguir una lista aunque no seas propietario o admin así que no se comprueba
+    // if (lista.esPrivada && !await isOwnerOrAdmin(parseInt(req.params.idLista), req.auth?.idUsuario, req.auth?.esAdmin)) {
+    //   res.status(httpStatus.UNAUTHORIZED).send("No tienes permisos para interactuar con esta lista");
+    //   return;
+    // }
+    
     await sigueListaDb.sigueListaDeletePrisma(parseInt(req.params.idLista), parseInt(req.auth?.idUsuario));
     res.status(httpStatus.NO_CONTENT).send();
   } catch (error) {
@@ -308,6 +344,8 @@ export const getFollowedLists = catchAsync(async (req : Request, res : Response)
       return await listasDb.getListaById(sigueLista.idLista);
     }));
     
+    // Solo se devuelven las listas públicas y las privadas si el usuario es propietario o admin
+    listas.filter((lista) => !lista?.esPrivada || isOwnerOrAdmin(lista.idLista, parseInt(req.auth?.idUsuario), req.auth?.esAdmin));
     res.send(listas);
   } catch (error) {
     res.status(httpStatus.BAD_REQUEST).send(error);
@@ -334,10 +372,11 @@ export const addAudioToLista = catchAsync(async (req : Request, res : Response) 
       return;
     }
 
-    if (!await isOwnerOrAdmin(req)) {
+    if (!await isOwnerOrAdmin(parseInt(req.params.idLista), req.auth?.idUsuario, req.auth?.esAdmin)) {
       res.status(httpStatus.UNAUTHORIZED).send("No tienes permisos para añadir un audio a esta lista");
       return;
     }
+
     await listasDb.addAudioToLista(parseInt(req.params.idLista), parseInt(req.params.idAudio));
     // Como se ha añadido un audio a la lista, se actualiza la fecha de última modificación
     // No debería fallar porque solo se actualiza la fecha, si pudiese fallar
@@ -345,7 +384,7 @@ export const addAudioToLista = catchAsync(async (req : Request, res : Response) 
     await listasDb.updateListaById(parseInt(req.params.idLista), { fechaUltimaMod: new Date() });
     res.status(httpStatus.CREATED).send();
   } catch (error) {
-    console.log(error);
+    // console.log(error);
     res.status(httpStatus.BAD_REQUEST).send(error);
   }
 });
@@ -369,7 +408,7 @@ export const deleteAudioFromLista = catchAsync(async (req : Request, res : Respo
       return;
     }
 
-    if (!await isOwnerOrAdmin(req)) {
+    if (!await isOwnerOrAdmin(parseInt(req.params.idLista), req.auth?.idUsuario, req.auth?.esAdmin)) {
       res.status(httpStatus.UNAUTHORIZED).send("No tienes permisos para añadir un audio a esta lista");
       return;
     }
@@ -402,7 +441,7 @@ export const addCollaboratorToLista = catchAsync(async (req : Request, res : Res
       return;
     }
 
-    if (!await isOwnerOrAdmin(req)) {
+    if (!await isOwnerOrAdmin(parseInt(req.params.idLista), req.auth?.idUsuario, req.auth?.esAdmin)) {
       res.status(httpStatus.UNAUTHORIZED).send("No tienes permisos para añadir un colaborador a esta lista");
       return;
     }
@@ -433,10 +472,11 @@ export const deleteCollaboratorFromLista = catchAsync(async (req : Request, res 
       return;
     }
 
-    if (!await isOwnerOrAdmin(req)) {
+    if (!await isOwnerOrAdmin(parseInt(req.params.idLista), req.auth?.idUsuario, req.auth?.esAdmin)) {
       res.status(httpStatus.UNAUTHORIZED).send("No tienes permisos para eliminar un colaborador de esta lista");
       return;
     }
+
     const lista = await listasDb.deletePropietarioFromLista(parseInt(req.params.idLista), parseInt(req.params.idUsuario));
     res.send(lista);
   } catch (error) {

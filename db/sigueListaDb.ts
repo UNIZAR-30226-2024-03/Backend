@@ -89,7 +89,7 @@ export async function sigueListaDeletePrisma(
             where: { idUsuario_idLista: { idUsuario, idLista } },
         });
     } catch (error) {
-        console.log(error);
+        // console.log(error);
         throw error;
     }
 }
@@ -115,7 +115,7 @@ export async function sigueListaGetListPrisma(
 
 
 /**
- * Función que devuelve los seguidores de una lista
+ * Función que devuelve {idUsuario, idLista, ultimaEscucha} de las listas seguidas por un usuario
  * @param {number} idLista
  * @returns {Promise<SigueLista[]>}
  */
