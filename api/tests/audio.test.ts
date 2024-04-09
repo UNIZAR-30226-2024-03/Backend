@@ -134,96 +134,91 @@ describe('Audio Endpoints', () => {
     });
 
 
-    describe('post /audio/upload', () => {
+    // describe('post /audio/upload', () => {
             
-        it('should create a new audio', async () => {
-            const formData = {
-                titulo: 'Test Audio correct',
-                duracionSeg: 120,
-                fechaLanz: new Date('2022-01-01').toISOString(),
-                esAlbum: false,
-                esPrivada: false,
-                idsUsuarios: `${user1_id},${user2_id}`,
-                img: 'prueba'
-            };
-        
-            const res = await supertest(app)
-                .post('/audio/upload')
-                .set('Authorization', `Bearer ${bearer1}`)
-                .field(formData)
-                .attach('cancion', 'audios/pruebasUnitarias.mp3')
-                .expect(200);
-        
-            audio_id_created = res.body.idaudio;
-        });
-
-        // it('returns a 400, bad parameters', async () => {
-        //     await supertest(app)
-        //         .post('/audio/upload')
-        //         .set('Authorization', `Bearer ${bearer1}`)
-        //         .attach('cancion', 'audios/pruebasUnitarias.mp3')
-        //         .field('titulo', 'Test Audio new')
-        //         .field('dur', 120)
-        //         .field('fechaLanz', new Date('2022-01-01').toISOString())
-        //         .field('esAlbum',false)
-        //         .field('b', false)
-        //         .field('idsUsuarios', `${user1_id},${user2_id}`)
-        //         .field('img', 'prueba')
-        //         .expect(400);
-        // });
-    });
-
-    // describe('GET /audio/delete', () => {
-            
-    //     it('returns a 403, auth failed', async () => {
-    //         await supertest(app)
-    //             .get(`/audio/delete/${audio_id_created}`)
-    //             .set('Authorization', `Bearer ${bearer3}`)
-    //             .expect(403);
-    //     },5000);
-        
-    //     it('should delete an audio by id', async () => {
-    //         await supertest(app)
-    //             .get(`/audio/delete/${audio_id_created}`)
+    //     it('should create a new audio', async () => {
+    //         const res = await supertest(app)
+    //             .post('/audio/upload')
     //             .set('Authorization', `Bearer ${bearer1}`)
+    //             .attach('cancion', 'audios/pruebasUnitarias.mp3')
+    //             .field('titulo', 'Test Audio correct')
+    //             .field('duracionSeg', 120)
+    //             .field('fechaLanz', new Date('2022-01-01').toISOString())
+    //             .field('esAlbum', false)
+    //             .field('esPrivada', false)
+    //             .field('idsUsuarios', `${user1_id},${user2_id}`)
+    //             .field('img', 'prueba')
     //             .expect(200);
-    //     },5000);
+    //         audio_id_created = res.body.idaudio;
+    //     });
 
-    //     it('returns 404 not found', async () => {
+    //     it('returns a 400, bad parameters', async () => {
     //         await supertest(app)
-    //             .get('/audio/delete/0')
+    //             .post('/audio/upload')
     //             .set('Authorization', `Bearer ${bearer1}`)
-    //             .expect(404);
-    //     },5000);
-
-
+    //             .attach('cancion', 'audios/pruebasUnitarias.mp3')
+    //             .field('titulo', 'Test Audio new')
+    //             .field('dur', 120)
+    //             .field('fechaLanz', new Date('2022-01-01').toISOString())
+    //             .field('esAlbum',false)
+    //             .field('b', false)
+    //             .field('idsUsuarios', `${user1_id},${user2_id}`)
+    //             .field('img', 'prueba')
+    //             .expect(400);
+    //     });
     // });
+
+    describe('GET /audio/delete', () => {
+            
+        it('returns a 403, auth failed', async () => {
+            await supertest(app)
+                .get(`/audio/delete/${audio1_id}`)
+                .set('Authorization', `Bearer ${bearer3}`)
+                .expect(403);
+        },5000);
+        
+        it('should delete an audio by id', async () => {
+            await supertest(app)
+                .get(`/audio/delete/${audio1_id}`)
+                .set('Authorization', `Bearer ${bearer1}`)
+                .expect(200);
+        },5000);
+
+        it('returns 404 not found', async () => {
+            await supertest(app)
+                .get('/audio/delete/0')
+                .set('Authorization', `Bearer ${bearer1}`)
+                .expect(404);
+        },5000);
+
+
+    });
   
 
-    // describe('GET /audio/update', () => {
+    describe('GET /audio/update', () => {
 
 
-    //     it('should update an audio by id', async () => {
-    //         await supertest(app)
-    //             .put(`/audio/update/${audio2_id}`)
-    //             .set('Authorization', `Bearer ${bearer1}`)
-    //             .send({
-    //                 titulo: 'Updated Audio'
-    //             })
-    //             .expect(200);
-    //     },5000);
+        it('should update an audio by id', async () => {
+            await supertest(app)
+                .put(`/audio/update/${audio2_id}`)
+                .set('Authorization', `Bearer ${bearer1}`)
+                .send({
+                    titulo: 'Updated Audio'
+                })
+                .expect(200);
+        },5000);
     
-    //     it('returns 404 not found', async () => {
-    //         await supertest(app)
-    //             .put(`/audio/update/0`)
-    //             .set('Authorization', `Bearer ${bearer1}`)
-    //             .send({
-    //                 titulo: 'Updated Audio'
-    //             })
-    //             .expect(404);
-    //     },5000);
+        it('returns 404 not found', async () => {
+            await supertest(app)
+                .put(`/audio/update/0`)
+                .set('Authorization', `Bearer ${bearer1}`)
+                .send({
+                    titulo: 'Updated Audio'
+                })
+                .expect(404);
+        },5000);
 
-    // });
+    });
 
 
 
