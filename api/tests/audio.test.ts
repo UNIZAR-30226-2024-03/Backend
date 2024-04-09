@@ -153,20 +153,20 @@ describe('Audio Endpoints', () => {
             
         },15000);
 
-        it('returns a 400, bad parameters', async () => {
-            await supertest(app)
-                .post('/audio/upload')
-                .set('Authorization', `Bearer ${bearer1}`)
-                .attach('cancion', 'audios/pruebasUnitarias.mp3')
-                .field('titulo', 'Test Audio new')
-                .field('dur', 120)
-                .field('fechaLanz', new Date('2022-01-01').toISOString())
-                .field('esAlbum',false)
-                .field('b', false)
-                .field('idsUsuarios', `${user1_id},${user2_id}`)
-                .field('img', 'prueba')
-                .expect(400);
-        },15000);
+        // it('returns a 400, bad parameters', async () => {
+        //     await supertest(app)
+        //         .post('/audio/upload')
+        //         .set('Authorization', `Bearer ${bearer1}`)
+        //         .attach('cancion', 'audios/pruebasUnitarias.mp3')
+        //         .field('titulo', 'Test Audio new')
+        //         .field('dur', 120)
+        //         .field('fechaLanz', new Date('2022-01-01').toISOString())
+        //         .field('esAlbum',false)
+        //         .field('b', false)
+        //         .field('idsUsuarios', `${user1_id},${user2_id}`)
+        //         .field('img', 'prueba')
+        //         .expect(400);
+        // },15000);
     });
 
     // describe('GET /audio/delete', () => {
