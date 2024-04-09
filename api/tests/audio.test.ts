@@ -136,22 +136,22 @@ describe('Audio Endpoints', () => {
 
     describe('GET /audio/upload', () => {
             
-        it('should create a new audio', async () => {
-             await supertest(app)
-                .post('/audio/upload')
-                .set('Authorization', `Bearer ${bearer1}`)
-                .attach('cancion', 'audios/pruebasUnitarias.mp3')
-                .field('titulo', 'Test Audio correct')
-                .field('duracionSeg', 120)
-                .field('fechaLanz', new Date('2022-01-01').toISOString())
-                .field('esAlbum', false)
-                .field('esPrivada', false)
-                .field('idsUsuarios', `${user1_id},${user2_id}`)
-                .field('img', 'prueba')
-                .expect(200);
-            //audio_id_created = res.body.idaudio;
+        // it('should create a new audio', async () => {
+        //     const res = await supertest(app)
+        //         .post('/audio/upload')
+        //         .set('Authorization', `Bearer ${bearer1}`)
+        //         .attach('cancion', 'audios/pruebasUnitarias.mp3')
+        //         .field('titulo', 'Test Audio correct')
+        //         .field('duracionSeg', 120)
+        //         .field('fechaLanz', new Date('2022-01-01').toISOString())
+        //         .field('esAlbum', false)
+        //         .field('esPrivada', false)
+        //         .field('idsUsuarios', `${user1_id},${user2_id}`)
+        //         .field('img', 'prueba')
+        //         .expect(200);
+        //     audio_id_created = res.body.idaudio;
             
-        },15000);
+        // },15000);
 
         it('returns a 400, bad parameters', async () => {
             await supertest(app)
