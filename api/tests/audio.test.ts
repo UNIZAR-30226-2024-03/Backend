@@ -62,7 +62,7 @@ describe('Audio Endpoints', () => {
     });
  
     afterAll(async () => {
-        await audioDatabase.deleteAudioById(audio1_id);
+        //await audioDatabase.deleteAudioById(audio1_id);
         await audioDatabase.deleteAudioById(audio2_id);
         await audioDatabase.deleteAudioById(audio3_id);
         await usuarioDeleteEmailPrisma("audio1@testingaudio.com");
