@@ -149,7 +149,7 @@ describe('Audio Endpoints', () => {
                 .field('idsUsuarios', `${user1_id},${user2_id}`)
                 .field('img', 'prueba')
                 .expect(200);
-            audio_id_created = res.body.idaudio;
+            //audio_id_created = res.body.idaudio;
             
         },15000);
 
