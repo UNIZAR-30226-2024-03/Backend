@@ -68,14 +68,18 @@ describe('Audio Endpoints', () => {
         await usuarioDeleteEmailPrisma("audio3@testingaudio.com");
         
     });
+    describe('GET /audio', () => {
 
+        it('should get an audio by id', async () => {
+            await supertest(app)
+                .get(`/audio/${audio1_id}`)
+                .set('Authorization', `Bearer ${bearer1}`)
+                .expect(200);
+        },15000);
 
-    it('should get an audio by id', async () => {
-        await supertest(app)
-            .get(`/audio/${audio1_id}`)
-            .set('Authorization', `Bearer ${bearer1}`)
-            .expect(200);
-    },15000);
+    });
+
+    
 
     // it('should get an audio by id', async () => {
     //     await supertest(app)
