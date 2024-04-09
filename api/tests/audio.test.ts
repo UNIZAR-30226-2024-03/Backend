@@ -143,7 +143,7 @@ describe('Audio Endpoints', () => {
                 fechaLanz: new Date('2022-01-01').toISOString(),
                 esAlbum: false,
                 esPrivada: false,
-                idsUsuarios: [user1_id, user2_id],
+                idsUsuarios: `${user1_id},${user2_id}`,
                 img: 'prueba'
             };
         
