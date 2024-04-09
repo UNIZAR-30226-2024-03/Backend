@@ -137,7 +137,7 @@ describe('Audio Endpoints', () => {
     describe('GET /audio/upload', () => {
             
         it('should create a new audio', async () => {
-            const res = await supertest(app)
+             await supertest(app)
                 .post('/audio/upload')
                 .set('Authorization', `Bearer ${bearer1}`)
                 .attach('cancion', 'audios/pruebasUnitarias.mp3')
@@ -149,7 +149,7 @@ describe('Audio Endpoints', () => {
                 .field('idsUsuarios', `${user1_id},${user2_id}`)
                 .field('img', 'prueba')
                 .expect(200);
-            audio_id_created = res.body.idaudio;
+            //audio_id_created = res.body.idaudio;
             
         },15000);
 
