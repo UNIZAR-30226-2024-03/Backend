@@ -15,6 +15,7 @@ router.post(
 );
 router.get(
   "/:id",
+  auth.authenticate,
   validate(fotoGetSchema),
   fotosCon.fotoGet,
 );
