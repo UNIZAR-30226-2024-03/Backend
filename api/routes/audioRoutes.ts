@@ -45,7 +45,7 @@ router.get('/play/:idaudio', auth.authenticate, audioController.playAudio);
 
 //PRE: Se recibe un audio en formato .mp3 o .wav, con un título, duración y fecha de lanzamiento en formato ISO-8601
 //POST: Se sube el archivo a la base de datos
-router.post('/upload', upload.single('cancion'),auth.authenticate, audioController.verifyUsersList, audioController.createAudio);
+router.post('/upload',auth.authenticate,upload.single('cancion'), audioController.verifyUsersList, audioController.createAudio);
 
 
 //PRE: Se recibe un id de audio correcto en la URL
