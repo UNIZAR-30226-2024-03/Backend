@@ -53,7 +53,6 @@ describe("Usuario routes", () => {
         .query({
           idUsuario: "invalid_number",
           rrss: "invalid_boolean",
-          listas: "invalid_boolean",
         })
         .expect(400);
     });
