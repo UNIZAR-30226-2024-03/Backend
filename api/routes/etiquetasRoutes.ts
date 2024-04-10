@@ -26,7 +26,7 @@ router.get(
 );
 
 // Dado un vector de id de audios me de sus etiquetas
-router.get(
+router.post(
   "/audios/", 
   auth.authenticate,
   etiquetas.tagsOfAudios,
