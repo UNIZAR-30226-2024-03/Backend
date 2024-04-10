@@ -81,13 +81,13 @@ describe("Etiquetas routes", () => {
         .expect(200);
     });
 
-    it("returns 200 ok bearer", async () => {
+    it("returns 403 bad bearer", async () => {
       await supertest(app)
         .get(ETIQUETAS_CANCION_ROUTE)
         .expect(403);
     });
 
-    it("returns 200 ok bearer", async () => {
+    it("returns 404 bad url", async () => {
       await supertest(app)
         .get(ETIQUETAS_CANCION_ROUTE_BAD)
         .set("Authorization", `Bearer ${bearer}`)
@@ -104,13 +104,13 @@ describe("Etiquetas routes", () => {
         .expect(200);
     });
 
-    it("returns 200 ok bearer", async () => {
+    it("returns 403 bad bearer", async () => {
       await supertest(app)
         .get(ETIQUETAS_PODCAST_ROUTE)
         .expect(403);
     });
 
-    it("returns 200 ok bearer", async () => {
+    it("returns 404 bad url", async () => {
       await supertest(app)
         .get(ETIQUETAS_PODCAST_ROUTE_BAD)
         .set("Authorization", `Bearer ${bearer}`)
@@ -118,7 +118,6 @@ describe("Etiquetas routes", () => {
     });
   });
 
-  
-  
+
 });
 
