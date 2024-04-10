@@ -71,15 +71,24 @@
  *              titulo:
  *                  type: string
  *                  description: Título del audio
+ *              path:
+ *                  type: string
+ *                  description: uri del audio
  *              duracion:
  *                  type: number
  *                  description: Duración del audio en segundos
- *              fechaSubida:
+ *              fechaLanz:
  *                  type: string
  *                  description: Fecha de subida del audio
- *              idUsuario:
- *                  type: number
- *                  description: Identificador del usuario que subió el audio
+ *              esAlbum:
+ *                  type: boolean
+ *                  description: Indica si el audio es un album
+ *              imgAudio:
+ *                  type: string
+ *                  description: uri de la imagen del audio
+ *              esPrivada:
+ *                  type: boolean
+ *                  description: Indica si el audio es privado
  *          example:
  *              idAudio: 1
  *              titulo: "Audio de ejemplo"
@@ -232,7 +241,7 @@ listaRouter.delete("/:idLista", auth.authenticate, listaController.deleteLista);
  *   put:
  *     tags: [Listas]
  *     summary: Edita una lista.
- *     description: Edita una lista si el usuario es propietario o administrador.
+ *     description: Edita una lista si el usuario es propietario o administrador. Los audios que se especifiquen en la petición serán añadidos a la lista junto con los que ya tuviera.
  *     requestBody:
  *       content:
  *          application/json:
