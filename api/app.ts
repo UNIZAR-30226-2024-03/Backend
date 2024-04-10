@@ -25,7 +25,7 @@ const swaggerOptions = {
     info: {
       title: 'Playbeat API',
       description: 'Playbeat API Information',
-      version: '6.2.8', // Version of the API
+      version: '1.0.0', // Version of the API
     },
     servers: [
       {
@@ -33,7 +33,7 @@ const swaggerOptions = {
       }
     ],
   },
-  apis: ['./routes/*.js'],
+  apis: ['./api/routes/*.ts'],
   explorer: true,
 };
 
