@@ -216,15 +216,15 @@ describe('Audio Endpoints', () => {
                 .expect(200);
         },5000);
     
-        // it('returns 404 not found', async () => {
-        //     await supertest(app)
-        //         .put(`/audio/update/0`)
-        //         .set('Authorization', `Bearer ${bearer1}`)
-        //         .send({
-        //             titulo: 'Updated Audio'
-        //         })
-        //         .expect(404);
-        // },5000);
+        it('returns 404 not found', async () => {
+            await supertest(app)
+                .put(`/audio/update/0`)
+                .set('Authorization', `Bearer ${bearer1}`)
+                .send({
+                    titulo: 'Updated Audio'
+                })
+                .expect(404);
+        },5000);
 
     });
 });
