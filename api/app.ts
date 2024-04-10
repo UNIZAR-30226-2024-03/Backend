@@ -1,4 +1,6 @@
 import express from "express";
+import swaggerjsdoc from "swagger-jsdoc";
+import swaggerUi from "swagger-ui-express";
 import dotenv from "dotenv";
 import cors from "cors"; //middleware para permitir solicitudes desde cualquier origen
 
@@ -17,6 +19,26 @@ import authErrorHandler from "./utils/errorHandling/authErrorHandler.js";
 
 const app = express();
 
+const swaggerOptions = {
+  swaggerDefinition: {
+    openapi: '3.0.0',
+    info: {
+      title: 'Playbeat API',
+      description: 'Playbeat API Information',
+      version: '1.0.0', // Version of the API
+    },
+    servers: [
+      {
+        url: 'https://playbeat.uksouth.cloudapp.azure.com/'
+      }
+    ],
+  },
+  apis: ['./api/routes/*.ts'],
+  explorer: true,
+};
+
+const swaggerDocs = swaggerjsdoc(swaggerOptions);
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 dotenv.config();
 
 // Allows parsing of json in the body of the request.
