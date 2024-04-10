@@ -12,19 +12,18 @@ export const usuarioModifySchema = z.object({
 export const usuarioGetSchema = z.object({
   query: z.object({
     idUsuario: z.coerce.number().int().optional().transform(Number),
-    rrss: z.coerce.boolean().optional().transform(Boolean),
     listas: z.coerce.boolean().optional().transform(Boolean),
   }),
 });
 
 export const usuarioFollowSchema = z.object({
-  query: z.object({
-    seguido: z.coerce.number().int().transform(Number),
+  params: z.object({
+    seguido: z.coerce.number().int(),
   }),
 });
 
 export const usuarioUnfollowSchema = z.object({
-  query: z.object({
-    seguido: z.coerce.number().int().transform(Number),
+  params: z.object({
+    seguido: z.coerce.number().int(),
   }),
 });
