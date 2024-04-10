@@ -82,14 +82,3 @@ export async function addPropietariosToAudio(id: number, idUsuarios: number[]) {
         },
     });
 }
-
-//PRE: Se recibe un id de audio correcto
-//POST: Se devuelve el path del audio con el id correspondiente
-export async function getPathById(id: number) {
-    const audio = await prisma.audio.findUnique({
-        where: {
-            idAudio: id,
-        },
-    });
-    return audio?.path;
-}
