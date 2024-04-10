@@ -1,4 +1,5 @@
 import { NextFunction, Response } from "express";
+import { Request } from "express-jwt";
 
 import * as usuarioTypesJs from "../utils/types/usuarioTypes.js";
 import { hashPassword } from "../utils/hashContrasegna.js";
@@ -11,6 +12,8 @@ export async function usuarioModify(
 ) {
   try {
     const idUsuario = Number(req.auth?.idUsuario);
+    if (!(await usuarioDbJs.usuarioExistPrisma(idUsuario)))
+      return res.sendStatus(404);
 
     const { contrasegna, imgPerfil, idUltimoAudio, segFinAudio } = req.body;
     const hashed = contrasegna === null ? hashPassword(contrasegna) : null;
@@ -42,12 +45,10 @@ export async function usuarioGet(
 ) {
   try {
     const idUsuario = req.query.idUsuario || Number(req.auth?.idUsuario);
-    const rrss = req.query.rrss;
-    const listas = req.query.listas;
+    const listas = Boolean(req.query.listas);
 
     const currentUsuario = await usuarioDbJs.usuarioGetPrisma(
       idUsuario,
-      rrss,
       listas,
     );
     if (!currentUsuario) return res.sendStatus(404);
@@ -60,13 +61,13 @@ export async function usuarioGet(
 }
 
 export async function usuarioFollow(
-  req: usuarioTypesJs.FollowRequest,
+  req: Request,
   res: Response,
   next: NextFunction,
 ) {
   try {
     const idUsuario = Number(req.auth?.idUsuario);
-    const idSeguido = req.query.seguido;
+    const idSeguido = Number(req.params.seguido);
     
     if (!(await usuarioDbJs.usuarioExistPrisma(idSeguido)))
       return res.sendStatus(404);
@@ -80,13 +81,13 @@ export async function usuarioFollow(
 }
 
 export async function usuarioUnfollow(
-  req: usuarioTypesJs.UnfollowRequest,
+  req: Request,
   res: Response,
   next: NextFunction,
 ) {
   try {
     const idUsuario = Number(req.auth?.idUsuario);
-    const idSeguido = req.query.seguido;
+    const idSeguido = Number(req.params.seguido);
 
     if (!(await usuarioDbJs.usuarioExistPrisma(idSeguido)))
       return res.sendStatus(404);
