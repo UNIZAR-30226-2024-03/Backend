@@ -117,6 +117,13 @@ describe('Audio Endpoints', () => {
                 .set('Authorization', `Bearer ${bearer1}`)
                 .expect(200);
         },5000);
+
+        it('should get an audio by id', async () => {
+            await supertest(app)
+                .get(`/audio/play/${audio3_id}`)
+                .set('Authorization', `Bearer ${bearer1}`)
+                .expect(200);
+        },5000);
     
         it('returns a 403, auth failed', async () => {
             await supertest(app)
@@ -219,10 +226,4 @@ describe('Audio Endpoints', () => {
         },5000);
 
     });
-
-
-
-
-
 });
-
