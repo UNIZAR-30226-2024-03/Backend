@@ -47,12 +47,29 @@ describe("Etiquetas routes", () => {
   const ETIQUETAS_ROUTE = "/etiquetas/"
   const ETIQUETAS_CANCION_ROUTE = "/etiquetas/cancion/"
   const ETIQUETAS_PODCAST_ROUTE = "/etiquetas/podcast/"
+
+  const ETIQUETAS_ROUTE_BAD = "/etiqueta/"
+  const ETIQUETAS_CANCION_ROUTE_BAD = "/etiquetas/canciones/"
+  const ETIQUETAS_PODCAST_ROUTE_BAD = "/etiquetas/podcasts/"
   describe(`GET ${ETIQUETAS_ROUTE}`, () => {
     it("returns 200 ok bearer", async () => {
       await supertest(app)
         .get(ETIQUETAS_ROUTE)
         .set("Authorization", `Bearer ${bearer}`)
         .expect(200);
+    });
+
+    it("returns 200 ok bearer", async () => {
+      await supertest(app)
+        .get(ETIQUETAS_ROUTE)
+        .expect(403);
+    });
+
+    it("returns 200 ok bearer", async () => {
+      await supertest(app)
+        .get(ETIQUETAS_ROUTE_BAD)
+        .set("Authorization", `Bearer ${bearer}`)
+        .expect(404);
     });
   });
 
@@ -63,6 +80,20 @@ describe("Etiquetas routes", () => {
         .set("Authorization", `Bearer ${bearer}`)
         .expect(200);
     });
+
+    it("returns 200 ok bearer", async () => {
+      await supertest(app)
+        .get(ETIQUETAS_CANCION_ROUTE)
+        .expect(403);
+    });
+
+    it("returns 200 ok bearer", async () => {
+      await supertest(app)
+        .get(ETIQUETAS_CANCION_ROUTE_BAD)
+        .set("Authorization", `Bearer ${bearer}`)
+        .expect(404);
+    });
+    
   });
 
   describe(`GET ${ETIQUETAS_PODCAST_ROUTE}`, () => {
@@ -72,7 +103,22 @@ describe("Etiquetas routes", () => {
         .set("Authorization", `Bearer ${bearer}`)
         .expect(200);
     });
+
+    it("returns 200 ok bearer", async () => {
+      await supertest(app)
+        .get(ETIQUETAS_PODCAST_ROUTE)
+        .expect(403);
+    });
+
+    it("returns 200 ok bearer", async () => {
+      await supertest(app)
+        .get(ETIQUETAS_PODCAST_ROUTE_BAD)
+        .set("Authorization", `Bearer ${bearer}`)
+        .expect(404);
+    });
   });
+
+  
   
 });
 
