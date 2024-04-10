@@ -179,10 +179,12 @@ describe("Etiquetas routes", () => {
       await supertest(app)
         .post(ETIQUETAS_AUDIOS_ROUTE)
         .set("Authorization", `Bearer ${bearer}`)
-        .send({idsAudios: [80]})
+        .send({idsAudios: [80]}) // idAudio que no existe
         .expect(500);
     });
   });
 
 });
+
+
 
