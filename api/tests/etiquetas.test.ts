@@ -146,22 +146,22 @@ describe("Etiquetas routes", () => {
   describe(`POST ${ETIQUETAS_AUDIOS_ROUTE}`, () => {
     it("returns 200 ok bearer", async () => {
       await supertest(app)
-        .get(ETIQUETAS_PODCAST_ROUTE)
+        .post(ETIQUETAS_AUDIOS_ROUTE)
         .set("Authorization", `Bearer ${bearer}`)
         .send({idsAudios: [audio1_id, audio2_id, audio3_id]})
         .expect(200);
-    });
+    })
 
     it("returns 401 bad bearer", async () => {
       await supertest(app)
-        .get(ETIQUETAS_AUDIOS_ROUTE)
+        .post(ETIQUETAS_AUDIOS_ROUTE)
         .send({idsAudios: [audio1_id, audio2_id, audio3_id]})
         .expect(401);
     });
 
     it("returns 404 bad url", async () => {
       await supertest(app)
-        .get(ETIQUETAS_AUDIOS_ROUTE_BAD)
+        .post(ETIQUETAS_AUDIOS_ROUTE_BAD)
         .set("Authorization", `Bearer ${bearer}`)
         .send({idsAudios: [audio1_id, audio2_id, audio3_id]})
         .expect(404);
@@ -169,17 +169,17 @@ describe("Etiquetas routes", () => {
 
     it("returns 400 bad request", async () => {
       await supertest(app)
-        .get(ETIQUETAS_AUDIOS_ROUTE)
+        .post(ETIQUETAS_AUDIOS_ROUTE)
         .set("Authorization", `Bearer ${bearer}`)
         .send({idsAudio: [audio1_id, audio2_id, audio3_id]})
         .expect(400);
     });
 
-    it("returns 500 bad idAudios", async () => {
+    it("returns 500 internal error", async () => {
       await supertest(app)
-        .get(ETIQUETAS_AUDIOS_ROUTE)
+        .post(ETIQUETAS_AUDIOS_ROUTE)
         .set("Authorization", `Bearer ${bearer}`)
-        .send({idsAudios: [audio1_id, audio2_id, 80]})
+        .send({idsAudios: [80]})
         .expect(500);
     });
   });
