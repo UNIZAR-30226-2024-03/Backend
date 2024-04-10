@@ -92,9 +92,12 @@
  *          example:
  *              idAudio: 1
  *              titulo: "Audio de ejemplo"
+ *              path: "adsfas-asdfaijlk-a"
  *              duracion: 120
- *              fechaSubida: "2021-06-01T12:00:00Z"
- *              idUsuario: 1
+ *              fechaLanz: "2021-06-01T12:00:00Z"
+ *              esAlbum: false
+ *              imgAudio: "adsfas-asdfaijlk-a"
+ *              esPrivada: false
  *      Usuario:
  *          type: object
  *          required:
