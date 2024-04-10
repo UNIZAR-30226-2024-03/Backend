@@ -143,7 +143,7 @@ describe("Etiquetas routes", () => {
     });
   });
 
-  /*describe(`GET ${ETIQUETAS_AUDIOS_ROUTE}`, () => {
+  describe(`POST ${ETIQUETAS_AUDIOS_ROUTE}`, () => {
     it("returns 200 ok bearer", async () => {
       await supertest(app)
         .get(ETIQUETAS_PODCAST_ROUTE)
@@ -182,7 +182,7 @@ describe("Etiquetas routes", () => {
         .send({idsAudios: [audio1_id, audio2_id, 80]})
         .expect(500);
     });
-  });*/
+  });
 
 });
 
