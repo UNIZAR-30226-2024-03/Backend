@@ -139,7 +139,7 @@ describe("Usuario routes", () => {
 
     it("returns 404 followed user not found", async () => {
       await supertest(app)
-        .put(USUARIO_FOLLOW_ROUTE+"9999999999")
+        .put(USUARIO_FOLLOW_ROUTE+"9999999")
         .set("Authorization", `Bearer ${bearer}`)
         .expect(404);
     });
