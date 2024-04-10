@@ -43,8 +43,8 @@ describe("Usuario routes", () => {
   });
 
   const USUARIO_ROUTE = "/usuario";
-  const USUARIO_FOLLOW_ROUTE = "/usuario/follow";
-  const USUARIO_UNFOLLOW_ROUTE = "/usuario/unfollow";
+  const USUARIO_FOLLOW_ROUTE = "/usuario/follow/";
+  const USUARIO_UNFOLLOW_ROUTE = "/usuario/unfollow/";
 
   describe(`GET ${USUARIO_ROUTE}`, () => {
     it("returns 400 bad params", async () => {
@@ -123,40 +123,36 @@ describe("Usuario routes", () => {
     });
   });
 
-  describe(`PUT ${USUARIO_FOLLOW_ROUTE}`, () => {
+  describe(`PUT ${USUARIO_FOLLOW_ROUTE}:seguido`, () => {
     it("returns 400 bad params", async () => {
       await supertest(app)
-        .put(USUARIO_FOLLOW_ROUTE)
-        .query({ seguido: "invalid_number" })
+        .put(USUARIO_FOLLOW_ROUTE+"hola")
         .set("Authorization", `Bearer ${bearer}`)
         .expect(400);
     });
 
     it("returns 401 unauthorized", async () => {
       await supertest(app)
-        .put(USUARIO_FOLLOW_ROUTE)
-        .query({ seguido: user2_id })
+        .put(USUARIO_FOLLOW_ROUTE+"11")
         .expect(401);
     });
 
     it("returns 404 followed user not found", async () => {
       await supertest(app)
-        .put(USUARIO_FOLLOW_ROUTE)
-        .query({ seguido: 999999 })
+        .put(USUARIO_FOLLOW_ROUTE+"9999999999")
         .set("Authorization", `Bearer ${bearer}`)
         .expect(404);
     });
 
     it("returns 201 ok", async () => {
       await supertest(app)
-        .put(USUARIO_FOLLOW_ROUTE)
-        .query({ seguido: user2_id })
+        .put(USUARIO_FOLLOW_ROUTE+String(user2_id))
         .set("Authorization", `Bearer ${bearer}`)
         .expect(201);
     });
   });
 
-  describe(`PUT ${USUARIO_UNFOLLOW_ROUTE}`, () => {
+  describe(`PUT ${USUARIO_UNFOLLOW_ROUTE}:seguido`, () => {
     beforeAll(async () => {
       if (!user1_id || !user3_id)
         throw Error("user1_id or user3_id not defined");
@@ -165,31 +161,27 @@ describe("Usuario routes", () => {
 
     it("returns 400 bad params", async () => {
       await supertest(app)
-        .put(USUARIO_UNFOLLOW_ROUTE)
-        .query({ seguido: "invalid_number" })
+        .put(USUARIO_UNFOLLOW_ROUTE+"fjklsd")
         .set("Authorization", `Bearer ${bearer}`)
         .expect(400);
     });
 
     it("returns 401 unauthorized", async () => {
       await supertest(app)
-        .put(USUARIO_UNFOLLOW_ROUTE)
-        .query({ seguido: user3_id })
+        .put(USUARIO_UNFOLLOW_ROUTE+String(user3_id))
         .expect(401);
     });
 
     it("returns 404 followed user not found", async () => {
       await supertest(app)
-        .put(USUARIO_UNFOLLOW_ROUTE)
-        .query({ seguido: 999999 })
+        .put(USUARIO_UNFOLLOW_ROUTE+"999999")
         .set("Authorization", `Bearer ${bearer}`)
         .expect(404);
     });
 
     it("returns 201 ok", async () => {
       await supertest(app)
-        .put(USUARIO_UNFOLLOW_ROUTE)
-        .query({ seguido: user3_id })
+        .put(USUARIO_UNFOLLOW_ROUTE+String(user3_id))
         .set("Authorization", `Bearer ${bearer}`)
         .expect(201);
     });
