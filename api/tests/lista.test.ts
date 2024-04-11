@@ -116,28 +116,11 @@ describe('Lista routes', () => {
           esAlbum: true,
           imgLista: 'imgLista',
           tipoLista: 'TIPO NO VALIDO',
-          idUsuario: userTest1_id,
           audios: [audioTest1_id],
         })
         .expect(httpStatus.BAD_REQUEST);
     });
 
-    it('returns '+ httpStatus.BAD_REQUEST + ' when idUsuario not valido ', async () => {
-      await request(app)
-        .post(LISTA_ROUTE)
-        .set('Authorization', `Bearer ${bearer}`)
-        .send({
-          nombre: 'listaTest',
-          descripcion: 'descripcion',
-          esPrivada: true,
-          esAlbum: true,
-          imgLista: 'imgLista',
-          tipoLista: 'NORMAL',
-          idUsuario: 999999,
-          audios: [],
-        })
-        .expect(httpStatus.BAD_REQUEST);
-    });
 
     it('returns ' + httpStatus.BAD_REQUEST + ' when audios not valido ', async () => {
       await request(app)
@@ -150,7 +133,6 @@ describe('Lista routes', () => {
           esAlbum: true,
           imgLista: 'imgLista',
           tipoLista: 'NORMAL',
-          idUsuario: userTest1_id,
           audios: [999999],
         })
         .expect(httpStatus.BAD_REQUEST);
@@ -167,7 +149,6 @@ describe('Lista routes', () => {
           esAlbum: true,
           imgLista: 'imgLista',
           tipoLista: 'NORMAL',
-          idUsuario: userTest1_id,
           audios: [],
         })
         .expect((res) => {
@@ -224,7 +205,6 @@ describe('Lista routes', () => {
           esAlbum: true,
           imgLista: 'imgLista',
           tipoLista: 'NORMAL',
-          idUsuario: userTest1_id,
           audios: [],
         })
         .expect(httpStatus.NOT_FOUND);
@@ -241,28 +221,11 @@ describe('Lista routes', () => {
           esAlbum: true,
           imgLista: 'imgLista',
           tipoLista: 'TIPO NO VALIDO',
-          idUsuario: userTest1_id,
           audios: [],
         })
         .expect(httpStatus.BAD_REQUEST);
     });
 
-    it('returns ' + httpStatus.BAD_REQUEST + ' when idUsuario not valido ', async () => {
-      await request(app)
-        .put(`${LISTA_ROUTE}/${lista?.idLista}`)
-        .set('Authorization', `Bearer ${bearer}`)
-        .send({
-          nombre: 'listaTest',
-          descripcion: 'descripcion',
-          esPrivada: true,
-          esAlbum: true,
-          imgLista: 'imgLista',
-          tipoLista: 'NORMAL',
-          idUsuario: 999999,
-          audios: [],
-        })
-        .expect(httpStatus.BAD_REQUEST);
-    });
 
     it('returns ' + httpStatus.BAD_REQUEST + ' when audios not valido ', async () => {
       await request(app)
@@ -275,28 +238,11 @@ describe('Lista routes', () => {
           esAlbum: true,
           imgLista: 'imgLista',
           tipoLista: 'NORMAL',
-          idUsuario: userTest1_id,
           audios: [999999],
         })
         .expect(httpStatus.BAD_REQUEST);
     });
 
-    it('returns ' + httpStatus.BAD_REQUEST + ' when idUsuario is not the owner', async () => {
-      await request(app)
-        .put(`${LISTA_ROUTE}/${lista?.idLista}`)
-        .set('Authorization', `Bearer ${bearer}`)
-        .send({
-          nombre: 'listaTest',
-          descripcion: 'descripcion',
-          esPrivada: true,
-          esAlbum: true,
-          imgLista: 'imgLista',
-          tipoLista: 'NORMAL',
-          idUsuario: userTest2_id,
-          audios: [],
-        })
-        .expect(httpStatus.BAD_REQUEST);
-    });
 
     it('returns ' + httpStatus.OK + ' and correct result when no audios', async () => {
       await request(app)

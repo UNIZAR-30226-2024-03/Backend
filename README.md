@@ -1,3 +1,6 @@
+# URL acceso a la documentación de la API 
+https://playbeat.uksouth.cloudapp.azure.com/api-docs
+
 # Configuración del entorno de desarrollo
 Instalaremos la extensión [ESLint](https://marketplace.visualstudio.com/items?itemName=dbaeumer.vscode-eslint). La utilizaremos para corregir la sintaxis y el estilo del código en el proyecto.
 
