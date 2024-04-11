@@ -75,3 +75,33 @@ export async function addTagToAudio(idAudio: number, idLabel: number, tipoEtique
     });
   }
 }
+
+export async function createTagSong (name: string): Promise<string> {
+  try {
+    const tag = await prisma.etiquetaCancion.create({
+      data: {
+        nombre: name,
+      },
+    });
+
+    return tag.nombre;
+  } catch (error) { 
+    console.error(error);
+    throw new Error("Error creando etiqueta de Canción en Base de Datos");
+  }
+}
+
+export async function createTagPodcast (name: string): Promise<string> {
+  try {
+    const tag = await prisma.etiquetaPodcast.create({
+      data: {
+        nombre: name,
+      },
+    });
+
+    return tag.nombre;
+  } catch (error) { 
+    console.error(error);
+    throw new Error("Error creando etiqueta de Podcast en Base de Datos");
+  }
+}
