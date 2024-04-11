@@ -105,3 +105,33 @@ export async function createTagPodcast (name: string): Promise<string> {
     throw new Error("Error creando etiqueta de Podcast en Base de Datos");
   }
 }
+
+export async function existsTag (name: string): Promise<boolean> {
+  try {
+    let tag = await prisma.etiquetaCancion.findUnique({
+      where: {
+        nombre: name,
+      },
+    });
+
+    if (tag) {
+      return true;
+    } else {
+      tag = await prisma.etiquetaPodcast.findUnique({
+        where: {
+          nombre: name,
+        },
+      });
+
+      if (tag) {
+        return true;
+      }
+    }
+
+    return false;
+  } catch (error) {
+    console.error(error);
+    throw new Error("Error buscando la etiqueta en Base de Datos");
+  }
+}
+
