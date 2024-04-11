@@ -6,6 +6,7 @@ import path from 'path';
 import fs from 'fs';
 import mediaserver from 'mediaserver'; //Variable para manejar archivos de audio, usa chunks para enviar el archivo
 
+import * as etiquetasDatabase from "../../db/etiquetasDb.js";
 import * as audioDatabase from "../../db/audioDb.js";
 import { promisify } from 'util';
 
@@ -74,6 +75,37 @@ export async function verifyUsersList(req: Request, res: Response, next: NextFun
     }
 }
 
+
+//Se encarga de verificar que los usuarios existan en la base de datos
+export async function verifyLabelList(req: Request, res: Response, next: NextFunction) {
+    try {
+        if (req.body.etiquetas) {
+            if (req.body.tipoEtiqueta==="Podcast" || req.body.tipoEtiqueta==="Cancion") {
+                const etiquetas = req.body.etiquetas.split(',').map(Number);
+                for (const idEtiqueta of etiquetas) {
+                    if (await etiquetasDatabase.existsTag(idEtiqueta)==false) {
+                        return res.status(404).send('Etiqueta no encontrada');
+                    }
+                }
+            }else{
+                return res.status(400).send('Bad Parameters, etiqueta no válida');
+            }
+        }else if (!req.body.etiquetas && req.body.tipoEtiqueta) {
+            return res.status(400).send('Bad Parameters, faltan las etiquetas');
+        }
+        next();
+    }catch (error) {
+        if (req.file){
+            try{
+                deleteFile(path.join(projectRootPath,"audios",req.file.filename));
+            }catch (error){
+                return res.status(404).send(error);
+            }
+        }
+        return res.status(404);            
+    }
+}
+
 export async function createAudio(req: Request, res: Response) {
     try {
         if (!req.file) {
@@ -113,7 +145,10 @@ export async function createAudio(req: Request, res: Response) {
             }else{
                 return res.status(400).send('Bad Parameters, etiqueta no válida');
             }
+        }else if (!req.body.etiquetas && req.body.tipoEtiqueta) {
+            return res.status(400).send('Bad Parameters, faltan las etiquetas');
         }
+
         for (const idUsuario of idsUsuarios2) {
             //Preguntar Alvaro si tiene esta función
             await prisma.usuario.update({
@@ -243,6 +278,19 @@ export async function updateAudio(req: Request, res: Response) {
         }
 
         audioDatabase.updateAudioById(Number(req.params.idaudio),audioData);
+
+        if (req.body.etiquetas) {
+            if (req.body.tipoEtiqueta==="Podcast" || req.body.tipoEtiqueta==="Cancion") {
+                const etiquetas = req.body.etiquetas.split(',').map(Number);
+                for (const idEtiqueta of etiquetas) {
+                    await audioDatabase.linkLabelToAudio(Number(req.params.idaudio), idEtiqueta, req.body.tipoEtiqueta);
+                }
+            }else{
+                return res.status(400).send('Bad Parameters, etiqueta no válida');
+            }
+        }else if (!req.body.etiquetas && req.body.tipoEtiqueta) {
+            return res.status(400).send('Bad Parameters, faltan las etiquetas');
+        }
 
         res.json( { message: 'Audio updated successfully' } );
     } catch (error) {

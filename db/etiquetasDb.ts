@@ -76,7 +76,7 @@ export async function addTagToAudio(idAudio: number, idLabel: number, tipoEtique
   }
 }
 
-export async function createTagSong (name: string): Promise<string> {
+export async function createTagSong (name: string): Promise<number> {
   try {
     const tag = await prisma.etiquetaCancion.create({
       data: {
@@ -84,14 +84,14 @@ export async function createTagSong (name: string): Promise<string> {
       },
     });
 
-    return tag.nombre;
+    return tag.idEtiqueta;
   } catch (error) { 
     console.error(error);
     throw new Error("Error creando etiqueta de Canción en Base de Datos");
   }
 }
 
-export async function createTagPodcast (name: string): Promise<string> {
+export async function createTagPodcast (name: string): Promise<number> {
   try {
     const tag = await prisma.etiquetaPodcast.create({
       data: {
@@ -99,7 +99,7 @@ export async function createTagPodcast (name: string): Promise<string> {
       },
     });
 
-    return tag.nombre;
+    return tag.idEtiqueta;
   } catch (error) { 
     console.error(error);
     throw new Error("Error creando etiqueta de Podcast en Base de Datos");
