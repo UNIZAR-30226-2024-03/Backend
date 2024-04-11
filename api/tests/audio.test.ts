@@ -21,6 +21,8 @@ describe('Audio Endpoints', () => {
     let bearer2: string;
     let bearer3: string;
     let audio_id_created: number;
+    let etiquetaPod_id: number;
+    let etiquetaCancion_id: number;
 
     beforeAll(async () => {
 
@@ -176,25 +178,25 @@ describe('Audio Endpoints', () => {
     //     });
     // });
 
-    describe('GET /audio/delete', () => {
+    describe('DELETE /audio/delete', () => {
             
         it('returns a 403, auth failed', async () => {
             await supertest(app)
-                .get(`/audio/delete/${audio1_id}`)
+                .delete(`/audio/delete/${audio1_id}`)
                 .set('Authorization', `Bearer ${bearer3}`)
                 .expect(403);
         },5000);
         
         it('should delete an audio by id', async () => {
             await supertest(app)
-                .get(`/audio/delete/${audio1_id}`)
+                .delete(`/audio/delete/${audio1_id}`)
                 .set('Authorization', `Bearer ${bearer1}`)
                 .expect(200);
         },5000);
 
         it('returns 404 not found', async () => {
             await supertest(app)
-                .get('/audio/delete/0')
+                .delete('/audio/delete/0')
                 .set('Authorization', `Bearer ${bearer1}`)
                 .expect(404);
         },5000);

@@ -50,7 +50,7 @@ router.post('/upload',auth.authenticate,upload.single('cancion'), audioControlle
 
 //PRE: Se recibe un id de audio correcto en la URL
 //POST: Se elimina el registro de BBDD y la canción del servidor
-router.get('/delete/:idaudio', auth.authenticate,audioController.deleteAudio);
+router.delete('/delete/:idaudio', auth.authenticate,audioController.deleteAudio);
 
 //PRE: Se recibe un id de audio correcto en la URL
 //POST: Se edita el registro de BBDD y la canción del servidor
