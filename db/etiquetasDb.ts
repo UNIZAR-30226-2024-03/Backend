@@ -108,24 +108,25 @@ export async function createTagPodcast (name: string): Promise<string> {
 
 export async function existsTag (name: string): Promise<boolean> {
   try {
-    let tag = await prisma.etiquetaCancion.findUnique({
+    const tagCancion = await prisma.etiquetaCancion.findFirst({
       where: {
         nombre: name,
       },
     });
 
-    if (tag) {
+    if (tagCancion) {
       return true;
-    } else {
-      tag = await prisma.etiquetaPodcast.findUnique({
-        where: {
-          nombre: name,
-        },
-      });
+    } 
 
-      if (tag) {
-        return true;
-      }
+    // Si la etiqueta no se encontró en EtiquetaCancion, intenta buscarla en EtiquetaPodcast
+    const tagPodcast = await prisma.etiquetaPodcast.findFirst({
+      where: {
+        nombre: name,
+      },
+    });
+
+    if (tagPodcast) {
+      return true;
     }
 
     return false;
