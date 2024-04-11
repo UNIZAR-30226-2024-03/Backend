@@ -51,3 +51,27 @@ export async function tagsOfAudio (id: number): Promise<any> {
     throw new Error("Error obteniendo etiquetas de Audio desde Base de Datos");
   }
 }
+
+
+export async function addTagToAudio(idAudio: number, idLabel: number, tipoEtiqueta: string) {
+
+  if (tipoEtiqueta === "Podcast") {
+    await prisma.etiquetaCancion.update({
+      where: { idEtiqueta: idLabel },
+      data: {
+        Audios: {
+          connect: { idAudio: idAudio },
+        },
+      },
+    });
+  } else if (tipoEtiqueta === "Cancion") {
+    await prisma.etiquetaPodcast.update({
+      where: { idEtiqueta: idLabel },
+      data: {
+        Audios: {
+          connect: { idAudio: idAudio },
+        },
+      },
+    });
+  }
+}

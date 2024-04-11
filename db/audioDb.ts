@@ -1,5 +1,5 @@
 import prisma from "../prisma/client.js";
-
+import * as etiquetasDb from "../db/etiquetasDb.js";
 
 //PRE: Se recibe un id de audio correcto
 //POST: Se devuelve el audio con el id correspondiente
@@ -57,7 +57,7 @@ export async function updateAudioById(id: number, audioData: any) {
 
 
 //PRE: Se recibe un id de audio correcto
-//POST: Se devuelve el audio con el id correspondiente
+//POST: Se devuelven los artistas que han participado en el audio con el id correspondiente en un array
 export async function getArtistaAudioById(id: number) {
     const audio = await prisma.audio.findMany({
         where: {
@@ -67,7 +67,10 @@ export async function getArtistaAudioById(id: number) {
             Artistas: true,
         },
     });
-    return audio;
+
+    const artistas = audio.flatMap((audio) => audio.Artistas);
+
+    return artistas;
 }
 
 //PRE: Se recibe un id de audio correcto y un array de ids de usuarios
@@ -81,4 +84,30 @@ export async function addPropietariosToAudio(id: number, idUsuarios: number[]) {
             },
         },
     });
+}
+
+export async function linkLabelToAudio(idAudio: number, idLabel: number,tipoEtiqueta: string) {
+    if (tipoEtiqueta === "Podcast") {
+        await prisma.audio.update({
+            where: { idAudio: idAudio },
+            data: {
+                EtiquetasPodcast: {
+                    connect: { idEtiqueta: idLabel },
+                },
+            },
+        });
+        await etiquetasDb.addTagToAudio(idAudio, idLabel, tipoEtiqueta);
+
+    } else if (tipoEtiqueta === "Cancion"){
+        await prisma.audio.update({
+            where: { idAudio: idAudio },
+            data: {
+                EtiquetasCancion: {
+                    connect: { idEtiqueta: idLabel },
+                },
+            },
+        });
+        await etiquetasDb.addTagToAudio(idAudio, idLabel, tipoEtiqueta);
+    }
+    
 }
