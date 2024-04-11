@@ -104,6 +104,16 @@ export async function createAudio(req: Request, res: Response) {
             img = req.body.img;
         }
         const audio = await audioDatabase.createAudioDB(req.body.titulo, req.file.filename, parseInt(req.body.duracionSeg, 10), fechaFormateada, Boolean(req.body.esAlbum), Boolean(req.body.esPrivada), idsUsuarios2,img);
+        if (req.body.etiquetas) {
+            if (req.body.tipoEtiqueta==="Podcast" || req.body.tipoEtiqueta==="Cancion") {
+                const etiquetas = req.body.etiquetas.split(',').map(Number);
+                for (const idEtiqueta of etiquetas) {
+                    await audioDatabase.linkLabelToAudio(audio.idAudio, idEtiqueta, req.body.tipoEtiqueta);
+                }
+            }else{
+                return res.status(400).send('Bad Parameters, etiqueta no válida');
+            }
+        }
         for (const idUsuario of idsUsuarios2) {
             //Preguntar Alvaro si tiene esta función
             await prisma.usuario.update({
@@ -282,10 +292,10 @@ async function isOwnerOrAdmin(req: Request){
         if (!req.auth?.esAdmin) {
             const propietarios = await audioDatabase.getArtistaAudioById(parseInt(req.params.idaudio));
 
-            if (propietarios === null) {
+            if (propietarios.length === 0) {
                 throw new Error("Audio no encontrado");
             }
-            if (!propietarios.some(propietario => propietario.Artistas.some(artista => artista.idUsuario === parseInt(req.auth?.idUsuario)))) {
+            if (!propietarios.some(propietario => propietario.idUsuario === parseInt(req.auth?.idUsuario))) {
                 return false;
             }
         }
