@@ -1,6 +1,7 @@
 import supertest from "supertest";
 import app from "../app.js";
 import * as audioDatabase from "../../db/audioDb.js";
+import * as etiquetasDatabase from "../../db/etiquetasDb.js";
 import fs from 'fs';
 import path from 'path';
 import util from 'util';
@@ -57,6 +58,12 @@ describe('Audio Endpoints', () => {
         audio1_id = audio1.idAudio;
         audio2_id = audio2.idAudio;
         audio3_id = audio3.idAudio;
+
+
+        etiquetaPod_id = await etiquetasDatabase.createTagPodcast("Podcast");
+        etiquetaCancion_id = await etiquetasDatabase.createTagSong("Cancion");
+
+
         await copyFile(path.join(projectRootPath,'audios','pruebasUnitarias.mp3'), path.join(projectRootPath,'audios','pruebaTest1.mp3'));
         await copyFile(path.join(projectRootPath,'audios','pruebasUnitarias.mp3'), path.join(projectRootPath,'audios','pruebaTest2.mp3'));
         await copyFile(path.join(projectRootPath,'audios','pruebasUnitarias.mp3'), path.join(projectRootPath,'audios','pruebaTest3.mp3'));
@@ -193,6 +200,7 @@ describe('Audio Endpoints', () => {
                 .set('Authorization', `Bearer ${bearer1}`)
                 .expect(200);
         },5000);
+        
 
         it('returns 404 not found', async () => {
             await supertest(app)
@@ -217,6 +225,30 @@ describe('Audio Endpoints', () => {
                 })
                 .expect(200);
         },5000);
+
+        it('should update an audio by id', async () => {
+            await supertest(app)
+            .put(`/audio/update/${audio2_id}`)
+            .set('Authorization', `Bearer ${bearer1}`)
+            .send({
+                etiquetas: `${etiquetaCancion_id}`,
+                tipoEtiqueta: "Cancion",
+                titulo: 'Updated Audio'
+            })
+            .expect(200);
+        },5000);
+
+        it('returns 400 Bad Parameters', async () => {
+            await supertest(app)
+            .put(`/audio/update/${audio2_id}`)
+            .set('Authorization', `Bearer ${bearer1}`)
+            .send({
+                etiquetas: `${etiquetaCancion_id}`,
+                titulo: 'Updated Audio'
+            })
+            .expect(400);
+        },5000);
+
     
         it('returns 404 not found', async () => {
             await supertest(app)

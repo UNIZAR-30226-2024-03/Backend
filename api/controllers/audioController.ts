@@ -5,9 +5,36 @@ import prisma from "../../prisma/client.js";
 import path from 'path';
 import fs from 'fs';
 import mediaserver from 'mediaserver'; //Variable para manejar archivos de audio, usa chunks para enviar el archivo
-
+import crypto from 'crypto';
+import multer from 'multer';
+import * as etiquetasDatabase from "../../db/etiquetasDb.js";
 import * as audioDatabase from "../../db/audioDb.js";
 import { promisify } from 'util';
+
+
+
+//Configuración de multer
+const opciones = multer.diskStorage({ //Opciones para subir archivos
+    destination: function(req: Request, file: Express.Multer.File, cb: any) { 
+        cb(null, path.join(projectRootPath,'audios')); //Se almacenan en la carpeta audios desde la raiz del proyecto
+    },
+    filename: function(req: Request, file: Express.Multer.File, cb: any) { 
+        const now = Date.now().toString(); // Salt
+        const hash = crypto.createHash('sha1').update(file.originalname + now).digest('hex'); // Hash
+        const extension = path.extname(file.originalname);
+        cb(null, `${hash}${extension}`); 
+    }
+});
+const upload = multer(
+    {storage: opciones,
+    fileFilter: function (req, file, cb) { //Filtro para aceptar solo archivos de audio
+        if (file.mimetype !== 'audio/mpeg' && file.mimetype !== 'audio/wav' && file.mimetype !== 'audio/mp4') { //Si el archivo no es de tipo mp3(mpeg es mp3), wav o mp4
+            return cb(null, false); // No se acepta el archivo, se devuelve el callback con false
+        }
+        cb(null, true); // Se acepta el archivo y se devuelve el callback con true
+    }
+});
+
 
 const projectRootPath = process.cwd(); // Devuelve el directorio raíz del proyecto y se almacena en una constante
 
@@ -18,20 +45,15 @@ const projectRootPath = process.cwd(); // Devuelve el directorio raíz del proye
 //POST: Sube obtiene información de un audio con formato JSON
 export async function getAudio(req: Request, res: Response) {
     try {
-        if (!req.params.idaudio) {
-            return res.status(400).send('Bad Parameters');
-        }
         const id = Number(req.params.idaudio);
-        const audio = await audioDatabase.findAudioById(id);
-        if (audio) {
-            if (audio.esPrivada && !await isOwnerOrAdmin(req)) { //Falta lógica de verificación de usarios
-                res.status(403).send("Unauthorized");
-            }else{
-                res.json(audio);
-            }
-        } else {
-            res.status(404).send("Audio not found"); // Bad request, parámetros incorrecto
+
+        if (req.body.audioConsulta.esPrivada && !await isOwnerOrAdmin(req)) { //Falta lógica de verificación de usarios
+            res.status(403).send("Unauthorized");
+        }else{
+            const artistas = await audioDatabase.getArtistaAudioById(id);
+            res.json({...req.body.audioConsulta, artistas});
         }
+
     } catch (error) {
         res.status(500).send(error); // Internal server error
     }
@@ -50,16 +72,33 @@ export async function verifyUsersList(req: Request, res: Response, next: NextFun
                     },
                 });
                 if (!usuario) {
-                    if (req.file){
-                        try{
-                            deleteFile(path.join(projectRootPath,"audios",req.file.filename));
-                        }catch (error){
-                            return res.status(404).send(error);
-                        }
-                    }
                     return res.status(404);            
                 }
             }
+        }
+        next();
+    }catch (error) {
+        return res.status(500);            
+    }
+}
+
+
+//Se encarga de verificar que los usuarios existan en la base de datos
+export async function verifyLabelList(req: Request, res: Response, next: NextFunction) {
+    try {
+        if (req.body.etiquetas) {
+            if (req.body.tipoEtiqueta==="Podcast" || req.body.tipoEtiqueta==="Cancion") {
+                const etiquetas = req.body.etiquetas.split(',').map(Number);
+                for (const idEtiqueta of etiquetas) {
+                    if (await etiquetasDatabase.existsTag(idEtiqueta)==false) {
+                        return res.status(404).send('Etiqueta no encontrada');
+                    }
+                }
+            }else{
+                return res.status(400).send('Bad Parameters, etiqueta no válida');
+            }
+        }else if (!req.body.etiquetas && req.body.tipoEtiqueta) {
+            return res.status(400).send('Bad Parameters, faltan las etiquetas');
         }
         next();
     }catch (error) {
@@ -76,20 +115,13 @@ export async function verifyUsersList(req: Request, res: Response, next: NextFun
 
 export async function createAudio(req: Request, res: Response) {
     try {
-        if (!req.file) {
-            return res.status(400).send('No file uploaded');
-        }
         if (!req.body.titulo        ||
             !req.body.duracionSeg   ||
             !req.body.fechaLanz     || 
             !req.body.esAlbum       ||
             !req.body.esPrivada  ) {
-                try{
-                    deleteFile(path.join(projectRootPath,"audios",req.file.filename));
-                }catch (error){
-                    return res.status(404).send(error);
-                }
-                return res.status(400).send('Bad Parameters');
+                console.log(req.body);
+                return res.status(400).send('Bad Parameters, faltan parámetros');
 
         }
         const fechaLanz = new Date(req.body.fechaLanz);
@@ -103,6 +135,10 @@ export async function createAudio(req: Request, res: Response) {
         if (req.body.img ) {
             img = req.body.img;
         }
+        upload.single('cancion') // Subir archivo de audio con multer
+        if (!req.file) {
+            return res.status(400).send('No file uploaded');
+        }
         const audio = await audioDatabase.createAudioDB(req.body.titulo, req.file.filename, parseInt(req.body.duracionSeg, 10), fechaFormateada, Boolean(req.body.esAlbum), Boolean(req.body.esPrivada), idsUsuarios2,img);
         if (req.body.etiquetas) {
             if (req.body.tipoEtiqueta==="Podcast" || req.body.tipoEtiqueta==="Cancion") {
@@ -113,7 +149,10 @@ export async function createAudio(req: Request, res: Response) {
             }else{
                 return res.status(400).send('Bad Parameters, etiqueta no válida');
             }
+        }else if (!req.body.etiquetas && req.body.tipoEtiqueta) {
+            return res.status(400).send('Bad Parameters, faltan las etiquetas');
         }
+
         for (const idUsuario of idsUsuarios2) {
             //Preguntar Alvaro si tiene esta función
             await prisma.usuario.update({
@@ -152,20 +191,13 @@ export async function createAudio(req: Request, res: Response) {
 export async function deleteAudio(req: Request, res: Response) {
 
     try {
-        if (!req.params.idaudio) {
-            return res.status(400).send('Bad Parameters');
-        }
         const id = Number(req.params.idaudio);
-        const audioRuta =await audioDatabase.findAudioById(id)
-        if (!audioRuta) {
-            return res.status(404).send("Audio not found");            
-        }
         if (!await isOwnerOrAdmin(req)){
             return res.status(403).send("Unauthorized");
         }
         audioDatabase.deleteAudioById(id);
         try{
-            deleteFile(path.join(projectRootPath,audioRuta.path));
+            deleteFile(path.join(projectRootPath,req.body.audioConsulta.path));
         }catch (error){
             return res.status(404).send(error);            
         }
@@ -179,7 +211,7 @@ export async function verifyAudio(req: Request, res: Response, next: NextFunctio
     
     try {
         if (!req.params.idaudio) {
-            return res.status(400).send('Bad Parameters');
+            return res.status(400).send('Bad Parameters, idaudio not found');
         }
         const id = Number(req.params.idaudio);
         const audioConsulta = await audioDatabase.findAudioById(id);
@@ -203,14 +235,11 @@ export async function verifyAudio(req: Request, res: Response, next: NextFunctio
 
 export async function updateAudio(req: Request, res: Response) {
     try {
-        if (!req.params.idaudio) {
-            return res.status(400).send('Bad Parameters');
-        }
         if (!await isOwnerOrAdmin(req)){
             return res.status(403).send("Unauthorized");
         }
         let audioData: any = {};
-
+        upload.single('cancion') // Subir archivo de audio con multer
         if (req.file){
             audioData.path = "/audios/"+req.file.filename;
             try{
@@ -243,6 +272,20 @@ export async function updateAudio(req: Request, res: Response) {
         }
 
         audioDatabase.updateAudioById(Number(req.params.idaudio),audioData);
+
+        if (req.body.etiquetas) {
+            if (req.body.tipoEtiqueta==="Podcast" || req.body.tipoEtiqueta==="Cancion") {
+                console.log(req.body.etiquetas);
+                const etiquetas = req.body.etiquetas.split(',').map(Number);
+                for (const idEtiqueta of etiquetas) {
+                    await audioDatabase.linkLabelToAudio(Number(req.params.idaudio), idEtiqueta, req.body.tipoEtiqueta);
+                }
+            }else{
+                return res.status(400).send('Bad Parameters, etiqueta no válida');
+            }
+        }else if (!req.body.etiquetas && req.body.tipoEtiqueta) {
+            return res.status(400).send('Bad Parameters, faltan las etiquetas');
+        }
 
         res.json( { message: 'Audio updated successfully' } );
     } catch (error) {
