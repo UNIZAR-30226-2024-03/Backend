@@ -31,4 +31,12 @@ io.on("connection", (socket) => {
     // Enviar un mensaje a todos los clientes en la sala
     socket.to(room).emit('message', 'Mensaje recibido: ' + message);
   });
+
+  socket.on('Sync', (message, room) => {
+    console.log('Mensaje recibido: "' + message+ '" a la sala: '+room);
+
+    // Ahora deberíamos guardar esta estampilla temporal
+  });
+
+
 });

@@ -60,8 +60,8 @@ describe('Audio Endpoints', () => {
         audio3_id = audio3.idAudio;
 
 
-        const etiquetaPod_id = await etiquetasDatabase.createTagPodcast("Podcast");
-        const etiquetaCancion_id = await etiquetasDatabase.createTagSong("Cancion");
+        etiquetaPod_id = await etiquetasDatabase.createTagPodcast("Podcast");
+        etiquetaCancion_id = await etiquetasDatabase.createTagSong("Cancion");
 
 
         await copyFile(path.join(projectRootPath,'audios','pruebasUnitarias.mp3'), path.join(projectRootPath,'audios','pruebaTest1.mp3'));
