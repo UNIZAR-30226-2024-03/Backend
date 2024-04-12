@@ -5,35 +5,13 @@ import prisma from "../../prisma/client.js";
 import path from 'path';
 import fs from 'fs';
 import mediaserver from 'mediaserver'; //Variable para manejar archivos de audio, usa chunks para enviar el archivo
-import crypto from 'crypto';
-import multer from 'multer';
 import * as etiquetasDatabase from "../../db/etiquetasDb.js";
 import * as audioDatabase from "../../db/audioDb.js";
 import { promisify } from 'util';
 
 
 
-//Configuración de multer
-const opciones = multer.diskStorage({ //Opciones para subir archivos
-    destination: function(req: Request, file: Express.Multer.File, cb: any) { 
-        cb(null, path.join(projectRootPath,'audios')); //Se almacenan en la carpeta audios desde la raiz del proyecto
-    },
-    filename: function(req: Request, file: Express.Multer.File, cb: any) { 
-        const now = Date.now().toString(); // Salt
-        const hash = crypto.createHash('sha1').update(file.originalname + now).digest('hex'); // Hash
-        const extension = path.extname(file.originalname);
-        cb(null, `${hash}${extension}`); 
-    }
-});
-const upload = multer(
-    {storage: opciones,
-    fileFilter: function (req, file, cb) { //Filtro para aceptar solo archivos de audio
-        if (file.mimetype !== 'audio/mpeg' && file.mimetype !== 'audio/wav' && file.mimetype !== 'audio/mp4') { //Si el archivo no es de tipo mp3(mpeg es mp3), wav o mp4
-            return cb(null, false); // No se acepta el archivo, se devuelve el callback con false
-        }
-        cb(null, true); // Se acepta el archivo y se devuelve el callback con true
-    }
-});
+
 
 
 const projectRootPath = process.cwd(); // Devuelve el directorio raíz del proyecto y se almacena en una constante
@@ -72,13 +50,13 @@ export async function verifyUsersList(req: Request, res: Response, next: NextFun
                     },
                 });
                 if (!usuario) {
-                    return res.status(404);            
+                    return res.status(404).send('Usuario no encontrado');            
                 }
             }
         }
         next();
     }catch (error) {
-        return res.status(500);            
+        return res.status(500).send(error);            
     }
 }
 
@@ -102,25 +80,20 @@ export async function verifyLabelList(req: Request, res: Response, next: NextFun
         }
         next();
     }catch (error) {
-        if (req.file){
-            try{
-                deleteFile(path.join(projectRootPath,"audios",req.file.filename));
-            }catch (error){
-                return res.status(404).send(error);
-            }
-        }
         return res.status(404);            
     }
 }
 
 export async function createAudio(req: Request, res: Response) {
     try {
+        if (!req.file) {
+            return res.status(400).send('No file uploaded');
+        }
         if (!req.body.titulo        ||
             !req.body.duracionSeg   ||
             !req.body.fechaLanz     || 
             !req.body.esAlbum       ||
-            !req.body.esPrivada  ) {
-                console.log(req.body);
+            !req.body.esPrivada) {
                 return res.status(400).send('Bad Parameters, faltan parámetros');
 
         }
@@ -135,11 +108,13 @@ export async function createAudio(req: Request, res: Response) {
         if (req.body.img ) {
             img = req.body.img;
         }
-        upload.single('cancion') // Subir archivo de audio con multer
-        if (!req.file) {
-            return res.status(400).send('No file uploaded');
-        }
+        console.log(req.body)
+        fs.rename(path.join(projectRootPath,'tmp',req.file.filename), path.join(projectRootPath,'audios',req.file.filename), function(err) {
+            if (err) throw err;
+            console.log('File moved');
+        });
         const audio = await audioDatabase.createAudioDB(req.body.titulo, req.file.filename, parseInt(req.body.duracionSeg, 10), fechaFormateada, Boolean(req.body.esAlbum), Boolean(req.body.esPrivada), idsUsuarios2,img);
+    
         if (req.body.etiquetas) {
             if (req.body.tipoEtiqueta==="Podcast" || req.body.tipoEtiqueta==="Cancion") {
                 const etiquetas = req.body.etiquetas.split(',').map(Number);
@@ -169,18 +144,13 @@ export async function createAudio(req: Request, res: Response) {
         }
 
         res.json( { message: 'Audio added successfully' ,idaudio: audio.idAudio});
+
+        
     } catch (error) {
         if (error instanceof Error) {
             console.error(`Error: ${error.message}`);
             if (error.stack) {
                 console.error(`Stack trace: ${error.stack}`);
-            }
-        }
-        if (req.file){
-            try{
-                deleteFile(path.join(projectRootPath,"audios",req.file.filename));
-            }catch (error){
-                return res.status(404).send(error);
             }
         }
         res.status(500).send(error);
@@ -239,8 +209,12 @@ export async function updateAudio(req: Request, res: Response) {
             return res.status(403).send("Unauthorized");
         }
         let audioData: any = {};
-        upload.single('cancion') // Subir archivo de audio con multer
         if (req.file){
+            fs.rename(path.join(projectRootPath,'tmp',req.file.filename), path.join(projectRootPath,'audios',req.file.filename), function(err) {
+                if (err) throw err;
+                console.log('File moved');
+            });
+
             audioData.path = "/audios/"+req.file.filename;
             try{
                 deleteFile(path.join(projectRootPath,req.body.audioConsulta.path)); // Acceder a audioConsulta desde req
@@ -270,7 +244,7 @@ export async function updateAudio(req: Request, res: Response) {
             audioData.imgAudio = req.body.img;
             
         }
-
+        
         audioDatabase.updateAudioById(Number(req.params.idaudio),audioData);
 
         if (req.body.etiquetas) {
@@ -322,6 +296,25 @@ export async function playAudio(req: Request, res: Response) {
     }
 }
 
+export function deleteTmpFiles(req: Request, res: Response, next: NextFunction){
+    const folder = path.join(projectRootPath,'tmp');
+    fs.readdir(folder, (err, files) => {
+        if (err) {
+            console.error(err);
+            return;
+        }
+        for (const file of files) {
+            fs.unlink(path.join(folder, file), err => {
+                if (err) {
+                    console.error(err);
+                    return;
+                }
+            });
+        }
+    });
+    next();
+}
+
 
 function deleteFile(filePath: string) {
     try {
@@ -338,7 +331,7 @@ async function isOwnerOrAdmin(req: Request){
             if (propietarios.length === 0) {
                 throw new Error("Audio no encontrado");
             }
-            if (!propietarios.some(propietario => propietario.idUsuario === parseInt(req.auth?.idUsuario))) {
+            if (!propietarios.includes(parseInt(req.auth?.idUsuario))) {
                 return false;
             }
         }

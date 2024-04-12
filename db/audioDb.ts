@@ -68,7 +68,7 @@ export async function getArtistaAudioById(id: number) {
         },
     });
 
-    const artistas = audio.flatMap((audio) => audio.Artistas);
+    const artistas = audio.flatMap((audio) => audio.Artistas.map((artista) => artista.idUsuario));
 
     return artistas;
 }
