@@ -50,7 +50,6 @@
  *              descripcion: "Descripción de la lista"
  *              imgLista: "adsfas-asdfaijlk-a"
  *              tipoLista: "NORMAL"
- *              idUsuario: 1
  *              fechaUltimaMod: "2021-06-01T12:00:00Z"
  *      TipoLista:
  *          type: string
@@ -249,7 +248,25 @@ listaRouter.delete("/:idLista", auth.authenticate, listaController.deleteLista);
  *       content:
  *          application/json:
  *             schema:
- *                $ref: '#/components/schemas/Audio'
+ *                type: object
+ *                properties:
+ *                   nombre:
+ *                      type: string
+ *                   esAlbum:
+ *                      type: boolean
+ *                   esPrivada:
+ *                      type: boolean
+ *                   descripcion:
+ *                      type: string
+ *                   imgLista:
+ *                      type: string
+ *                   tipoLista:
+ *                      $ref: '#/components/schemas/TipoLista'
+ *                   audios:
+ *                      type: array
+ *                      items:
+ *                         type: number
+ *            
  *     parameters:
  *       - in: path
  *         name: idLista
