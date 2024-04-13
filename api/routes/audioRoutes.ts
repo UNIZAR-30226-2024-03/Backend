@@ -44,7 +44,7 @@ const upload = multer(
 
 /**
  * @swagger
- *  /audios:
+ *  /audio/{idaudio}:
  *  get:
  *    summary: Obtiene información del audio indicado en la URL
  *    tags: [Audio]
@@ -100,7 +100,7 @@ router.get('/:idaudio',auth.authenticate,audioController.verifyAudio,audioContro
 
 /**
  * @swagger
- *  /audios/play/{idaudio}:
+ *  /audio/play/{idaudio}:
  *  get:
  *    summary: Reproduce el audio indicado en la URL
  *    tags: [Audio]
@@ -130,7 +130,7 @@ router.get('/play/:idaudio', auth.authenticate,audioController.verifyAudio, audi
 
 /**
  * @swagger
- *  /audios/upload:
+ *  /audio/upload:
  *  post:
  *    summary: Crea un nuevo audio
  *    tags: [Audio]
@@ -205,7 +205,7 @@ router.post('/upload',auth.authenticate,audioController.deleteTmpFiles,upload.si
 
 /**
  * @swagger
- * /audios/delete/{idaudio}:
+ * /audio/delete/{idaudio}:
  *  delete:
  *    summary: Elimina el audio indicado en la URL
  *    tags: [Audio]
@@ -234,7 +234,7 @@ router.delete('/delete/:idaudio', auth.authenticate,audioController.verifyAudio,
 
 /**
  * @swagger
- *  /audios/update/{idaudio}:
+ *  /audio/update/{idaudio}:
  *  put:
  *    summary: Actualiza un audio existente
  *    tags: [Audio]
