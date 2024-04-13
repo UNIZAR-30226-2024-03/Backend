@@ -8,12 +8,6 @@ import mediaserver from 'mediaserver'; //Variable para manejar archivos de audio
 import * as etiquetasDatabase from "../../db/etiquetasDb.js";
 import * as audioDatabase from "../../db/audioDb.js";
 import { promisify } from 'util';
-
-
-
-
-
-
 const projectRootPath = process.cwd(); // Devuelve el directorio raíz del proyecto y se almacena en una constante
 
 
@@ -230,13 +224,16 @@ export async function updateAudio(req: Request, res: Response) {
         if (req.body.titulo) {
             audioData.titulo = req.body.titulo;
         }
+
         if (req.body.duracionSeg) {
             audioData.duracionSeg = parseInt(req.body.duracionSeg, 10);
         }
+
         if (req.body.fechaLanz) {
             const fechaLanz = new Date(req.body.fechaLanz);
             audioData.fechaLanz = fechaLanz.toISOString();
         }
+
         if (req.body.esAlbum) {
             audioData.esAlbum = req.body.esAlbum === 'true';
         }
