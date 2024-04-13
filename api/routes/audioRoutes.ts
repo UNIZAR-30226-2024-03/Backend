@@ -6,7 +6,6 @@
  */
 
 
-
 const projectRootPath = process.cwd(); // Devuelve el directorio raíz del proyecto y se almacena en una constante
 
 import { Router , Request, NextFunction} from "express";
@@ -146,38 +145,28 @@ router.get('/play/:idaudio', auth.authenticate,audioController.verifyAudio, audi
  *              cancion:
  *                type: string
  *                format: binary
- *                required: true
  *              titulo:
  *                type: string
- *                required: true
  *              duracionSeg:
  *                type: integer
- *                required: true
  *              fechaLanz:
  *                type: string
- *                required: true
  *                format: date-time
  *                description: "Formato de fecha: YYYY-MM-DDTHH:mm:ss.sssZ"
  *              esAlbum:
  *                type: boolean
- *                required: true
  *              esPrivada:
  *                type: boolean
- *                required: true
- *              imgAudio:
+ *              imgAudio (opcional):
  *                type: string
- *                required: false              
- *              idsUsuarios:
+ *              idsUsuarios (opcional):
  *                type: string
- *                required: false
  *                description: Lista de ids de usuario separados por comas
- *              etiquetas:
+ *              etiquetas (opcional):
  *                 type: string
- *                 required: false
  *                 description: Lista de ids de etiquetas separadas por comas
- *              tipoEtiqueta:
+ *              tipoEtiqueta (opcional):
  *                  type: string
- *                  required: false
  *                  description: Tipo de etiqueta a añadir, debe de ser 'Podcast' o 'Cancion'
  * 
  *    responses:
@@ -247,45 +236,34 @@ router.delete('/delete/:idaudio', auth.authenticate,audioController.verifyAudio,
  *          schema:
  *            type: object
  *            properties:
- *              cancion:
+ *              cancion (opcional):
  *                type: string
  *                format: binary
- *                required: false
- *              titulo:
+ *              titulo (opcional):
  *                type: string
- *                required: false
- *              duracionSeg:
+ *              duracionSeg (opcional):
  *                type: integer
- *                required: false
- *              fechaLanz:
+ *              fechaLanz (opcional):
  *                type: string
- *                required: false
  *                format: date-time
  *                description: "Formato de fecha: YYYY-MM-DDTHH:mm:ss.sssZ"
- *              esAlbum:
+ *              esAlbum (opcional):
  *                type: boolean
- *                required: false
- *              esPrivada:
+ *              esPrivada (opcional):
  *                type: boolean
- *                required: false
- *              imgAudio:
+ *              imgAudio (opcional):
  *                type: string
- *                required: false              
- *              idsUsuarios:
+ *              idsUsuarios (opcional):
  *                type: string
- *                required: false
  *                description: Lista de ids de usuario separados por comas
- *              etiquetas:
+ *              etiquetas (opcional):
  *                 type: string
- *                 required: false
  *                 description: Lista de ids de etiquetas separadas por comas
- *              tipoEtiqueta:
+ *              tipoEtiqueta (opcional):
  *                  type: string
- *                  required: false
  *                  description: Tipo de etiqueta a añadir, debe de ser 'Podcast' o 'Cancion'
- *              eliminarEtiquetas:
+ *              eliminarEtiquetas (opcional):
  *                  type: boolean
- *                  required: false
  *                  description: Indica si se deben eliminar las etiquetas del audio en vez de añadirlas
  * 
  *    responses:
