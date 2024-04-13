@@ -55,16 +55,7 @@ export async function tagsOfAudio (id: number): Promise<any> {
 
 export async function addTagToAudio(idAudio: number, idLabel: number, tipoEtiqueta: string) {
 
-  if (tipoEtiqueta === "Podcast") {
-    await prisma.etiquetaCancion.update({
-      where: { idEtiqueta: idLabel },
-      data: {
-        Audios: {
-          connect: { idAudio: idAudio },
-        },
-      },
-    });
-  } else if (tipoEtiqueta === "Cancion") {
+  if (tipoEtiqueta == 'Podcast') {
     await prisma.etiquetaPodcast.update({
       where: { idEtiqueta: idLabel },
       data: {
@@ -73,7 +64,40 @@ export async function addTagToAudio(idAudio: number, idLabel: number, tipoEtique
         },
       },
     });
+  } else if (tipoEtiqueta == 'Cancion') {
+    await prisma.etiquetaCancion.update({
+      where: { idEtiqueta: idLabel },
+      data: {
+        Audios: {
+          connect: { idAudio: idAudio },
+        },
+      },
+    });
   }
+}
+
+
+export async function removeTagFromAudio(idAudio: number, idLabel: number, tipoEtiqueta: string) {
+  
+    if (tipoEtiqueta == 'Podcast') {
+      await prisma.etiquetaPodcast.update({
+        where: { idEtiqueta: idLabel },
+        data: {
+          Audios: {
+            disconnect: { idAudio: idAudio },
+          },
+        },
+      });
+    } else if (tipoEtiqueta == 'Cancion') {
+      await prisma.etiquetaCancion.update({
+        where: { idEtiqueta: idLabel },
+        data: {
+          Audios: {
+            disconnect: { idAudio: idAudio },
+          },
+        },
+      });
+    }
 }
 
 export async function createTagSong (name: string): Promise<number> {

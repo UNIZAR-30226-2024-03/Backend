@@ -29,7 +29,8 @@ export async function getAudio(req: Request, res: Response) {
             res.status(403).send("Unauthorized");
         }else{
             const artistas = await audioDatabase.getArtistaAudioById(id);
-            res.json({...req.body.audioConsulta, artistas});
+            const vecesEscuchada = await audioDatabase.getVecesEscuchada(id);
+            res.json({...req.body.audioConsulta, artistas, vecesEscuchada});
         }
 
     } catch (error) {
@@ -89,21 +90,28 @@ export async function createAudio(req: Request, res: Response) {
         if (!req.file) {
             return res.status(400).send('No file uploaded');
         }
-        if (!req.body.titulo        ||
-            !req.body.duracionSeg   ||
-            !req.body.fechaLanz     || 
-            !req.body.esAlbum       ||
-            !req.body.esPrivada) {
-                return res.status(400).send('Bad Parameters, faltan parámetros');
+        if (!req.body.titulo                                ||
+            !req.body.duracionSeg                           ||
+            !req.body.fechaLanz                             || 
+            !req.body.esAlbum                               ||
+            !req.body.esPrivada                             || 
+            (!req.body.etiquetas && req.body.tipoEtiqueta)  ||
+            (req.body.etiquetas && !req.body.tipoEtiqueta)  ||
+            (req.body.tipoEtiqueta && req.body.tipoEtiqueta != 'Cancion' && req.body.tipoEtiqueta != 'Podcast')) {
+                return res.status(400).send('Bad Parameters, faltan parámetros o etiquetas incorrectas');
 
         }
         const fechaLanz = new Date(req.body.fechaLanz);
+        if (isNaN(fechaLanz.getTime())) {
+            return  res.status(400).send('Bad Parameters, fecha no válida');
+        }
+
         const fechaFormateada = fechaLanz.toISOString();
         let idsUsuarios2: number[] = [];
-        idsUsuarios2.push(req.auth?.idUsuario);
         if (req.body.idsUsuarios) {
             idsUsuarios2 = req.body.idsUsuarios.split(',').map(Number);
         }
+        idsUsuarios2.push(req.auth?.idUsuario);
         let img = "null";
         if (req.body.img ) {
             img = req.body.img;
@@ -113,19 +121,15 @@ export async function createAudio(req: Request, res: Response) {
             if (err) throw err;
             console.log('File moved');
         });
-        const audio = await audioDatabase.createAudioDB(req.body.titulo, req.file.filename, parseInt(req.body.duracionSeg, 10), fechaFormateada, Boolean(req.body.esAlbum), Boolean(req.body.esPrivada), idsUsuarios2,img);
+        const audio = await audioDatabase.createAudioDB(req.body.titulo, req.file.filename, parseInt(req.body.duracionSeg, 10), fechaFormateada, (req.body.esAlbum === 'true'), (req.body.esPrivada === 'true'), idsUsuarios2, img);
     
         if (req.body.etiquetas) {
-            if (req.body.tipoEtiqueta==="Podcast" || req.body.tipoEtiqueta==="Cancion") {
-                const etiquetas = req.body.etiquetas.split(',').map(Number);
-                for (const idEtiqueta of etiquetas) {
-                    await audioDatabase.linkLabelToAudio(audio.idAudio, idEtiqueta, req.body.tipoEtiqueta);
-                }
-            }else{
-                return res.status(400).send('Bad Parameters, etiqueta no válida');
+            const etiquetas = req.body.etiquetas.split(',').map(Number);
+            for (const idEtiqueta of etiquetas) {
+                console.log("Se va a linkar etiqueta a audio con tipo "+req.body.tipoEtiqueta+" y id "+idEtiqueta+" y id audio "+audio.idAudio);
+                await audioDatabase.linkLabelToAudio(audio.idAudio, idEtiqueta, req.body.tipoEtiqueta);
             }
-        }else if (!req.body.etiquetas && req.body.tipoEtiqueta) {
-            return res.status(400).send('Bad Parameters, faltan las etiquetas');
+
         }
 
         for (const idUsuario of idsUsuarios2) {
@@ -143,7 +147,7 @@ export async function createAudio(req: Request, res: Response) {
             await audioDatabase.addPropietariosToAudio(audio.idAudio, idsUsuarios2);
         }
 
-        res.json( { message: 'Audio added successfully' ,idaudio: audio.idAudio});
+        res.status(200).json( { message: 'Audio added successfully' ,idaudio: audio.idAudio});
 
         
     } catch (error) {
@@ -171,7 +175,7 @@ export async function deleteAudio(req: Request, res: Response) {
         }catch (error){
             return res.status(404).send(error);            
         }
-        res.json({ message: 'Audio deleted successfully' });
+        res.status(200).json({ message: 'Audio deleted successfully' });
     } catch (error) {
         res.status(500).send(error);
     }
@@ -234,11 +238,11 @@ export async function updateAudio(req: Request, res: Response) {
             audioData.fechaLanz = fechaLanz.toISOString();
         }
         if (req.body.esAlbum) {
-            audioData.esAlbum = req.body.esAlbum;
+            audioData.esAlbum = req.body.esAlbum === 'true';
         }
 
         if (req.body.esPrivada) {
-            audioData.esPrivada = Boolean(req.body.esPrivada);
+            audioData.esPrivada = req.body.esPrivada === 'true';
         }
         if (req.body.img) {
             audioData.imgAudio = req.body.img;
@@ -248,14 +252,20 @@ export async function updateAudio(req: Request, res: Response) {
         audioDatabase.updateAudioById(Number(req.params.idaudio),audioData);
 
         if (req.body.etiquetas) {
-            if (req.body.tipoEtiqueta==="Podcast" || req.body.tipoEtiqueta==="Cancion") {
-                console.log(req.body.etiquetas);
-                const etiquetas = req.body.etiquetas.split(',').map(Number);
-                for (const idEtiqueta of etiquetas) {
-                    await audioDatabase.linkLabelToAudio(Number(req.params.idaudio), idEtiqueta, req.body.tipoEtiqueta);
+            if (req.body.tipoEtiqueta=='Podcast' || req.body.tipoEtiqueta=='Cancion') {
+                if (req.body.eliminarEtiquetas) {
+                    const etiquetas = req.body.eliminarEtiquetas.split(',').map(Number);
+                    for (const idEtiqueta of etiquetas) {
+                        await audioDatabase.unlinkLabelToAudio(Number(req.params.idaudio), idEtiqueta, req.body.tipoEtiqueta);
+                    }
+                }else{
+                    const etiquetas = req.body.etiquetas.split(',').map(Number);
+                    for (const idEtiqueta of etiquetas) {
+                        await audioDatabase.linkLabelToAudio(Number(req.params.idaudio), idEtiqueta, req.body.tipoEtiqueta);
+                    }
                 }
             }else{
-                return res.status(400).send('Bad Parameters, etiqueta no válida');
+                return res.status(400).send('Bad Parameters,  tipo de etiqueta no válida');
             }
         }else if (!req.body.etiquetas && req.body.tipoEtiqueta) {
             return res.status(400).send('Bad Parameters, faltan las etiquetas');
@@ -276,9 +286,6 @@ export async function updateAudio(req: Request, res: Response) {
 
 export async function playAudio(req: Request, res: Response) {
     try {
-        if (!req.params.idaudio) {
-            return res.status(400).send('Bad Parameters');
-        }
         const audio = await audioDatabase.findAudioById(Number(req.params.idaudio));
         if (!audio) {
             return res.status(404).send("Audio not found");            
@@ -287,6 +294,7 @@ export async function playAudio(req: Request, res: Response) {
         const access = promisify(fs.access);
         await access(cancion, fs.constants.F_OK);
         if (!audio.esPrivada || await isOwnerOrAdmin(req)){
+            await audioDatabase.listenToAudio(req.auth?.idUsuario,Number(req.params.idaudio));
             mediaserver.pipe(req, res, cancion);
         }else{
             return res.status(403).send("Unauthorized");

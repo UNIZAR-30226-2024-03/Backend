@@ -87,7 +87,7 @@ export async function addPropietariosToAudio(id: number, idUsuarios: number[]) {
 }
 
 export async function linkLabelToAudio(idAudio: number, idLabel: number,tipoEtiqueta: string) {
-    if (tipoEtiqueta === "Podcast") {
+    if (tipoEtiqueta == 'Podcast') {
         await prisma.audio.update({
             where: { idAudio: idAudio },
             data: {
@@ -98,7 +98,7 @@ export async function linkLabelToAudio(idAudio: number, idLabel: number,tipoEtiq
         });
         await etiquetasDb.addTagToAudio(idAudio, idLabel, tipoEtiqueta);
 
-    } else if (tipoEtiqueta === "Cancion"){
+    } else if (tipoEtiqueta == 'Cancion'){
         await prisma.audio.update({
             where: { idAudio: idAudio },
             data: {
@@ -110,4 +110,48 @@ export async function linkLabelToAudio(idAudio: number, idLabel: number,tipoEtiq
         await etiquetasDb.addTagToAudio(idAudio, idLabel, tipoEtiqueta);
     }
     
+}
+
+export async function unlinkLabelToAudio(idAudio: number, idLabel: number,tipoEtiqueta: string) {
+    if (tipoEtiqueta == 'Podcast') {
+        await prisma.audio.update({
+            where: { idAudio: idAudio },
+            data: {
+                EtiquetasPodcast: {
+                    disconnect: { idEtiqueta: idLabel },
+                },
+            },
+        });
+        await etiquetasDb.removeTagFromAudio(idAudio, idLabel, tipoEtiqueta);
+    } else if (tipoEtiqueta == 'Cancion'){
+        await prisma.audio.update({
+            where: { idAudio: idAudio },
+            data: {
+                EtiquetasCancion: {
+                    disconnect: { idEtiqueta: idLabel },
+                },
+            },
+        });
+        await etiquetasDb.removeTagFromAudio(idAudio, idLabel, tipoEtiqueta);
+    }
+}
+
+
+export async function listenToAudio(userId: number, audioId: number) {
+    await prisma.escucha.create({
+      data: {
+        idUsuario: userId,
+        idAudio: audioId,
+        fecha: new Date(),
+      },
+    });
+}
+
+export async function getVecesEscuchada(audioId: number) {
+    const vecesEscuchada = await prisma.escucha.count({
+      where: {
+        idAudio: audioId,
+      },
+    });
+    return vecesEscuchada;
 }
