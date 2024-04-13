@@ -1,3 +1,12 @@
+/**
+ * @swagger
+ * tags:
+ *   name: Audio
+ *   description: Operaciones relacionadas con los audios
+ */
+
+
+
 const projectRootPath = process.cwd(); // Devuelve el directorio raíz del proyecto y se almacena en una constante
 
 import { Router , Request, NextFunction} from "express";
@@ -33,26 +42,262 @@ const upload = multer(
 
 
 
-//PRE: Se recibe un id de audio correcto en la URL
-//POST: Sube obtiene información de un audio con formato JSON
+/**
+ * @swagger
+ *  /audios:
+ *  get:
+ *    summary: Obtiene información del audio indicado en la URL
+ *    tags: [Audio]
+ *    security:
+ *      - bearerAuth: []
+ *    parameters:
+ *      - in: path
+ *        name: idaudio
+ *        required: true
+ *        description: Identificador del audio
+ *        schema:
+ *          type: integer
+ *    responses:
+ *      200:
+ *        description: Información del audio
+ *        content:
+ *          application/json:
+ *            schema:
+ *              type: object
+ *              properties:
+ *                idaudio:
+ *                  type: integer
+ *                titulo:
+ *                  type: string
+ *                path:
+ *                  type: string
+ *                duracionSeg:
+ *                  type: integer
+ *                fechaLanz:
+ *                  type: string
+ *                esAlbum:
+ *                  type: boolean
+ *                imgAudio:
+ *                  type: string
+ *                esPrivada:
+ *                  type: boolean
+ *                artistas:
+ *                  type: array
+ *                  items:
+ *                    type: integer
+ *                vecesEscuchada:
+ *                 type: integer
+ *      400:
+ *        description: No se ha recibido el id del audio
+ *      403:
+ *        description: No se tiene permiso para acceder a este recurso
+ *      404:
+ *        description: No se ha encontrado el audio con el id indicado
+ *      500:
+ *        description: Error interno del servidor
+ */
 router.get('/:idaudio',auth.authenticate,audioController.verifyAudio,audioController.getAudio);
 
-//PRE: Se recibe un id de audio correcto en la URL
-//POST: Se devuelve el archivo de audio en chunks
+/**
+ * @swagger
+ *  /audios/play/{idaudio}:
+ *  get:
+ *    summary: Reproduce el audio indicado en la URL
+ *    tags: [Audio]
+ *    security:
+ *      - bearerAuth: []
+ *    parameters:
+ *      - in: path
+ *        name: idaudio
+ *        required: true
+ *        description: Identificador del audio
+ *        schema:
+ *          type: integer
+ *    responses:
+ *      200:
+ *        description: Reproduciendo audio
+ *      400:
+ *        description: No se ha recibido el id del audio
+ *      403:
+ *        description: No se tiene permiso para acceder a este recurso
+ *      404:
+ *        description: No se ha encontrado el audio con el id indicado
+ *      500:
+ *        description: Error interno del servidor
+ */
 router.get('/play/:idaudio', auth.authenticate,audioController.verifyAudio, audioController.playAudio);
 
 
-//PRE: Se recibe un audio en formato .mp3 o .wav, con un título, duración y fecha de lanzamiento en formato ISO-8601
-//POST: Se sube el archivo a la base de datos
+/**
+ * @swagger
+ *  /audios/upload:
+ *  post:
+ *    summary: Crea un nuevo audio
+ *    tags: [Audio]
+ *    security:
+ *      - bearerAuth: []
+ *    requestBody:
+ *      required: true
+ *      content:
+ *        multipart/form-data:
+ *          schema:
+ *            type: object
+ *            properties:
+ *              cancion:
+ *                type: string
+ *                format: binary
+ *                required: true
+ *              titulo:
+ *                type: string
+ *                required: true
+ *              duracionSeg:
+ *                type: integer
+ *                required: true
+ *              fechaLanz:
+ *                type: string
+ *                required: true
+ *                format: date-time
+ *                description: "Formato de fecha: YYYY-MM-DDTHH:mm:ss.sssZ"
+ *              esAlbum:
+ *                type: boolean
+ *                required: true
+ *              esPrivada:
+ *                type: boolean
+ *                required: true
+ *              imgAudio:
+ *                type: string
+ *                required: false              
+ *              idsUsuarios:
+ *                type: string
+ *                required: false
+ *                description: Lista de ids de usuario separados por comas
+ *              etiquetas:
+ *                 type: string
+ *                 required: false
+ *                 description: Lista de ids de etiquetas separadas por comas
+ *              tipoEtiqueta:
+ *                  type: string
+ *                  required: false
+ *                  description: Tipo de etiqueta a añadir, debe de ser 'Podcast' o 'Cancion'
+ * 
+ *    responses:
+ *      200:
+ *       description: Audio creado correctamente
+ *       content:
+ *          application/json:
+ *            schema:
+ *              type: object
+ *              properties:
+ *                message:
+ *                 type: string
+ *                idaudio:
+ *                  type: integer
+ *      400:
+ *        description: Error con formato de la petición
+ *      403:
+ *        description: No se tiene permiso para acceder a este recurso
+ *      500:
+ *        description: Error interno del servidor
+ */
 router.post('/upload',auth.authenticate,audioController.deleteTmpFiles,upload.single('cancion'), audioController.verifyUsersList, audioController.createAudio);
 
 
-//PRE: Se recibe un id de audio correcto en la URL
-//POST: Se elimina el registro de BBDD y la canción del servidor
+
+/**
+ * @swagger
+ * /audios/delete/{idaudio}:
+ *  delete:
+ *    summary: Elimina el audio indicado en la URL
+ *    tags: [Audio]
+ *    security:
+ *      - bearerAuth: []
+ *    parameters:
+ *      - in: path
+ *        name: idaudio
+ *        required: true
+ *        description: Identificador del audio
+ *        schema:
+ *          type: integer
+ *    responses:
+ *      200:
+ *        description: Audio eliminado correctamente
+ *      400:
+ *        description: No se ha recibido el id del audio
+ *      403:
+ *        description: No se tiene permiso para acceder a este recurso
+ *      404:
+ *        description: No se ha encontrado el audio con el id indicado
+ *      500:
+ *        description: Error interno del servidor
+ */
 router.delete('/delete/:idaudio', auth.authenticate,audioController.verifyAudio,audioController.deleteAudio);
 
-//PRE: Se recibe un id de audio correcto en la URL
-//POST: Se edita el registro de BBDD y la canción del servidor
+/**
+ * @swagger
+ *  /audios/update/{idaudio}:
+ *  put:
+ *    summary: Actualiza un audio existente
+ *    tags: [Audio]
+ *    security:
+ *      - bearerAuth: []
+ *    requestBody:
+ *      required: true
+ *      content:
+ *        multipart/form-data:
+ *          schema:
+ *            type: object
+ *            properties:
+ *              cancion:
+ *                type: string
+ *                format: binary
+ *                required: false
+ *              titulo:
+ *                type: string
+ *                required: false
+ *              duracionSeg:
+ *                type: integer
+ *                required: false
+ *              fechaLanz:
+ *                type: string
+ *                required: false
+ *                format: date-time
+ *                description: "Formato de fecha: YYYY-MM-DDTHH:mm:ss.sssZ"
+ *              esAlbum:
+ *                type: boolean
+ *                required: false
+ *              esPrivada:
+ *                type: boolean
+ *                required: false
+ *              imgAudio:
+ *                type: string
+ *                required: false              
+ *              idsUsuarios:
+ *                type: string
+ *                required: false
+ *                description: Lista de ids de usuario separados por comas
+ *              etiquetas:
+ *                 type: string
+ *                 required: false
+ *                 description: Lista de ids de etiquetas separadas por comas
+ *              tipoEtiqueta:
+ *                  type: string
+ *                  required: false
+ *                  description: Tipo de etiqueta a añadir, debe de ser 'Podcast' o 'Cancion'
+ *              eliminarEtiquetas:
+ *                  type: boolean
+ *                  required: false
+ *                  description: Indica si se deben eliminar las etiquetas del audio en vez de añadirlas
+ * 
+ *    responses:
+ *      200:
+ *       description: Audio creado correctamente
+ *      400:
+ *        description: Error con formato de la petición
+ *      403:
+ *        description: No se tiene permiso para acceder a este recurso
+ *      500:
+ *        description: Error interno del servidor
+ */
 router.put('/update/:idaudio', auth.authenticate,audioController.deleteTmpFiles,upload.single('cancion'),audioController.verifyAudio,audioController.verifyUsersList,audioController.updateAudio);
 
 
