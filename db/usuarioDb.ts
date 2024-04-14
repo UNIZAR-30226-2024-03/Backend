@@ -113,3 +113,12 @@ export async function usuarioDeleteEmailPrisma(email: string): Promise<void> {
     where: { email: email },
   });
 }
+
+export async function usuarioModifyLastAudioPrisma(idUsuario: number,idUltimoAudio: number,segFinAudio: number): Promise<void> {
+  await prisma.usuario.update({
+    where: { idUsuario: idUsuario },
+    data: { 
+      idUltimoAudio: idUltimoAudio,
+      segFinAudio: segFinAudio },
+  });
+}
