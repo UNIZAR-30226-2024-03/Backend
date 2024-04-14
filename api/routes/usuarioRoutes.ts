@@ -56,13 +56,18 @@ const router = Router();
  *      - bearerAuth: []
  *    tags: [Usuario]
  *    parameters:
- *      - in: query
- *        idUsuario:
- *          type: integer
- *          description: Id del usuario a obtener
- *        rrss:
- *          type: boolean
- *          description: Indica si se quiere obtener las redes sociales del usuario
+ *       - in: query
+ *         name: idUsuario
+ *         required: false
+ *         description: Busca al usuario por su id.
+ *         schema:
+ *           type: string
+ *       - in: query
+ *         name: rrss
+ *         required: false
+ *         description: True si se quiere obtener los seguidores y seguidos del usuario.
+ *         schema:
+ *           type: boolean
  *    responses:
  *      200:
  *        description: Éxito, devuelve la información del usuario
@@ -130,10 +135,11 @@ router.put(
  *      - bearerAuth: []
  *    tags: [Usuario]
  *    parameters:
- *      - in: params
- *        seguido:
- *          type: integer
- *          description: Id del usuario a seguir
+ *       - in: params
+ *         name: seguido
+ *         description: Id del usuario a seguir
+ *         schema:
+ *           type: string
  *    responses:
  *      200:
  *        description: Éxito, el usuario autenticado sigue al usuario especificado
@@ -162,10 +168,11 @@ router.put(
  *      - bearerAuth: []
  *    tags: [Usuario]
  *    parameters:
- *      - in: params
- *        seguido:
- *          type: integer
- *          description: Id del usuario a dejar de seguir
+ *       - in: params
+ *         name: seguido
+ *         description: Id del usuario a seguir
+ *         schema:
+ *           type: string
  *    responses:
  *      200:
  *        description: Éxito, el usuario autenticado sigue al usuario especificado
