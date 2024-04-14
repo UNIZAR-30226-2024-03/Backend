@@ -55,17 +55,36 @@ io.on("connection", (socket) => {
       }
  });
  
-  socket.on('message', (message, room) => {
-    console.log('Mensaje recibido: "' + message+ '" a la sala: '+room+' desde el socket: '+socket.id);
+  socket.on('message', (message) => {
+    message = JSON.parse(message);
+    if (('JWT' in message) && ('room' in message) && ('message' in message)) {
+      const idUsuario = authenticateWS(message.JWT);
+      console.log(idUsuario);
+      if(idUsuario != null){
+        console.log('Mensaje recibido a la sala: '+message.room+' desde el socket: '+socket.id);
 
-    //broadcast a todos los sockets en la sala
-    io.to(room).emit('message', 'Mensaje recibido: ' + message);
+        //broadcast a todos los sockets en la sala, incluyendo el que envió el mensaje
+        io.to(message.room).emit('message', 'Mensaje recibido: ' + message);
+      }else{
+        console.log(`Socket ${socket.id} no autorizado, `+message.JWT+" no es un token valido, "+message.room);
+      }
+    }
+
   });
 
-  socket.on('reload', (room) => {
-    console.log('Recargar la sala: '+room);
-    //broadcast a todos los sockets en la sala
-    io.to(room).emit('reload', 'actualizar');
+  socket.on('reload', (message) => {
+    message = JSON.parse(message);
+    if (('JWT' in message) && ('room' in message) ) {
+      const idUsuario = authenticateWS(message.JWT);
+      console.log(idUsuario);
+      if(idUsuario != null){
+        console.log('Recargar la sala: '+message.room);
+        io.to(message.room).emit('reload', 'actualizar');
+      }else{
+        console.log(`Socket ${socket.id} no autorizado, `+message.JWT+" no es un token valido, "+message.room);
+      
+      }
+    }
   });
 
 
@@ -76,7 +95,7 @@ io.on("connection", (socket) => {
       const idUsuario = authenticateWS(message.JWT);
       if(idUsuario != null){
         console.log(`Vamos a modificar el usuario`, idUsuario, message.idAudio, message.currentTime);
-        usuarioDatabase.usuarioModifyPrisma(idUsuario, null, null, message.idAudio, message.currentTime);
+        usuarioDatabase.usuarioModifyLastAudioPrisma(idUsuario, message.idAudio, message.currentTime);
       }else{
         console.log(`Socket ${socket.id} no autorizado, `+message.JWT+" no es un token valido, "+message.room);
       }
