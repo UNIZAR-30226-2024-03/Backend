@@ -9,7 +9,7 @@ const httpsServer = https.createServer(app);
 export const io = new Server(httpsServer, {
   cors: {
     origin: "*",
-    methods: ["GET", "POST"]
+    methods: ["GET", "POST", "PUT", "OPTIONS"]
   }
 });
 
@@ -41,11 +41,11 @@ io.on("connection", (socket) => {
   });
 
   socket.on('join', (message) => {
-      console.log(message)
       message = JSON.parse(message);
-      if (!('JWT' in message) || !('room' in message)) {
+      if (('JWT' in message) && ('room' in message)) {
         console.log("Mensaje recibido: "+message.JWT+" a la sala: "+message.room);
         const idUsuario = authenticateWS(message.JWT);
+        console.log(idUsuario);
         if(idUsuario != null){
           console.log(`Socket ${socket.id} joining ${message.room}`);
           socket.join(message.room);
@@ -56,16 +56,23 @@ io.on("connection", (socket) => {
  });
  
   socket.on('message', (message, room) => {
-    console.log('Mensaje recibido: "' + message+ '" a la sala: '+room);
+    console.log('Mensaje recibido: "' + message+ '" a la sala: '+room+' desde el socket: '+socket.id);
 
-    // Enviar un mensaje a todos los clientes en la sala
-    socket.to(room).emit('message', 'Mensaje recibido: ' + message);
+    //broadcast a todos los sockets en la sala
+    io.to(room).emit('message', 'Mensaje recibido: ' + message);
   });
+
+  socket.on('reload', (room) => {
+    console.log('Recargar la sala: '+room);
+    //broadcast a todos los sockets en la sala
+    io.to(room).emit('reload', 'actualizar');
+  });
+
 
   socket.on('Sync', (message, room) => {
     console.log('Mensaje recibido: "' + message+ '" a la sala: '+room);
     message = JSON.parse(message);
-    if (!('JWT' in message) || !('idAudio' in message) || !('currentTime' in message)) {
+    if (('JWT' in message) && ('idAudio' in message) && ('currentTime' in message)) {
       const idUsuario = authenticateWS(message.JWT);
       if(idUsuario != null){
         console.log(`Vamos a modificar el usuario`, idUsuario, message.idAudio, message.currentTime);
@@ -74,9 +81,9 @@ io.on("connection", (socket) => {
         console.log(`Socket ${socket.id} no autorizado, `+message.JWT+" no es un token valido, "+message.room);
       }
     }
-
   });
 
-
+  
 });
+
 

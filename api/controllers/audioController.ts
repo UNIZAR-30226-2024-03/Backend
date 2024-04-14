@@ -20,7 +20,7 @@ export async function getAudio(req: Request, res: Response) {
         const id = Number(req.params.idaudio);
 
         if (req.body.audioConsulta.esPrivada && !await isOwnerOrAdmin(req)) { //Falta lógica de verificación de usarios
-            res.status(403).send("Unauthorized");
+            res.status(403).send("Permission denied, unsifficient permissions");
         }else{
             const artistas = await audioDatabase.getArtistaAudioById(id);
             const vecesEscuchada = await audioDatabase.getVecesEscuchada(id);
@@ -161,7 +161,7 @@ export async function deleteAudio(req: Request, res: Response) {
     try {
         const id = Number(req.params.idaudio);
         if (!await isOwnerOrAdmin(req)){
-            return res.status(403).send("Unauthorized");
+            return res.status(403).send("Permission denied, unsifficient permissions");
         }
         audioDatabase.deleteAudioById(id);
         try{
@@ -204,7 +204,7 @@ export async function verifyAudio(req: Request, res: Response, next: NextFunctio
 export async function updateAudio(req: Request, res: Response) {
     try {
         if (!await isOwnerOrAdmin(req)){
-            return res.status(403).send("Unauthorized");
+            return res.status(403).send("Permission denied, unsifficient permissions");
         }
         let audioData: any = {};
         if (req.file){
@@ -294,7 +294,7 @@ export async function playAudio(req: Request, res: Response) {
             await audioDatabase.listenToAudio(req.auth?.idUsuario,Number(req.params.idaudio));
             mediaserver.pipe(req, res, cancion);
         }else{
-            return res.status(403).send("Unauthorized");
+            return res.status(403).send("Permission denied, unsifficient permissions");
         }
     } catch (err) {
         res.status(404).send('File not found');
