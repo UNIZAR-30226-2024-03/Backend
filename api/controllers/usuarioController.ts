@@ -44,9 +44,8 @@ export async function usuarioGet(
   next: NextFunction,
 ) {
   try {
-    const idUsuario = Number(req.query.idUsuario) != null ?  Number(req.query.idUsuario) : Number(req.auth?.idUsuario);
+    const idUsuario = Number.isNaN(req.query.idUsuario) ? Number(req.auth?.idUsuario) : req.query.idUsuario;
     const listas = Boolean(req.query.listas);
-
     const currentUsuario = await usuarioDbJs.usuarioGetPrisma(
       idUsuario,
       listas,
