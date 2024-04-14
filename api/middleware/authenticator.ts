@@ -29,6 +29,7 @@ export const authenticate = jwt({
   getToken: getTokenInHeader,
 });
 
+
 // OptionalAuthenticate is a middleware that will not throw errors, the authentication is optional.
 export const optionalAuthenticate = jwt({
   algorithms: ["HS256"],
@@ -36,3 +37,5 @@ export const optionalAuthenticate = jwt({
   credentialsRequired: false,
   getToken: getTokenInHeader,
 });
+
+

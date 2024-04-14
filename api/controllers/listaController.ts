@@ -36,8 +36,7 @@ const isOwnerOrAdmin = async (idLista : number, idUsuario : number, esAdmin : Bo
 
 
 /**
- * Crea una lista nueva
-  * @param {ObjectId} idUsuario
+ * Crea una lista nueva de la que el usuario del jwt será propietario
   * @param {string} nombre
   * @param {string} descripcion
   * @param {boolean} esPrivada
@@ -48,13 +47,13 @@ const isOwnerOrAdmin = async (idLista : number, idUsuario : number, esAdmin : Bo
   * @returns {Promise<Lista>}
  */
 export const createLista = catchAsync(async (req : Request, res : Response) => {
-  const { nombre, descripcion, esPrivada, imgLista, esAlbum, tipoLista, idUsuario, audios } = req.body; 
+  const { nombre, descripcion, esPrivada, imgLista, esAlbum, tipoLista, audios } = req.body; 
   // No se necesita Seguidores porque al crear una lista no tiene seguidores
   // No necesita fechaUltimaMod porque se crea en el momento de la creación
 
   // createLista puede lanzar un error si el nombre de la lista ya existe por o que se debe capturar
   try {
-    const lista = await listasDb.createLista(nombre, descripcion, esPrivada, esAlbum, imgLista, tipoLista, idUsuario, audios);
+    const lista = await listasDb.createLista(nombre, descripcion, esPrivada, esAlbum, imgLista, tipoLista, req.auth?.idUsuario, audios);
     res.status(httpStatus.CREATED).send(lista);
   } catch (error) {
     res.status(httpStatus.BAD_REQUEST).send(error)
@@ -490,7 +489,7 @@ export const deleteCollaboratorFromLista = catchAsync(async (req : Request, res 
  * @param {ObjectId} idUsuario
  * @returns {Promise<Lista[]>}
  */
-export const getListasByUser = catchAsync(async (req : Request, res : Response) => {
+export const getListasByPropietario = catchAsync(async (req : Request, res : Response) => {
   try {
     if(!await usuarioDb.usuarioExistPrisma(parseInt(req.params.idUsuario))) {
       res.status(httpStatus.NOT_FOUND).send("Usuario no encontrado");
