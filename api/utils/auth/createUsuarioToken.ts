@@ -13,6 +13,7 @@ export function createUsuarioToken(usuario: Usuario) {
   const tokenObject = {
     idUsuario: usuario.idUsuario,
     email: usuario.email,
+    esAdmin: usuario.esAdmin,
     expirationDate: new Date(Date.now() + EXPIRATION * 60 * 1000),
   };
   const usuarioJSON = JSON.stringify(tokenObject);
