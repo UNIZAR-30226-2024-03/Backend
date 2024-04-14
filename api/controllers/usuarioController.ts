@@ -44,7 +44,7 @@ export async function usuarioGet(
   next: NextFunction,
 ) {
   try {
-    const idUsuario = req.query.idUsuario || Number(req.auth?.idUsuario);
+    const idUsuario = Number(req.query.idUsuario) != null ?  Number(req.query.idUsuario) : Number(req.auth?.idUsuario);
     const listas = Boolean(req.query.listas);
 
     const currentUsuario = await usuarioDbJs.usuarioGetPrisma(
