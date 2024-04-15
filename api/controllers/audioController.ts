@@ -303,20 +303,24 @@ export async function playAudio(req: Request, res: Response) {
 
 export function deleteTmpFiles(req: Request, res: Response, next: NextFunction){
     const folder = path.join(projectRootPath,'tmp');
-    fs.readdir(folder, (err, files) => {
-        if (err) {
-            console.error(err);
-            return;
-        }
-        for (const file of files) {
-            fs.unlink(path.join(folder, file), err => {
-                if (err) {
-                    console.error(err);
-                    return;
-                }
-            });
-        }
-    });
+    if (!fs.existsSync(folder)){
+        fs.mkdirSync(folder, { recursive: true });
+    }else{
+        fs.readdir(folder, (err, files) => {
+            if (err) {
+                console.error(err);
+                return;
+            }
+            for (const file of files) {
+                fs.unlink(path.join(folder, file), err => {
+                    if (err) {
+                        console.error(err);
+                        return;
+                    }
+                });
+            }
+        });
+    }
     next();
 }
 
