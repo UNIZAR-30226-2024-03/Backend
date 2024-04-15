@@ -25,13 +25,13 @@ describe('Lista routes', () => {
   let audioTest2_id: number | undefined = undefined;
   
   let lista: Lista | undefined = undefined;
+  let listaPub: Lista | undefined = undefined;
   let listaToDeleteId: number | undefined = undefined;
 
   let bearer: string | undefined = undefined;
   let bearer2: string | undefined = undefined;
   let bearer3: string | undefined = undefined;
 
- 
   beforeAll(async () => {
     const userTest1 = await usuarioCreatePrisma(
       'test1',
@@ -95,9 +95,20 @@ describe('Lista routes', () => {
       'imgLista',
       'NORMAL', // tipoLista
       userTest1_id, // idUsuario
-      [audioTest1_id, audioTest2_id] // Sin audios
+      [audioTest1_id, audioTest2_id] // Un audio privado y uno público
     );
-  });
+
+    listaPub = await listasDb.createLista(
+      'listaTestPub',
+      'descripcion',
+      false, // esPrivada
+      true, //esAlbum
+      'imgLista',
+      'NORMAL', // tipoLista
+      userTest1_id, // idUsuario
+      [audioTest1_id, audioTest2_id] // Un audio privado y uno público
+    );}
+  , 10000);
 
   afterAll(async () => {
     await usuarioDeleteEmailPrisma('test1@test.com');
@@ -107,6 +118,7 @@ describe('Lista routes', () => {
     await deleteAudioById(audioTest2_id ?? 0);
 
     await listasDb.deleteListaById(lista?.idLista as number);
+    await listasDb.deleteListaById(listaPub?.idLista as number);
   });
 
   const LISTA_ROUTE = '/lista';
@@ -368,15 +380,14 @@ describe('Lista routes', () => {
 
 
     it('returns ' + httpStatus.OK + ' and correct result when user not owner of private audios in list', async () => {
-      // Hacemos la lista pública
-      // await listasDb.updateListaById(lista?.idLista as number, { esPrivada: false });
 
       await request(app)
-        .get(`${LISTA_EXTRA}/${lista?.idLista}`)
+        .get(`${LISTA_EXTRA}/${listaPub?.idLista}`)
         .set('Authorization', `Bearer ${bearer2}`)
         .expect((res) => {
+          // console.log("when user not owner of private audios in list", res.body);
           expect(res.status).toEqual(httpStatus.OK);
-          expect(res.body.nombre).toEqual('listaTest');
+          expect(res.body.nombre).toEqual('listaTestPub');
           expect(res.body.descripcion).toEqual('descripcion');
           expect(res.body.esPrivada).toEqual(false);
           expect(res.body.esAlbum).toEqual(true);
@@ -388,8 +399,6 @@ describe('Lista routes', () => {
           expect(res.body.Seguidores).toBeDefined();
         });
 
-      // Volvemos a dejar la lista privada
-      // await listasDb.updateListaById(lista?.idLista as number, { esPrivada: true });
     });
 
     it('returns ' + httpStatus.OK + ' and user is owner of private audios in list', async () => {
@@ -397,6 +406,7 @@ describe('Lista routes', () => {
         .get(`${LISTA_EXTRA}/${lista?.idLista}`)
         .set('Authorization', `Bearer ${bearer}`)
         .expect((res) => {
+          expect(res.status).toEqual(httpStatus.OK);
           expect(res.body.nombre).toEqual('listaTest');
           expect(res.body.descripcion).toEqual('descripcion');
           expect(res.body.esPrivada).toEqual(true);
@@ -431,9 +441,10 @@ describe('Lista routes', () => {
 
     it('returns ' + httpStatus.OK + ' and correct result when user not owner of audio privado', async () => {
       await request(app)
-        .get(`${LISTA_EXTRA}/Audios/${lista?.idLista}`)
+        .get(`${LISTA_EXTRA}/Audios/${listaPub?.idLista}`)
         .set('Authorization', `Bearer ${bearer2}`)
         .expect((res) => {
+          // console.log("when user not owner of audio privado", res.body);
           expect(res.status).toEqual(httpStatus.OK);
           expect(res.body.length).toEqual(1);
         });
@@ -462,10 +473,12 @@ describe('Lista routes', () => {
     });
 
     it('returns ' + httpStatus.UNAUTHORIZED + ' when lista privada and user is not owner or admin', async () => {
+  
       await request(app)
         .get(`${LISTA_EXTRA}/Propietarios/${lista?.idLista}`)
         .set('Authorization', `Bearer ${bearer2}`)
         .expect(httpStatus.UNAUTHORIZED);
+      
     });
 
     it('returns ' + httpStatus.OK + ' when all params are ok', async () => {
