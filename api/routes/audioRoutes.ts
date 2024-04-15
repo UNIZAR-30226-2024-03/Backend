@@ -157,6 +157,8 @@ router.get('/play/:idaudio', auth.authenticate,audioController.verifyAudio, audi
  *                type: boolean
  *              esPrivada:
  *                type: boolean
+ *              esPodcast:
+ *               type: boolean
  *              imgAudio (opcional):
  *                type: string
  *              idsUsuarios (opcional):
