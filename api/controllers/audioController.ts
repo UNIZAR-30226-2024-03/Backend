@@ -94,8 +94,12 @@ export async function createAudio(req: Request, res: Response) {
             (req.body.etiquetas && !req.body.tipoEtiqueta)  ||
             (req.body.tipoEtiqueta && req.body.tipoEtiqueta != 'Cancion' && req.body.tipoEtiqueta != 'Podcast')) {
                 return res.status(400).send('Bad Parameters, faltan parámetros o etiquetas incorrectas');
-
         }
+        if ((req.body.tipoEtiqueta == 'Podcast' && req.body.esPodcast == 'false') ||
+            (req.body.tipoEtiqueta == 'Cancion' && req.body.esPodcast == 'true')) {
+            return res.status(400).send('Bad Parameters, un podcast no puede tener etiquetas de canción y viceversa');
+        }
+        
         const fechaLanz = new Date(req.body.fechaLanz);
         if (isNaN(fechaLanz.getTime())) {
             return  res.status(400).send('Bad Parameters, fecha no válida');
