@@ -59,7 +59,8 @@ describe('Lista routes', () => {
       false,
       true, // esPrivada
       [userTest1.idUsuario],
-      'imgAudio'
+      'imgAudio',
+      false
     );
 
     const audioTest2 = await createAudioDB(
@@ -70,7 +71,8 @@ describe('Lista routes', () => {
       false,
       false,
       [userTest2.idUsuario],
-      'imgAudio2'
+      'imgAudio2',
+      true
     );
 
     userTest1_id = userTest1.idUsuario;
@@ -163,7 +165,6 @@ describe('Lista routes', () => {
           audios: [],
         })
         .expect((res) => {
-          // console.log(res.body);
           expect(res.body.nombre).toEqual('listaTest');
           expect(res.body.descripcion).toEqual('descripcion');
           expect(res.body.esPrivada).toEqual(true);
@@ -335,6 +336,7 @@ describe('Lista routes', () => {
         .get(`${LISTA_ROUTE}/${lista?.idLista}`)
         .set('Authorization', `Bearer ${bearer}`)
         .expect((res) => {
+          expect(res.status).toEqual(httpStatus.OK);
           expect(res.body.nombre).toEqual('listaTest');
           expect(res.body.descripcion).toEqual('descripcion');
           expect(res.body.esPrivada).toEqual(true);
@@ -365,31 +367,35 @@ describe('Lista routes', () => {
 
 
 
-    it('returns ' + httpStatus.OK + ' and correct result when owner all params are ok and user is not owner or admin', async () => {
+    it('returns ' + httpStatus.OK + ' and correct result when user not owner of private audios in list', async () => {
+      // Hacemos la lista pública
+      // await listasDb.updateListaById(lista?.idLista as number, { esPrivada: false });
+
       await request(app)
         .get(`${LISTA_EXTRA}/${lista?.idLista}`)
         .set('Authorization', `Bearer ${bearer2}`)
         .expect((res) => {
+          expect(res.status).toEqual(httpStatus.OK);
           expect(res.body.nombre).toEqual('listaTest');
           expect(res.body.descripcion).toEqual('descripcion');
-          expect(res.body.esPrivada).toEqual(true);
+          expect(res.body.esPrivada).toEqual(false);
           expect(res.body.esAlbum).toEqual(true);
           expect(res.body.imgLista).toEqual('imgLista');
           expect(res.body.tipoLista).toEqual('NORMAL');
-          // Tiene que tener un campo Audios, Propietarios y Seguidores
-          expect(res.body.Audios).toBeDefined();
-          expect(res.body.Audios.length).toEqual(1); // La lista de test tiene un audio público y uno privado
 
+          expect(res.body.Audios.length).toEqual(1); // La lista de test tiene un audio público y uno privado
           expect(res.body.Propietarios).toBeDefined();
           expect(res.body.Seguidores).toBeDefined();
         });
+
+      // Volvemos a dejar la lista privada
+      // await listasDb.updateListaById(lista?.idLista as number, { esPrivada: true });
     });
 
-    // TODO: Añadir 2 audios a la lista para que uno sea público y otro privado
-    it('returns ' + httpStatus.OK + ' and correct result when lista is public and user not owner/admin', async () => {
+    it('returns ' + httpStatus.OK + ' and user is owner of private audios in list', async () => {
       await request(app)
         .get(`${LISTA_EXTRA}/${lista?.idLista}`)
-        .set('Authorization', `Bearer ${bearer2}`)
+        .set('Authorization', `Bearer ${bearer}`)
         .expect((res) => {
           expect(res.body.nombre).toEqual('listaTest');
           expect(res.body.descripcion).toEqual('descripcion');
@@ -397,9 +403,8 @@ describe('Lista routes', () => {
           expect(res.body.esAlbum).toEqual(true);
           expect(res.body.imgLista).toEqual('imgLista');
           expect(res.body.tipoLista).toEqual('NORMAL');
-          // Tiene que tener un campo Audios, Propietarios y Seguidores
-          expect(res.body.Audios).toBeDefined();
-          expect(res.body.Audios[0]).toBeDefined(); // La lista de test tiene un audio que se ha añadido al crearla
+          
+          expect(res.body.Audios.length).toEqual(2); // La lista de test tiene un audio que se ha añadido al crearla
           expect(res.body.Propietarios).toBeDefined();
           expect(res.body.Seguidores).toBeDefined();
         });
@@ -427,18 +432,20 @@ describe('Lista routes', () => {
     it('returns ' + httpStatus.OK + ' and correct result when user not owner of audio privado', async () => {
       await request(app)
         .get(`${LISTA_EXTRA}/Audios/${lista?.idLista}`)
-        .set('Authorization', `Bearer ${bearer}`)
+        .set('Authorization', `Bearer ${bearer2}`)
         .expect((res) => {
-          expect(res.body).toEqual([audioTest1_id]);
+          expect(res.status).toEqual(httpStatus.OK);
+          expect(res.body.length).toEqual(1);
         });
     });
 
     it('returns ' + httpStatus.OK + ' and correct result when user is owner of audio privado', async () => {
       await request(app)
         .get(`${LISTA_EXTRA}/Audios/${lista?.idLista}`)
-        .set('Authorization', `Bearer ${bearer2}`)
+        .set('Authorization', `Bearer ${bearer}`)
         .expect((res) => {
-          expect(res.body).toEqual([audioTest1_id, audioTest2_id]);
+          expect(res.status).toEqual(httpStatus.OK);
+          expect(res.body.length).toEqual(2);
         });
     });
 
@@ -570,22 +577,29 @@ describe('Lista routes', () => {
         .expect(httpStatus.NOT_FOUND);
     });
 
-    // it('returns ' + httpStatus.UNAUTHORIZED + ' when user is not owner or admin', async () => {
-    //   await request(app)
-    //     .post(`${LISTA_AUDIO}/${lista?.idLista}/${audioTest1_id}`)
-    //     .set('Authorization', `Bearer ${bearer2}`)
-    //     .expect(httpStatus.UNAUTHORIZED);
-    // });
+    it('returns ' + httpStatus.UNAUTHORIZED + ' when user is not owner or admin', async () => {
+      await request(app)
+        .post(`${LISTA_AUDIO}/${lista?.idLista}/${audioTest1_id}`)
+        .set('Authorization', `Bearer ${bearer2}`)
+        .expect(httpStatus.UNAUTHORIZED);
+    });
 
     //TODO: Probar con un audio que sea privado
 
 
-    // it('returns ' + httpStatus.CREATED + ' when all params are ok', async () => {
-    //   await request(app)
-    //     .post(`${LISTA_AUDIO}/${lista?.idLista}/${audioTest1_id}`)
-    //     .set('Authorization', `Bearer ${bearer}`)
-    //     .expect(httpStatus.CREATED);
-    // });
+    it('returns ' + httpStatus.CREATED + ' when audio privado', async () => {
+      await request(app)
+        .post(`${LISTA_AUDIO}/${lista?.idLista}/${audioTest1_id}`)
+        .set('Authorization', `Bearer ${bearer}`)
+        .expect(httpStatus.CREATED);
+    });
+
+    it('returns ' + httpStatus.CREATED + ' when audio publico', async () => {
+      await request(app)
+        .post(`${LISTA_AUDIO}/${lista?.idLista}/${audioTest2_id}`)
+        .set('Authorization', `Bearer ${bearer}`)
+        .expect(httpStatus.CREATED);
+    });
   });
 
 
@@ -605,19 +619,26 @@ describe('Lista routes', () => {
         .expect(httpStatus.NOT_FOUND);
     });
 
-    // it('returns ' + httpStatus.UNAUTHORIZED + ' when user is not owner or admin', async () => {
-    //   await request(app)
-    //     .delete(`${LISTA_AUDIO}/${lista?.idLista}/${audioTest1_id}`)
-    //     .set('Authorization', `Bearer ${bearer2}`)
-    //     .expect(httpStatus.UNAUTHORIZED);
-    // });
+    it('returns ' + httpStatus.UNAUTHORIZED + ' when user is not owner or admin', async () => {
+      await request(app)
+        .delete(`${LISTA_AUDIO}/${lista?.idLista}/${audioTest1_id}`)
+        .set('Authorization', `Bearer ${bearer2}`)
+        .expect(httpStatus.UNAUTHORIZED);
+    });
 
-    // it('returns ' + httpStatus.NO_CONTENT + ' when all params are ok', async () => {
-    //   await request(app)
-    //     .delete(`${LISTA_AUDIO}/${lista?.idLista}/${audioTest1_id}`)
-    //     .set('Authorization', `Bearer ${bearer}`)
-    //     .expect(httpStatus.NO_CONTENT);
-    // });
+    it('returns ' + httpStatus.NO_CONTENT + ' when audio privado', async () => {
+      await request(app)
+        .delete(`${LISTA_AUDIO}/${lista?.idLista}/${audioTest1_id}`)
+        .set('Authorization', `Bearer ${bearer}`)
+        .expect(httpStatus.NO_CONTENT);
+    });
+
+    it('returns ' + httpStatus.NO_CONTENT + ' when audio publico', async () => {
+      await request(app)
+        .delete(`${LISTA_AUDIO}/${lista?.idLista}/${audioTest2_id}`)
+        .set('Authorization', `Bearer ${bearer}`)
+        .expect(httpStatus.NO_CONTENT);
+    });
   });
 
 
