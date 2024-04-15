@@ -30,7 +30,7 @@ BEGIN
         )
         GROUP BY aec."A"
         ORDER BY COUNT(*) DESC
-        LIMIT 10;
+        LIMIT 50;
 
     END LOOP;
 
@@ -40,7 +40,7 @@ BEGIN
 	    FROM public."Escucha"
 	    GROUP BY "idAudio"
 	    ORDER BY escuchas DESC
-	    LIMIT 10
+	    LIMIT 50
 	) AS subquery LOOP
 	    -- Generar nombre de lista
 	    lista_top_nombre := 'Top 10 Most Played';
