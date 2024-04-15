@@ -67,14 +67,14 @@ describe("Auth routes", () => {
     it("returns 400 missing params", async () => {
       await supertest(app).post(LOGIN_ROUTE).send({}).expect(400);
     });
-    it("returns 404 user does not exist", async () => {
+    it("returns 401 user does not exist", async () => {
       await supertest(app)
         .post(LOGIN_ROUTE)
         .send({
           email: "not_found@testing.com",
           contrasegna: "password",
         })
-        .expect(404);
+        .expect(401);
     });
     it("returns 401 incorrect password", async () => {
       await supertest(app)
