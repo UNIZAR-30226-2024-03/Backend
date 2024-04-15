@@ -12,7 +12,7 @@ export const usuarioModifySchema = z.object({
 export const usuarioGetSchema = z.object({
   query: z.object({
     idUsuario: z.coerce.number().int().optional().transform(Number),
-    listas: z.coerce.boolean().optional().transform(Boolean),
+    rrss: z.coerce.boolean().optional().transform(Boolean),
   }),
 });
 
