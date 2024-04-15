@@ -77,9 +77,15 @@ export async function usuarioModifyPrisma(
   idUltimoAudio: number | null,
   segFinAudio: number | null,
 ): Promise<Usuario | null> {
+  let data = {};
+  if (contrasegna) data = { ...data, contrasegna };
+  if (imgPerfil) data = { ...data, imgPerfil };
+  if (idUltimoAudio) data = { ...data, idUltimoAudio };
+  if (segFinAudio) data = { ...data, segFinAudio };
+  
   const usuario = await prisma.usuario.update({
     where: { idUsuario: idUsuario },
-    data: { contrasegna, imgPerfil, idUltimoAudio, segFinAudio },
+    data: data,
   });
   return usuario;
 }
@@ -111,5 +117,14 @@ export async function usuarioUnfollowPrisma(
 export async function usuarioDeleteEmailPrisma(email: string): Promise<void> {
   await prisma.usuario.delete({
     where: { email: email },
+  });
+}
+
+export async function usuarioModifyLastAudioPrisma(idUsuario: number,idUltimoAudio: number,segFinAudio: number): Promise<void> {
+  await prisma.usuario.update({
+    where: { idUsuario: idUsuario },
+    data: { 
+      idUltimoAudio: idUltimoAudio,
+      segFinAudio: segFinAudio },
   });
 }

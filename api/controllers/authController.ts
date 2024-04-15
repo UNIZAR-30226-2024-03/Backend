@@ -74,7 +74,7 @@ export async function authLogin(
   try {
     const { email, contrasegna } = req.body;
     const usuario = await usuarioDbJs.usuarioGetEmailPrisma(email);
-    if (!usuario) return res.sendStatus(404);
+    if (!usuario) return res.status(401).send("Usuario no encontrado.");
 
     if (!usuario.contrasegna)
       return res.status(401).send("Usuario se registro con google.");

@@ -23,11 +23,6 @@ const router = Router();
  *    responses:
  *      200:
  *        description: Success, returns the authentication token
- *        content:
- *          text/plain:
- *            schema:
- *              type: string
- *              example: yourtoken
  *      401:
  *        description: Unauthorized by Google. Invalid token.
  *      500:
@@ -48,10 +43,11 @@ router.get(
  *    tags: [Auth, User]
  *    parameters:
  *      - in: body
- *        email:
- *          type: string
- *        contrasegna:
- *          type: string
+ *        name: email
+ *        type: string
+ *      - in: body
+ *        name: contrasegna
+ *        type: string
  *    responses:
  *      200:
  *        description: Success, returns the authentication token
@@ -80,12 +76,14 @@ router.post(
  *    tags: [Auth, User]
  *    parameters:
  *      - in: body
- *        email:
- *          type: string
- *        nombreUsuario:
- *          type: string
- *        contrasegna:
- *          type: string
+ *        name: email
+ *        type: string
+ *      - in: body
+ *        name: nombreUsuario
+ *        type: string
+ *      - in: body
+ *        name: contrasegna
+ *        type: string
  *    responses:
  *      201:
  *        description: Success, returns the authentication token
