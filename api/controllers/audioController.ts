@@ -88,7 +88,8 @@ export async function createAudio(req: Request, res: Response) {
             !req.body.duracionSeg                           ||
             !req.body.fechaLanz                             || 
             !req.body.esAlbum                               ||
-            !req.body.esPrivada                             || 
+            !req.body.esPrivada                             ||
+            !req.body.esPodcast                             || 
             (!req.body.etiquetas && req.body.tipoEtiqueta)  ||
             (req.body.etiquetas && !req.body.tipoEtiqueta)  ||
             (req.body.tipoEtiqueta && req.body.tipoEtiqueta != 'Cancion' && req.body.tipoEtiqueta != 'Podcast')) {
@@ -111,11 +112,10 @@ export async function createAudio(req: Request, res: Response) {
             img = req.body.img;
         }
         console.log(req.body)
-        fs.rename(path.join(projectRootPath,'tmp',req.file.filename), path.join(projectRootPath,'audios',req.file.filename), function(err) {
-            if (err) throw err;
+        fs.rename(path.join(projectRootPath,'tmp',req.file.filename), path.join(projectRootPath,'audios',req.file.filename), function() {
             console.log('File moved');
         });
-        const audio = await audioDatabase.createAudioDB(req.body.titulo, req.file.filename, parseInt(req.body.duracionSeg, 10), fechaFormateada, (req.body.esAlbum === 'true'), (req.body.esPrivada === 'true'), idsUsuarios2, img);
+        const audio = await audioDatabase.createAudioDB(req.body.titulo, req.file.filename, parseInt(req.body.duracionSeg, 10), fechaFormateada, (req.body.esAlbum === 'true'), (req.body.esPrivada === 'true'), idsUsuarios2, img, (req.body.esPodcast === 'true'));
     
         if (req.body.etiquetas) {
             const etiquetas = req.body.etiquetas.split(',').map(Number);
@@ -242,8 +242,7 @@ export async function updateAudio(req: Request, res: Response) {
             audioData.esPrivada = req.body.esPrivada === 'true';
         }
         if (req.body.img) {
-            audioData.imgAudio = req.body.img;
-            
+            audioData.imgAudio = req.body.img;    
         }
         
         audioDatabase.updateAudioById(Number(req.params.idaudio),audioData);

@@ -25,7 +25,7 @@ export async function deleteAudioById(id: number) {
 
 //PRE: Se recibe un id de audio correcto
 //POST: Se devuelve el audio con el id correspondiente
-export async function createAudioDB(titulo: string, path: string, duracionSeg: number, fechaLanz: string, esAlbum: boolean, esPrivada: boolean, idsUsuarios2: number[],img: string) {
+export async function createAudioDB(titulo: string, path: string, duracionSeg: number, fechaLanz: string, esAlbum: boolean, esPrivada: boolean, idsUsuarios2: number[],img: string, esPodcast: boolean) {
     const audioData = {
         titulo: titulo,
         path: "/audios/"+path,
@@ -34,6 +34,7 @@ export async function createAudioDB(titulo: string, path: string, duracionSeg: n
         esAlbum: esAlbum,
         esPrivada: esPrivada,
         imgAudio: img,
+        esPodcast: esPodcast,
         Artistas:{
             connect: idsUsuarios2.map((idUsuario: number) => ({ idUsuario })),
         }
