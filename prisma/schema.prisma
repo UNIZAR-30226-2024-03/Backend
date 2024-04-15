@@ -76,6 +76,7 @@ model Audio {
   esAlbum     Boolean @default(false)
   imgAudio    String?
   esPrivada   Boolean @default(false)
+  esPodcast   Boolean @default(false)
 
   Artistas         Usuario[]
   Lista            Lista[]

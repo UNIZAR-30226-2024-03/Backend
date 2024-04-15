@@ -51,9 +51,9 @@ describe('Audio Endpoints', () => {
         bearer3 = createUsuarioToken(user3); 
 
 
-        const audio1 = await audioDatabase.createAudioDB('Test Audio', 'pruebaTest1.mp3', 120, new Date('2022-01-01').toISOString(), false, false, [user1_id, user2_id],"prueba");
-        const audio2 = await audioDatabase.createAudioDB('Test Audio 2', 'pruebaTest2.mp3', 120, new Date('2022-01-01').toISOString(), false, false, [user1_id, user2_id],"prueba");
-        const audio3 = await audioDatabase.createAudioDB('Test Audio 3', 'pruebaTest3.mp3', 120, new Date('2022-01-01').toISOString(), false, true, [user1_id, user2_id],"prueba");
+        const audio1 = await audioDatabase.createAudioDB('Test Audio', 'pruebaTest1.mp3', 120, new Date('2022-01-01').toISOString(), false, false, [user1_id, user2_id],"prueba",false);
+        const audio2 = await audioDatabase.createAudioDB('Test Audio 2', 'pruebaTest2.mp3', 120, new Date('2022-01-01').toISOString(), false, false, [user1_id, user2_id],"prueba",false);
+        const audio3 = await audioDatabase.createAudioDB('Test Audio 3', 'pruebaTest3.mp3', 120, new Date('2022-01-01').toISOString(), false, true, [user1_id, user2_id],"prueba",false);
         
         audio1_id = audio1.idAudio;
         audio2_id = audio2.idAudio;
