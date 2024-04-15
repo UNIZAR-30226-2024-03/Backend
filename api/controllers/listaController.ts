@@ -70,12 +70,16 @@ export const createLista = catchAsync(async (req : Request, res : Response) => {
 
 /**
  * Elimina una lista si el usuario es propietario o administrador
+ * Si hay más de un propietario, eliminamos al usuario del jwt de la lista y
+ * los audios privados de los que es propietario en caso de que no haya ningun otro propietario
+ * que sea propietario de esos audios
  * @param {ObjectId} id
  * @returns {Promise<Lista>}
  */
 export const deleteLista = catchAsync(async (req : Request, res : Response) => {
   try {
-    if (!await listasDb.getListaById(parseInt(req.params.idLista))) {
+    const lista = await listasDb.getListaByIdWithExtras(parseInt(req.params.idLista));
+    if (!lista) {
       res.status(httpStatus.NOT_FOUND).send("Lista no encontrada");
       return;
     }
@@ -83,10 +87,29 @@ export const deleteLista = catchAsync(async (req : Request, res : Response) => {
     if (!await isOwnerOrAdmin(parseInt(req.params.idLista), req.auth?.idUsuario, req.auth?.esAdmin)) {
       res.status(httpStatus.UNAUTHORIZED).send("No tienes permisos para borrar esta lista");
       return;
-    } 
-    await listasDb.deleteListaById(parseInt(req.params.idLista));
-    // Devolvermos el estado 204 (NO_CONTENT) porque no hay contenido que devolver y el mensaje de que se ha borrado correctamente
-    res.status(httpStatus.NO_CONTENT).send("Lista borrada correctamente");
+    }
+    const propietarios = await listasDb.getPropietariosFromLista(parseInt(req.params.idLista));
+    if (propietarios.length > 1) {
+      // Si hay más de un propietario, eliminamos al usuario del jwt de la lista y
+      // los audios privados de los que es propietario en caso de que no haya ningun otro propietario
+      // que sea propietario de esos audios
+      for (let i = 0; i < lista.Audios.length; i++) {
+        if (lista.Audios[i].esPrivada) {
+          const artistas = await audioDb.getArtistaAudioById(lista.Audios[i].idAudio);
+          // Miramos si otro propietario de la lista es artista del audio
+          if (!artistas.some((artista) => artista!= req.auth?.idUsuario && propietarios.includes(artista))) {
+            await listasDb.deleteAudioFromLista(parseInt(req.params.idLista), lista.Audios[i].idAudio);
+          }
+        }
+      }
+
+      await listasDb.deletePropietarioFromLista(parseInt(req.params.idLista), parseInt(req.auth?.idUsuario));
+      res.status(httpStatus.OK).send("Audios privados sin otros artistas propietarios de la lista misma y usuario eliminado como propietario de la lista");
+    } else{
+      await listasDb.deleteListaById(parseInt(req.params.idLista));
+      // Devolvermos el estado 204 (NO_CONTENT) porque no hay contenido que devolver y el mensaje de que se ha borrado correctamente
+      res.status(httpStatus.NO_CONTENT).send("Lista borrada correctamente");
+    }
 
   } catch (error) {
     res.status(httpStatus.BAD_REQUEST).send(error);

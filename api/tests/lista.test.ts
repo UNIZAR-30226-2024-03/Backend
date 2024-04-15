@@ -174,7 +174,7 @@ describe('Lista routes', () => {
           esAlbum: true,
           imgLista: 'imgLista',
           tipoLista: 'NORMAL',
-          audios: [],
+          audios: [audioTest1_id, audioTest2_id],
         })
         .expect((res) => {
           expect(res.body.nombre).toEqual('listaTest');
@@ -207,12 +207,38 @@ describe('Lista routes', () => {
         .expect(httpStatus.UNAUTHORIZED);
     });
 
-    it('returns ' + httpStatus.NO_CONTENT + ' when all params are ok', async () => {
+    it('returns ' + httpStatus.OK + ' when lista has more than one owner', async () => {
+      // Añadimos un colaborador a la lista
+      await request(app)
+        .post(`${LISTA_COLLABORATOR}/${listaToDeleteId}/${userTest2_id}`)
+        .set('Authorization', `Bearer ${bearer}`)
+        .expect(httpStatus.OK);
+
       await request(app)
         .delete(`${LISTA_ROUTE}/${listaToDeleteId}`)
         .set('Authorization', `Bearer ${bearer}`)
+        .expect(httpStatus.OK);
+
+      // Comprobamos que la lista sigue existiendo pero sin el usuario 1 como propietario
+      // y sin el audio1 que era privado y solo lo tenía el usuario 1
+      await request(app)
+        .get(`${LISTA_EXTRA}/Audios/${listaToDeleteId}`)
+        .set('Authorization', `Bearer ${bearer2}`)
+        .expect((res) => {
+          expect(res.status).toEqual(httpStatus.OK);
+          expect(res.body.length).toEqual(1);
+        });
+    }, 10000);
+
+
+    it('returns ' + httpStatus.NO_CONTENT + ' when all params are ok', async () => {
+      await request(app)
+        .delete(`${LISTA_ROUTE}/${listaToDeleteId}`)
+        .set('Authorization', `Bearer ${bearer2}`)
         .expect(httpStatus.NO_CONTENT);
     });
+
+
   });
 
 
@@ -564,6 +590,8 @@ describe('Lista routes', () => {
         .set('Authorization', `Bearer ${bearer3}`)
         .expect(httpStatus.BAD_REQUEST);
     });
+
+    // Probar a eliminar una lista con más propietarios
 
     it('returns ' + httpStatus.NO_CONTENT + ' when all params are ok', async () => {
       await request(app)
