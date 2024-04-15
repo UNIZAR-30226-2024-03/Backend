@@ -214,24 +214,26 @@ listaRouter.post("/", auth.authenticate, listaController.createLista);
  *     tags: [Listas]
  *     summary: Borra una lista.
  *     description: Borra una lista si el usuario es propietario o administrador. Si hay más de un propietario, eliminamos al usuario del jwt de la lista y los audios privados de los que es propietario en caso de que no haya ningun otro propietario que sea propietario de esos audios
- *   parameters:
- *     - in: path
- *       name: idLista
- *       required: true
- *       description: Id de la lista a borrar.
- *       schema:
- *          type: number
- *   security:
- *      - bearerAuth: []
- *   responses:
- *      204:
- *         description: Lista borrada correctamente.
- *      401:
- *         description: No autorizado para borrar la lista.
- *      400:
- *         description: Error en la petición.
- *      404:
- *         description: No se ha encontrado la lista.
+ *     parameters:
+ *      - in: path
+ *        name: idLista
+ *        required: true
+ *        description: Id de la lista a borrar.
+ *        schema:
+ *           type: number
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *          description: Audios privados sin otros artistas propietarios de la misma lista y usuario como propietario eliminados de la lista
+ *       204:
+ *          description: Lista borrada correctamente.
+ *       401:
+ *          description: No autorizado para borrar la lista.
+ *       400:
+ *          description: Error en la petición.
+ *       404:
+ *          description: No se ha encontrado la lista.
  * 
  */
 listaRouter.delete("/:idLista", auth.authenticate, listaController.deleteLista); 

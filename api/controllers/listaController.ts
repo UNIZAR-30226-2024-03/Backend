@@ -104,7 +104,7 @@ export const deleteLista = catchAsync(async (req : Request, res : Response) => {
       }
 
       await listasDb.deletePropietarioFromLista(parseInt(req.params.idLista), parseInt(req.auth?.idUsuario));
-      res.status(httpStatus.OK).send("Audios privados sin otros artistas propietarios de la lista misma y usuario eliminado como propietario de la lista");
+      res.status(httpStatus.OK).send("Audios privados sin otros artistas propietarios de la misma lista y usuario como propietario eliminados de la lista");
     } else{
       await listasDb.deleteListaById(parseInt(req.params.idLista));
       // Devolvermos el estado 204 (NO_CONTENT) porque no hay contenido que devolver y el mensaje de que se ha borrado correctamente
