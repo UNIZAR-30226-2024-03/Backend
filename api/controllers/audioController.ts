@@ -5,10 +5,9 @@ import prisma from "../../prisma/client.js";
 import path from 'path';
 import fs from 'fs';
 import mediaserver from 'mediaserver'; //Variable para manejar archivos de audio, usa chunks para enviar el archivo
-
+import * as etiquetasDatabase from "../../db/etiquetasDb.js";
 import * as audioDatabase from "../../db/audioDb.js";
 import { promisify } from 'util';
-
 const projectRootPath = process.cwd(); // Devuelve el directorio raíz del proyecto y se almacena en una constante
 
 
@@ -18,20 +17,16 @@ const projectRootPath = process.cwd(); // Devuelve el directorio raíz del proye
 //POST: Sube obtiene información de un audio con formato JSON
 export async function getAudio(req: Request, res: Response) {
     try {
-        if (!req.params.idaudio) {
-            return res.status(400).send('Bad Parameters');
-        }
         const id = Number(req.params.idaudio);
-        const audio = await audioDatabase.findAudioById(id);
-        if (audio) {
-            if (audio.esPrivada && !await isOwnerOrAdmin(req)) { //Falta lógica de verificación de usarios
-                res.status(403).send("Unauthorized");
-            }else{
-                res.json(audio);
-            }
-        } else {
-            res.status(404).send("Audio not found"); // Bad request, parámetros incorrecto
+
+        if (req.body.audioConsulta.esPrivada && !await isOwnerOrAdmin(req)) { //Falta lógica de verificación de usarios
+            res.status(403).send("Permission denied, unsifficient permissions");
+        }else{
+            const artistas = await audioDatabase.getArtistaAudioById(id);
+            const vecesEscuchada = await audioDatabase.getVecesEscuchada(id);
+            res.json({...req.body.audioConsulta, artistas, vecesEscuchada});
         }
+
     } catch (error) {
         res.status(500).send(error); // Internal server error
     }
@@ -50,26 +45,36 @@ export async function verifyUsersList(req: Request, res: Response, next: NextFun
                     },
                 });
                 if (!usuario) {
-                    if (req.file){
-                        try{
-                            deleteFile(path.join(projectRootPath,"audios",req.file.filename));
-                        }catch (error){
-                            return res.status(404).send(error);
-                        }
-                    }
-                    return res.status(404);            
+                    return res.status(404).send('Usuario no encontrado');            
                 }
             }
         }
         next();
     }catch (error) {
-        if (req.file){
-            try{
-                deleteFile(path.join(projectRootPath,"audios",req.file.filename));
-            }catch (error){
-                return res.status(404).send(error);
+        return res.status(500).send(error);            
+    }
+}
+
+
+//Se encarga de verificar que los usuarios existan en la base de datos
+export async function verifyLabelList(req: Request, res: Response, next: NextFunction) {
+    try {
+        if (req.body.etiquetas) {
+            if (req.body.tipoEtiqueta==="Podcast" || req.body.tipoEtiqueta==="Cancion") {
+                const etiquetas = req.body.etiquetas.split(',').map(Number);
+                for (const idEtiqueta of etiquetas) {
+                    if (await etiquetasDatabase.existsTag(idEtiqueta)==false) {
+                        return res.status(404).send('Etiqueta no encontrada');
+                    }
+                }
+            }else{
+                return res.status(400).send('Bad Parameters, etiqueta no válida');
             }
+        }else if (!req.body.etiquetas && req.body.tipoEtiqueta) {
+            return res.status(400).send('Bad Parameters, faltan las etiquetas');
         }
+        next();
+    }catch (error) {
         return res.status(404);            
     }
 }
@@ -79,31 +84,52 @@ export async function createAudio(req: Request, res: Response) {
         if (!req.file) {
             return res.status(400).send('No file uploaded');
         }
-        if (!req.body.titulo        ||
-            !req.body.duracionSeg   ||
-            !req.body.fechaLanz     || 
-            !req.body.esAlbum       ||
-            !req.body.esPrivada  ) {
-                try{
-                    deleteFile(path.join(projectRootPath,"audios",req.file.filename));
-                }catch (error){
-                    return res.status(404).send(error);
-                }
-                return res.status(400).send('Bad Parameters');
-
+        if (!req.body.titulo                                ||
+            !req.body.duracionSeg                           ||
+            !req.body.fechaLanz                             || 
+            !req.body.esAlbum                               ||
+            !req.body.esPrivada                             ||
+            !req.body.esPodcast                             || 
+            (!req.body.etiquetas && req.body.tipoEtiqueta)  ||
+            (req.body.etiquetas && !req.body.tipoEtiqueta)  ||
+            (req.body.tipoEtiqueta && req.body.tipoEtiqueta != 'Cancion' && req.body.tipoEtiqueta != 'Podcast')) {
+                return res.status(400).send('Bad Parameters, faltan parámetros o etiquetas incorrectas');
         }
+        if ((req.body.tipoEtiqueta == 'Podcast' && req.body.esPodcast == 'false') ||
+            (req.body.tipoEtiqueta == 'Cancion' && req.body.esPodcast == 'true')) {
+            return res.status(400).send('Bad Parameters, un podcast no puede tener etiquetas de canción y viceversa');
+        }
+        
         const fechaLanz = new Date(req.body.fechaLanz);
+        if (isNaN(fechaLanz.getTime())) {
+            return  res.status(400).send('Bad Parameters, fecha no válida');
+        }
+
         const fechaFormateada = fechaLanz.toISOString();
         let idsUsuarios2: number[] = [];
-        idsUsuarios2.push(req.auth?.idUsuario);
         if (req.body.idsUsuarios) {
             idsUsuarios2 = req.body.idsUsuarios.split(',').map(Number);
         }
+        idsUsuarios2.push(req.auth?.idUsuario);
         let img = "null";
         if (req.body.img ) {
             img = req.body.img;
         }
-        const audio = await audioDatabase.createAudioDB(req.body.titulo, req.file.filename, parseInt(req.body.duracionSeg, 10), fechaFormateada, Boolean(req.body.esAlbum), Boolean(req.body.esPrivada), idsUsuarios2,img);
+        console.log(req.body)
+        fs.rename(path.join(projectRootPath,'tmp',req.file.filename), path.join(projectRootPath,'audios',req.file.filename), function() {
+            console.log('File moved');
+        });
+        const audio = await audioDatabase.createAudioDB(req.body.titulo, req.file.filename, parseInt(req.body.duracionSeg, 10), fechaFormateada, (req.body.esAlbum === 'true'), (req.body.esPrivada === 'true'), idsUsuarios2, img, (req.body.esPodcast === 'true'));
+    
+        if (req.body.etiquetas) {
+            const etiquetas = req.body.etiquetas.split(',').map(Number);
+            for (const idEtiqueta of etiquetas) {
+                console.log("Se va a linkar etiqueta a audio con tipo "+req.body.tipoEtiqueta+" y id "+idEtiqueta+" y id audio "+audio.idAudio);
+                await audioDatabase.linkLabelToAudio(audio.idAudio, idEtiqueta, req.body.tipoEtiqueta);
+            }
+
+        }
+
         for (const idUsuario of idsUsuarios2) {
             //Preguntar Alvaro si tiene esta función
             await prisma.usuario.update({
@@ -119,19 +145,14 @@ export async function createAudio(req: Request, res: Response) {
             await audioDatabase.addPropietariosToAudio(audio.idAudio, idsUsuarios2);
         }
 
-        res.json( { message: 'Audio added successfully' ,idaudio: audio.idAudio});
+        res.status(200).json( { message: 'Audio added successfully' ,idaudio: audio.idAudio});
+
+        
     } catch (error) {
         if (error instanceof Error) {
             console.error(`Error: ${error.message}`);
             if (error.stack) {
                 console.error(`Stack trace: ${error.stack}`);
-            }
-        }
-        if (req.file){
-            try{
-                deleteFile(path.join(projectRootPath,"audios",req.file.filename));
-            }catch (error){
-                return res.status(404).send(error);
             }
         }
         res.status(500).send(error);
@@ -142,24 +163,17 @@ export async function createAudio(req: Request, res: Response) {
 export async function deleteAudio(req: Request, res: Response) {
 
     try {
-        if (!req.params.idaudio) {
-            return res.status(400).send('Bad Parameters');
-        }
         const id = Number(req.params.idaudio);
-        const audioRuta =await audioDatabase.findAudioById(id)
-        if (!audioRuta) {
-            return res.status(404).send("Audio not found");            
-        }
         if (!await isOwnerOrAdmin(req)){
-            return res.status(403).send("Unauthorized");
+            return res.status(403).send("Permission denied, unsifficient permissions");
         }
         audioDatabase.deleteAudioById(id);
         try{
-            deleteFile(path.join(projectRootPath,audioRuta.path));
+            deleteFile(path.join(projectRootPath,req.body.audioConsulta.path));
         }catch (error){
             return res.status(404).send(error);            
         }
-        res.json({ message: 'Audio deleted successfully' });
+        res.status(200).json({ message: 'Audio deleted successfully' });
     } catch (error) {
         res.status(500).send(error);
     }
@@ -169,7 +183,7 @@ export async function verifyAudio(req: Request, res: Response, next: NextFunctio
     
     try {
         if (!req.params.idaudio) {
-            return res.status(400).send('Bad Parameters');
+            return res.status(400).send('Bad Parameters, idaudio not found');
         }
         const id = Number(req.params.idaudio);
         const audioConsulta = await audioDatabase.findAudioById(id);
@@ -193,15 +207,16 @@ export async function verifyAudio(req: Request, res: Response, next: NextFunctio
 
 export async function updateAudio(req: Request, res: Response) {
     try {
-        if (!req.params.idaudio) {
-            return res.status(400).send('Bad Parameters');
-        }
         if (!await isOwnerOrAdmin(req)){
-            return res.status(403).send("Unauthorized");
+            return res.status(403).send("Permission denied, unsifficient permissions");
         }
         let audioData: any = {};
-
         if (req.file){
+            fs.rename(path.join(projectRootPath,'tmp',req.file.filename), path.join(projectRootPath,'audios',req.file.filename), function(err) {
+                if (err) throw err;
+                console.log('File moved');
+            });
+
             audioData.path = "/audios/"+req.file.filename;
             try{
                 deleteFile(path.join(projectRootPath,req.body.audioConsulta.path)); // Acceder a audioConsulta desde req
@@ -213,26 +228,48 @@ export async function updateAudio(req: Request, res: Response) {
         if (req.body.titulo) {
             audioData.titulo = req.body.titulo;
         }
+
         if (req.body.duracionSeg) {
             audioData.duracionSeg = parseInt(req.body.duracionSeg, 10);
         }
+
         if (req.body.fechaLanz) {
             const fechaLanz = new Date(req.body.fechaLanz);
             audioData.fechaLanz = fechaLanz.toISOString();
         }
+
         if (req.body.esAlbum) {
-            audioData.esAlbum = req.body.esAlbum;
+            audioData.esAlbum = req.body.esAlbum === 'true';
         }
 
         if (req.body.esPrivada) {
-            audioData.esPrivada = Boolean(req.body.esPrivada);
+            audioData.esPrivada = req.body.esPrivada === 'true';
         }
         if (req.body.img) {
-            audioData.imgAudio = req.body.img;
-            
+            audioData.imgAudio = req.body.img;    
         }
-
+        
         audioDatabase.updateAudioById(Number(req.params.idaudio),audioData);
+
+        if (req.body.etiquetas) {
+            if (req.body.tipoEtiqueta=='Podcast' || req.body.tipoEtiqueta=='Cancion') {
+                if (req.body.eliminarEtiquetas) {
+                    const etiquetas = req.body.eliminarEtiquetas.split(',').map(Number);
+                    for (const idEtiqueta of etiquetas) {
+                        await audioDatabase.unlinkLabelToAudio(Number(req.params.idaudio), idEtiqueta, req.body.tipoEtiqueta);
+                    }
+                }else{
+                    const etiquetas = req.body.etiquetas.split(',').map(Number);
+                    for (const idEtiqueta of etiquetas) {
+                        await audioDatabase.linkLabelToAudio(Number(req.params.idaudio), idEtiqueta, req.body.tipoEtiqueta);
+                    }
+                }
+            }else{
+                return res.status(400).send('Bad Parameters,  tipo de etiqueta no válida');
+            }
+        }else if (!req.body.etiquetas && req.body.tipoEtiqueta) {
+            return res.status(400).send('Bad Parameters, faltan las etiquetas');
+        }
 
         res.json( { message: 'Audio updated successfully' } );
     } catch (error) {
@@ -249,9 +286,6 @@ export async function updateAudio(req: Request, res: Response) {
 
 export async function playAudio(req: Request, res: Response) {
     try {
-        if (!req.params.idaudio) {
-            return res.status(400).send('Bad Parameters');
-        }
         const audio = await audioDatabase.findAudioById(Number(req.params.idaudio));
         if (!audio) {
             return res.status(404).send("Audio not found");            
@@ -260,13 +294,37 @@ export async function playAudio(req: Request, res: Response) {
         const access = promisify(fs.access);
         await access(cancion, fs.constants.F_OK);
         if (!audio.esPrivada || await isOwnerOrAdmin(req)){
+            await audioDatabase.listenToAudio(req.auth?.idUsuario,Number(req.params.idaudio));
             mediaserver.pipe(req, res, cancion);
         }else{
-            return res.status(403).send("Unauthorized");
+            return res.status(403).send("Permission denied, unsifficient permissions");
         }
     } catch (err) {
         res.status(404).send('File not found');
     }
+}
+
+export function deleteTmpFiles(req: Request, res: Response, next: NextFunction){
+    const folder = path.join(projectRootPath,'tmp');
+    if (!fs.existsSync(folder)){
+        fs.mkdirSync(folder, { recursive: true });
+    }else{
+        fs.readdir(folder, (err, files) => {
+            if (err) {
+                console.error(err);
+                return;
+            }
+            for (const file of files) {
+                fs.unlink(path.join(folder, file), err => {
+                    if (err) {
+                        console.error(err);
+                        return;
+                    }
+                });
+            }
+        });
+    }
+    next();
 }
 
 
@@ -282,10 +340,10 @@ async function isOwnerOrAdmin(req: Request){
         if (!req.auth?.esAdmin) {
             const propietarios = await audioDatabase.getArtistaAudioById(parseInt(req.params.idaudio));
 
-            if (propietarios === null) {
+            if (propietarios.length === 0) {
                 throw new Error("Audio no encontrado");
             }
-            if (!propietarios.some(propietario => propietario.Artistas.some(artista => artista.idUsuario === parseInt(req.auth?.idUsuario)))) {
+            if (!propietarios.includes(parseInt(req.auth?.idUsuario))) {
                 return false;
             }
         }

@@ -1,6 +1,7 @@
 import supertest from "supertest";
 import app from "../app.js";
 import * as audioDatabase from "../../db/audioDb.js";
+import * as etiquetasDatabase from "../../db/etiquetasDb.js";
 import fs from 'fs';
 import path from 'path';
 import util from 'util';
@@ -21,6 +22,8 @@ describe('Audio Endpoints', () => {
     let bearer2: string;
     let bearer3: string;
     let audio_id_created: number;
+    let etiquetaPod_id: number;
+    let etiquetaCancion_id: number;
 
     beforeAll(async () => {
 
@@ -48,13 +51,19 @@ describe('Audio Endpoints', () => {
         bearer3 = createUsuarioToken(user3); 
 
 
-        const audio1 = await audioDatabase.createAudioDB('Test Audio', 'pruebaTest1.mp3', 120, new Date('2022-01-01').toISOString(), false, false, [user1_id, user2_id],"prueba");
-        const audio2 = await audioDatabase.createAudioDB('Test Audio 2', 'pruebaTest2.mp3', 120, new Date('2022-01-01').toISOString(), false, false, [user1_id, user2_id],"prueba");
-        const audio3 = await audioDatabase.createAudioDB('Test Audio 3', 'pruebaTest3.mp3', 120, new Date('2022-01-01').toISOString(), false, true, [user1_id, user2_id],"prueba");
+        const audio1 = await audioDatabase.createAudioDB('Test Audio', 'pruebaTest1.mp3', 120, new Date('2022-01-01').toISOString(), false, false, [user1_id, user2_id],"prueba",false);
+        const audio2 = await audioDatabase.createAudioDB('Test Audio 2', 'pruebaTest2.mp3', 120, new Date('2022-01-01').toISOString(), false, false, [user1_id, user2_id],"prueba",false);
+        const audio3 = await audioDatabase.createAudioDB('Test Audio 3', 'pruebaTest3.mp3', 120, new Date('2022-01-01').toISOString(), false, true, [user1_id, user2_id],"prueba",false);
         
         audio1_id = audio1.idAudio;
         audio2_id = audio2.idAudio;
         audio3_id = audio3.idAudio;
+
+
+        etiquetaPod_id = await etiquetasDatabase.createTagPodcast("Podcast");
+        etiquetaCancion_id = await etiquetasDatabase.createTagSong("Cancion");
+
+
         await copyFile(path.join(projectRootPath,'audios','pruebasUnitarias.mp3'), path.join(projectRootPath,'audios','pruebaTest1.mp3'));
         await copyFile(path.join(projectRootPath,'audios','pruebasUnitarias.mp3'), path.join(projectRootPath,'audios','pruebaTest2.mp3'));
         await copyFile(path.join(projectRootPath,'audios','pruebasUnitarias.mp3'), path.join(projectRootPath,'audios','pruebaTest3.mp3'));
@@ -176,25 +185,26 @@ describe('Audio Endpoints', () => {
     //     });
     // });
 
-    describe('GET /audio/delete', () => {
+    describe('DELETE /audio/delete', () => {
             
         it('returns a 403, auth failed', async () => {
             await supertest(app)
-                .get(`/audio/delete/${audio1_id}`)
+                .delete(`/audio/delete/${audio1_id}`)
                 .set('Authorization', `Bearer ${bearer3}`)
                 .expect(403);
         },5000);
         
         it('should delete an audio by id', async () => {
             await supertest(app)
-                .get(`/audio/delete/${audio1_id}`)
+                .delete(`/audio/delete/${audio1_id}`)
                 .set('Authorization', `Bearer ${bearer1}`)
                 .expect(200);
         },5000);
+        
 
         it('returns 404 not found', async () => {
             await supertest(app)
-                .get('/audio/delete/0')
+                .delete('/audio/delete/0')
                 .set('Authorization', `Bearer ${bearer1}`)
                 .expect(404);
         },5000);
@@ -215,6 +225,30 @@ describe('Audio Endpoints', () => {
                 })
                 .expect(200);
         },5000);
+
+        it('should update an audio by id', async () => {
+            await supertest(app)
+            .put(`/audio/update/${audio2_id}`)
+            .set('Authorization', `Bearer ${bearer1}`)
+            .send({
+                etiquetas: `${etiquetaCancion_id}`,
+                tipoEtiqueta: "Cancion",
+                titulo: 'Updated Audio'
+            })
+            .expect(200);
+        },5000);
+
+        it('returns 400 Bad Parameters', async () => {
+            await supertest(app)
+            .put(`/audio/update/${audio2_id}`)
+            .set('Authorization', `Bearer ${bearer1}`)
+            .send({
+                etiquetas: `${etiquetaCancion_id}`,
+                titulo: 'Updated Audio'
+            })
+            .expect(400);
+        },5000);
+
     
         it('returns 404 not found', async () => {
             await supertest(app)

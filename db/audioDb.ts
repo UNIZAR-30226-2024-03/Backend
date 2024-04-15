@@ -1,5 +1,5 @@
 import prisma from "../prisma/client.js";
-
+import * as etiquetasDb from "../db/etiquetasDb.js";
 
 //PRE: Se recibe un id de audio correcto
 //POST: Se devuelve el audio con el id correspondiente
@@ -25,7 +25,7 @@ export async function deleteAudioById(id: number) {
 
 //PRE: Se recibe un id de audio correcto
 //POST: Se devuelve el audio con el id correspondiente
-export async function createAudioDB(titulo: string, path: string, duracionSeg: number, fechaLanz: string, esAlbum: boolean, esPrivada: boolean, idsUsuarios2: number[],img: string) {
+export async function createAudioDB(titulo: string, path: string, duracionSeg: number, fechaLanz: string, esAlbum: boolean, esPrivada: boolean, idsUsuarios2: number[],img: string, esPodcast: boolean) {
     const audioData = {
         titulo: titulo,
         path: "/audios/"+path,
@@ -34,6 +34,7 @@ export async function createAudioDB(titulo: string, path: string, duracionSeg: n
         esAlbum: esAlbum,
         esPrivada: esPrivada,
         imgAudio: img,
+        esPodcast: esPodcast,
         Artistas:{
             connect: idsUsuarios2.map((idUsuario: number) => ({ idUsuario })),
         }
@@ -57,7 +58,7 @@ export async function updateAudioById(id: number, audioData: any) {
 
 
 //PRE: Se recibe un id de audio correcto
-//POST: Se devuelve el audio con el id correspondiente
+//POST: Se devuelven los artistas que han participado en el audio con el id correspondiente en un array
 export async function getArtistaAudioById(id: number) {
     const audio = await prisma.audio.findMany({
         where: {
@@ -67,7 +68,10 @@ export async function getArtistaAudioById(id: number) {
             Artistas: true,
         },
     });
-    return audio;
+
+    const artistas = audio.flatMap((audio) => audio.Artistas.map((artista) => artista.idUsuario));
+
+    return artistas;
 }
 
 //PRE: Se recibe un id de audio correcto y un array de ids de usuarios
@@ -81,4 +85,74 @@ export async function addPropietariosToAudio(id: number, idUsuarios: number[]) {
             },
         },
     });
+}
+
+export async function linkLabelToAudio(idAudio: number, idLabel: number,tipoEtiqueta: string) {
+    if (tipoEtiqueta == 'Podcast') {
+        await prisma.audio.update({
+            where: { idAudio: idAudio },
+            data: {
+                EtiquetasPodcast: {
+                    connect: { idEtiqueta: idLabel },
+                },
+            },
+        });
+        await etiquetasDb.addTagToAudio(idAudio, idLabel, tipoEtiqueta);
+
+    } else if (tipoEtiqueta == 'Cancion'){
+        await prisma.audio.update({
+            where: { idAudio: idAudio },
+            data: {
+                EtiquetasCancion: {
+                    connect: { idEtiqueta: idLabel },
+                },
+            },
+        });
+        await etiquetasDb.addTagToAudio(idAudio, idLabel, tipoEtiqueta);
+    }
+    
+}
+
+export async function unlinkLabelToAudio(idAudio: number, idLabel: number,tipoEtiqueta: string) {
+    if (tipoEtiqueta == 'Podcast') {
+        await prisma.audio.update({
+            where: { idAudio: idAudio },
+            data: {
+                EtiquetasPodcast: {
+                    disconnect: { idEtiqueta: idLabel },
+                },
+            },
+        });
+        await etiquetasDb.removeTagFromAudio(idAudio, idLabel, tipoEtiqueta);
+    } else if (tipoEtiqueta == 'Cancion'){
+        await prisma.audio.update({
+            where: { idAudio: idAudio },
+            data: {
+                EtiquetasCancion: {
+                    disconnect: { idEtiqueta: idLabel },
+                },
+            },
+        });
+        await etiquetasDb.removeTagFromAudio(idAudio, idLabel, tipoEtiqueta);
+    }
+}
+
+
+export async function listenToAudio(userId: number, audioId: number) {
+    await prisma.escucha.create({
+      data: {
+        idUsuario: userId,
+        idAudio: audioId,
+        fecha: new Date(),
+      },
+    });
+}
+
+export async function getVecesEscuchada(audioId: number) {
+    const vecesEscuchada = await prisma.escucha.count({
+      where: {
+        idAudio: audioId,
+      },
+    });
+    return vecesEscuchada;
 }

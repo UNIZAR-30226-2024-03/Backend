@@ -10,6 +10,7 @@ import fotosRouter from "./routes/fotosRoutes.js";
 import audioRouter from "./routes/audioRoutes.js";
 import listaRouter from "./routes/listaRoutes.js";
 import etiquetasRouter from "./routes/etiquetasRoutes.js";
+import searchRouter from "./routes/searchRoutes.js";
 
 import prismaErrorHandler from "./utils/errorHandling/prismaErrorHandler.js";
 import generalErrorHandler from "./utils/errorHandling/generalErrorHandler.js";
@@ -51,6 +52,7 @@ app.use("/foto", fotosRouter);
 app.use("/lista", listaRouter);
 app.use("/audio", audioRouter);
 app.use("/etiquetas", etiquetasRouter);
+app.use("/search", searchRouter);
 
 app.get("/", function (_req, res) {
   return res.send("Backend for Playbeat.");

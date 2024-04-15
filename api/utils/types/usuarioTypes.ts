@@ -14,18 +14,5 @@ export interface GetRequest extends Request {
   query: {
     idUsuario: number;
     rrss: boolean;
-    listas: boolean;
-  } & ParsedQs;
-}
-
-export interface FollowRequest extends Request {
-  query: {
-    seguido: number;
-  } & ParsedQs;
-}
-
-export interface UnfollowRequest extends Request {
-  query: {
-    seguido: number;
   } & ParsedQs;
 }
