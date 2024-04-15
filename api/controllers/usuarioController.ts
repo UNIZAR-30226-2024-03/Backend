@@ -45,10 +45,10 @@ export async function usuarioGet(
 ) {
   try {
     const idUsuario = Number.isNaN(req.query.idUsuario) ? Number(req.auth?.idUsuario) : req.query.idUsuario;
-    const listas = Boolean(req.query.listas);
+    const rrss = Boolean(req.query.rrss);
     const currentUsuario = await usuarioDbJs.usuarioGetPrisma(
       idUsuario,
-      listas,
+      rrss,
     );
     if (!currentUsuario) return res.sendStatus(404);
     currentUsuario.contrasegna = null;
