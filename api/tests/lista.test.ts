@@ -36,38 +36,49 @@ describe('Lista routes', () => {
     const userTest1 = await usuarioCreatePrisma(
       'test1',
       'test1@test.com',
-      'password',
+      'password'
     );
 
     const userTest2 = await usuarioCreatePrisma(
       'test2',
       'test2@test.com',
-      'password',
+      'password'
     );
 
     const userTest3 = await usuarioCreatePrisma(
       'test3',
       'test3@test.com',
-      'password',
+      'password'
     );
 
-    // const audioTest1 = await createAudioDB(
-    //   'audioTest1',
-    //   // 'audioTest1.mp3',
-    // );
+    const audioTest1 = await createAudioDB(
+      'audioTest1',
+      'pathTest1.mp3',
+      120,
+      new Date('2022-01-01').toISOString(),
+      false,
+      true, // esPrivada
+      [userTest1.idUsuario],
+      'imgAudio'
+    );
 
-    // const audioTest2 = await createAudioDB(
-    //   'audioTest2',
-    //   // 'audioTest2.mp3',
-    // );
-    
-    audioTest1_id = 1;
+    const audioTest2 = await createAudioDB(
+      'audioTest2',
+      'pathTest2.mp3',
+      122,
+      new Date('2022-01-01').toISOString(),
+      false,
+      false,
+      [userTest2.idUsuario],
+      'imgAudio2'
+    );
 
     userTest1_id = userTest1.idUsuario;
     userTest2_id = userTest2.idUsuario;
     userTest3_id = userTest3.idUsuario;
 
-    // audioTest1_id = audioTest1.idAudio;
+    audioTest1_id = audioTest1.idAudio;
+    audioTest2_id = audioTest2.idAudio;
 
     // Creamos un token para cada usuario para simular la sesión de cada uno
     bearer = createUsuarioToken(userTest1); 
@@ -82,7 +93,7 @@ describe('Lista routes', () => {
       'imgLista',
       'NORMAL', // tipoLista
       userTest1_id, // idUsuario
-      [], // Sin audios
+      [audioTest1_id, audioTest2_id] // Sin audios
     );
   });
 
@@ -90,8 +101,8 @@ describe('Lista routes', () => {
     await usuarioDeleteEmailPrisma('test1@test.com');
     await usuarioDeleteEmailPrisma('test2@test.com');
     await usuarioDeleteEmailPrisma('test3@test.com');
-    // await deleteAudioById(audioTest1_id ?? 0);
-    // await deleteAudioById(audioTest2_id ?? 0);
+    await deleteAudioById(audioTest1_id ?? 0);
+    await deleteAudioById(audioTest2_id ?? 0);
 
     await listasDb.deleteListaById(lista?.idLista as number);
   });
@@ -256,15 +267,15 @@ describe('Lista routes', () => {
         });
     });
 
-    // it('returns ' + httpStatus.OK + ' when audios != []', async () => {
-    //   await request(app)
-    //     .put(`${LISTA_ROUTE}/${lista?.idLista}`)
-    //     .set('Authorization', `Bearer ${bearer}`)
-    //     .send({
-    //       audios: [audioTest1_id],
-    //     })
-    //     .expect(httpStatus.OK);
-    // });
+    it('returns ' + httpStatus.OK + ' when audios != []', async () => {
+      await request(app)
+        .put(`${LISTA_ROUTE}/${lista?.idLista}`)
+        .set('Authorization', `Bearer ${bearer}`)
+        .send({
+          audios: [audioTest1_id],
+        })
+        .expect(httpStatus.OK);
+    });
 
     it('returns ' + httpStatus.OK + ' when audios=[]', async () => {
       await request(app)
@@ -354,10 +365,10 @@ describe('Lista routes', () => {
 
 
 
-    it('returns ' + httpStatus.OK + ' and correct result when owner all params are ok', async () => {
+    it('returns ' + httpStatus.OK + ' and correct result when owner all params are ok and user is not owner or admin', async () => {
       await request(app)
         .get(`${LISTA_EXTRA}/${lista?.idLista}`)
-        .set('Authorization', `Bearer ${bearer}`)
+        .set('Authorization', `Bearer ${bearer2}`)
         .expect((res) => {
           expect(res.body.nombre).toEqual('listaTest');
           expect(res.body.descripcion).toEqual('descripcion');
@@ -367,7 +378,7 @@ describe('Lista routes', () => {
           expect(res.body.tipoLista).toEqual('NORMAL');
           // Tiene que tener un campo Audios, Propietarios y Seguidores
           expect(res.body.Audios).toBeDefined();
-// expect(res.body.Audios[0]).toBeDefined(); // La lista de test tiene un audio que se ha añadido al crearla
+          expect(res.body.Audios.length).toEqual(1); // La lista de test tiene un audio público y uno privado
 
           expect(res.body.Propietarios).toBeDefined();
           expect(res.body.Seguidores).toBeDefined();
@@ -375,24 +386,24 @@ describe('Lista routes', () => {
     });
 
     // TODO: Añadir 2 audios a la lista para que uno sea público y otro privado
-    // it('returns ' + httpStatus.OK + ' and correct result when lista is public and user not owner/admin', async () => {
-    //   await request(app)
-    //     .get(`${LISTA_EXTRA}/${lista?.idLista}`)
-    //     .set('Authorization', `Bearer ${bearer2}`)
-    //     .expect((res) => {
-    //       expect(res.body.nombre).toEqual('listaTest');
-    //       expect(res.body.descripcion).toEqual('descripcion');
-    //       expect(res.body.esPrivada).toEqual(true);
-    //       expect(res.body.esAlbum).toEqual(true);
-    //       expect(res.body.imgLista).toEqual('imgLista');
-    //       expect(res.body.tipoLista).toEqual('NORMAL');
-    //       // Tiene que tener un campo Audios, Propietarios y Seguidores
-    //       expect(res.body.Audios).toBeDefined();
-    //       expect(res.body.Audios[0]).toBeDefined(); // La lista de test tiene un audio que se ha añadido al crearla
-    //       expect(res.body.Propietarios).toBeDefined();
-    //       expect(res.body.Seguidores).toBeDefined();
-    //     });
-
+    it('returns ' + httpStatus.OK + ' and correct result when lista is public and user not owner/admin', async () => {
+      await request(app)
+        .get(`${LISTA_EXTRA}/${lista?.idLista}`)
+        .set('Authorization', `Bearer ${bearer2}`)
+        .expect((res) => {
+          expect(res.body.nombre).toEqual('listaTest');
+          expect(res.body.descripcion).toEqual('descripcion');
+          expect(res.body.esPrivada).toEqual(true);
+          expect(res.body.esAlbum).toEqual(true);
+          expect(res.body.imgLista).toEqual('imgLista');
+          expect(res.body.tipoLista).toEqual('NORMAL');
+          // Tiene que tener un campo Audios, Propietarios y Seguidores
+          expect(res.body.Audios).toBeDefined();
+          expect(res.body.Audios[0]).toBeDefined(); // La lista de test tiene un audio que se ha añadido al crearla
+          expect(res.body.Propietarios).toBeDefined();
+          expect(res.body.Seguidores).toBeDefined();
+        });
+    });
   });
 
 
@@ -413,16 +424,23 @@ describe('Lista routes', () => {
         .expect(httpStatus.UNAUTHORIZED);
     });
 
-    // TODO: Añadir 2 audios a la lista para que uno sea público y otro privado
-    // it('returns ' + httpStatus.OK + ' and correct result when all params are ok', async () => {
-    //   await request(app)
-    //     .get(`${LISTA_EXTRA}/Audios/${lista?.idLista}`)
-    //     .set('Authorization', `Bearer ${bearer}`)
-    //     .expect((res) => {
-    //       expect(res.body).toEqual([audioTest1_id]);
-    //     });
+    it('returns ' + httpStatus.OK + ' and correct result when user not owner of audio privado', async () => {
+      await request(app)
+        .get(`${LISTA_EXTRA}/Audios/${lista?.idLista}`)
+        .set('Authorization', `Bearer ${bearer}`)
+        .expect((res) => {
+          expect(res.body).toEqual([audioTest1_id]);
+        });
+    });
 
-    // });
+    it('returns ' + httpStatus.OK + ' and correct result when user is owner of audio privado', async () => {
+      await request(app)
+        .get(`${LISTA_EXTRA}/Audios/${lista?.idLista}`)
+        .set('Authorization', `Bearer ${bearer2}`)
+        .expect((res) => {
+          expect(res.body).toEqual([audioTest1_id, audioTest2_id]);
+        });
+    });
 
   });
 
@@ -738,7 +756,6 @@ describe('Lista routes', () => {
           expect(res.status).toEqual(httpStatus.OK);
         });
     });
-
     
   });
 });

@@ -10,17 +10,26 @@ import * as usuarioDb from '../../db/usuarioDb.js';
 
 /**
  * Función que devuelve true si el idUsuario es propietario de la lista o administrador
-  * @param {number} idLista
+  * @param {number} idItem
   * @param {number} idUsuario
   * @param {boolean} esAdmin
  * @returns {Promise<boolean>}
  * @throws {Error}
  */
-const isOwnerOrAdmin = async (idLista : number, idUsuario : number, esAdmin : Boolean) => {
+const isOwnerOrAdmin = async (idItem : number, idUsuario : number, esAdmin : Boolean, esAudio : Boolean = false) => {
   // Comprobamos si el usuario del jwt es propietario de la lista o admin
   if (!esAdmin) {
+    if (esAudio) {
+      const artistas = await audioDb.getArtistaAudioById(idItem);
+      if (!artistas) {
+        throw new Error("Audio no encontrado");
+      }
+
+      return artistas.includes(idUsuario);
+      
+    }
     // No es admin, buscamos si es un propietario
-    const propietarios = await listasDb.getPropietariosFromLista(idLista);
+    const propietarios = await listasDb.getPropietariosFromLista(idItem);
     // if (propietarios.length === 0) {
     //   // console.log("Propietarios en isOwnerOrAdmin", propietarios)
     //   throw new Error("Lista no encontrada");
@@ -260,8 +269,9 @@ export const getListaByIdWithExtras = catchAsync(async (req : Request, res : Res
     }
 
     // console.log("lista", lista);
-    const isOwner = await isOwnerOrAdmin(parseInt(req.params.idLista), req.auth?.idUsuario, req.auth?.esAdmin);
-    lista.Audios.filter((audio: { esPrivada: any; }) => !audio.esPrivada || isOwner);
+    // El usuario recibirá los audios públicos y los privados si es propietario del audio o admin
+    lista.Audios.filter((audio: { esPrivada: any; idAudio: any }) => 
+      !audio.esPrivada || isOwnerOrAdmin(audio.idAudio, req.auth?.idUsuario, req.auth?.esAdmin, true));
     
     res.send(lista);
         
