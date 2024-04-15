@@ -213,7 +213,7 @@ listaRouter.post("/", auth.authenticate, listaController.createLista);
  *   delete:
  *     tags: [Listas]
  *     summary: Borra una lista.
- *     description: Borra una lista si el usuario es propietario o administrador.
+ *     description: Borra una lista si el usuario es propietario o administrador. Si hay más de un propietario, eliminamos al usuario del jwt de la lista y los audios privados de los que es propietario en caso de que no haya ningun otro propietario que sea propietario de esos audios
  *   parameters:
  *     - in: path
  *       name: idLista

@@ -6,27 +6,33 @@ import * as listasDb from '../../db/listaDb.js';
 import * as sigueListaDb from '../../db/sigueListaDb.js';
 import * as audioDb from '../../db/audioDb.js';
 import * as usuarioDb from '../../db/usuarioDb.js';
+import { Audio } from '@prisma/client';
 
 
 /**
  * Función que devuelve true si el idUsuario es propietario de la lista o administrador
-  * @param {number} idLista
+  * @param {number} idItem
   * @param {number} idUsuario
   * @param {boolean} esAdmin
  * @returns {Promise<boolean>}
  * @throws {Error}
  */
-const isOwnerOrAdmin = async (idLista : number, idUsuario : number, esAdmin : Boolean) => {
+const isOwnerOrAdmin = async (idItem : number, idUsuario : number, esAdmin : Boolean, esAudio : Boolean = false) => {
   // Comprobamos si el usuario del jwt es propietario de la lista o admin
   if (!esAdmin) {
-    // No es admin, buscamos si es un propietario
-    const propietarios = await listasDb.getPropietariosFromLista(idLista);
-    // if (propietarios.length === 0) {
-    //   // console.log("Propietarios en isOwnerOrAdmin", propietarios)
-    //   throw new Error("Lista no encontrada");
-    // }
-    if (!propietarios.includes(idUsuario)) {
-      return false;
+    if (esAudio) {
+      const artistas = await audioDb.getArtistaAudioById(idItem);
+      if (!artistas) {
+        throw new Error("Audio no encontrado");
+      }
+      return artistas.includes(idUsuario);
+      
+    } else {
+      // No es admin, buscamos si es un propietario
+      const propietarios = await listasDb.getPropietariosFromLista(idItem);
+      if (!propietarios.includes(idUsuario)) {
+        return false;
+      }
     }
   }
   return true;
@@ -64,12 +70,16 @@ export const createLista = catchAsync(async (req : Request, res : Response) => {
 
 /**
  * Elimina una lista si el usuario es propietario o administrador
+ * Si hay más de un propietario, eliminamos al usuario del jwt de la lista y
+ * los audios privados de los que es propietario en caso de que no haya ningun otro propietario
+ * que sea propietario de esos audios
  * @param {ObjectId} id
  * @returns {Promise<Lista>}
  */
 export const deleteLista = catchAsync(async (req : Request, res : Response) => {
   try {
-    if (!await listasDb.getListaById(parseInt(req.params.idLista))) {
+    const lista = await listasDb.getListaByIdWithExtras(parseInt(req.params.idLista));
+    if (!lista) {
       res.status(httpStatus.NOT_FOUND).send("Lista no encontrada");
       return;
     }
@@ -77,10 +87,29 @@ export const deleteLista = catchAsync(async (req : Request, res : Response) => {
     if (!await isOwnerOrAdmin(parseInt(req.params.idLista), req.auth?.idUsuario, req.auth?.esAdmin)) {
       res.status(httpStatus.UNAUTHORIZED).send("No tienes permisos para borrar esta lista");
       return;
-    } 
-    await listasDb.deleteListaById(parseInt(req.params.idLista));
-    // Devolvermos el estado 204 (NO_CONTENT) porque no hay contenido que devolver y el mensaje de que se ha borrado correctamente
-    res.status(httpStatus.NO_CONTENT).send("Lista borrada correctamente");
+    }
+    const propietarios = await listasDb.getPropietariosFromLista(parseInt(req.params.idLista));
+    if (propietarios.length > 1) {
+      // Si hay más de un propietario, eliminamos al usuario del jwt de la lista y
+      // los audios privados de los que es propietario en caso de que no haya ningun otro propietario
+      // que sea propietario de esos audios
+      for (let i = 0; i < lista.Audios.length; i++) {
+        if (lista.Audios[i].esPrivada) {
+          const artistas = await audioDb.getArtistaAudioById(lista.Audios[i].idAudio);
+          // Miramos si otro propietario de la lista es artista del audio
+          if (!artistas.some((artista) => artista!= req.auth?.idUsuario && propietarios.includes(artista))) {
+            await listasDb.deleteAudioFromLista(parseInt(req.params.idLista), lista.Audios[i].idAudio);
+          }
+        }
+      }
+
+      await listasDb.deletePropietarioFromLista(parseInt(req.params.idLista), parseInt(req.auth?.idUsuario));
+      res.status(httpStatus.OK).send("Audios privados sin otros artistas propietarios de la lista misma y usuario eliminado como propietario de la lista");
+    } else{
+      await listasDb.deleteListaById(parseInt(req.params.idLista));
+      // Devolvermos el estado 204 (NO_CONTENT) porque no hay contenido que devolver y el mensaje de que se ha borrado correctamente
+      res.status(httpStatus.NO_CONTENT).send("Lista borrada correctamente");
+    }
 
   } catch (error) {
     res.status(httpStatus.BAD_REQUEST).send(error);
@@ -166,7 +195,7 @@ export const getListaById = catchAsync(async (req : Request, res : Response) => 
 export const getAudiosFromLista = catchAsync(async (req : Request, res : Response) => {
   try {
     const lista = await listasDb.getListaById(parseInt(req.params.idLista));
-    if(!lista) {
+    if (!lista) {
       res.status(httpStatus.NOT_FOUND).send("Lista no encontrada");
       return;
     }
@@ -175,11 +204,18 @@ export const getAudiosFromLista = catchAsync(async (req : Request, res : Respons
       res.status(httpStatus.UNAUTHORIZED).send("No tienes permisos para interactuar con esta lista");
       return;
     }
-    
-    const audios = await listasDb.getAudiosFromLista(parseInt(req.params.idLista));
-    const isOwner = await isOwnerOrAdmin(parseInt(req.params.idLista), req.auth?.idUsuario, req.auth?.esAdmin);
-    audios.filter((audio) => !audio.esPrivada || isOwner);
-    res.send(audios);
+
+    let audios = await listasDb.getAudiosFromLista(parseInt(req.params.idLista));
+    // Devolvemos solo los audios que son públicos o los privados si el usuario es propietario o admin
+    let audiosRes: Audio[] = [];
+
+    for (let i = 0; i < audios.length; i++) {
+      if (!audios[i].esPrivada || await isOwnerOrAdmin(audios[i].idAudio, req.auth?.idUsuario, req.auth?.esAdmin, true)) {
+        audiosRes.push(audios[i]);
+      }
+    }
+
+    res.send(audiosRes);
   } catch (error) {
     res.status(httpStatus.BAD_REQUEST).send(error);
   }
@@ -259,10 +295,18 @@ export const getListaByIdWithExtras = catchAsync(async (req : Request, res : Res
       return;
     }
 
-    // console.log("lista", lista);
-    const isOwner = await isOwnerOrAdmin(parseInt(req.params.idLista), req.auth?.idUsuario, req.auth?.esAdmin);
-    lista.Audios.filter((audio: { esPrivada: any; }) => !audio.esPrivada || isOwner);
+    // El usuario recibirá los audios públicos y los privados si es propietario del audio o admin
+    // lista.Audios = lista.Audios.filter((audio: { esPrivada: any; idAudio: any }) => 
+    //   !audio.esPrivada || isOwnerOrAdmin(audio.idAudio, req.auth?.idUsuario, req.auth?.esAdmin, true));
     
+    let audiosRes: Audio[] = [];
+
+    for (let i = 0; i < lista.Audios.length; i++) {
+      if (!lista.Audios[i].esPrivada || await isOwnerOrAdmin(lista.Audios[i].idAudio, req.auth?.idUsuario, req.auth?.esAdmin, true)) {
+        audiosRes.push(lista.Audios[i]);
+      }
+    }
+    lista.Audios = audiosRes;
     res.send(lista);
         
   } catch (error) {
@@ -499,7 +543,7 @@ export const getListasByPropietario = catchAsync(async (req : Request, res : Res
     const listas = await listasDb.getListasByPropietario(parseInt(req.params.idUsuario));
     res.send(listas);
   } catch (error) {
-    console.log(error);
+    // console.log(error);
     res.status(httpStatus.BAD_REQUEST).send(error);
   }
 });
