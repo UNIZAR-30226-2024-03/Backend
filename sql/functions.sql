@@ -61,3 +61,42 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+
+
+-- #################################################################################################
+CREATE OR REPLACE FUNCTION crear_lista_si_no_existe(nombre_lista TEXT) RETURNS VOID AS $$
+BEGIN
+	INSERT INTO public."Lista" (nombre, "tipoLista")
+	    SELECT nombre_lista, 'NORMAL'
+	    WHERE NOT EXISTS (
+	        SELECT 1 
+	        FROM public."Lista" 
+	        WHERE nombre = nombre_lista
+	    );
+END;
+$$ LANGUAGE plpgsql;
+
+-- #################################################################################################
+CREATE OR REPLACE FUNCTION validar_tipo_audio()
+RETURNS TRIGGER AS $$
+DECLARE
+    es_podcast BOOLEAN;
+BEGIN
+    -- Obtener el valor de esPodcast para el audio correspondiente
+    SELECT "esPodcast" INTO es_podcast FROM "Audio" WHERE "idAudio" = NEW."A";
+
+    IF es_podcast THEN
+        -- El audio es un podcast, la etiqueta debe insertarse en _AudioToEtiquetaPodcast
+        IF TG_TABLE_NAME <> '_AudioToEtiquetaPodcast' THEN
+            RAISE EXCEPTION 'El audio es un podcast, debe insertarse en _AudioToEtiquetaPodcast';
+        END IF;
+    ELSE
+        -- El audio no es un podcast, la etiqueta debe insertarse en _AudioToEtiquetaCancion
+        IF TG_TABLE_NAME <> '_AudioToEtiquetaCancion' THEN
+            RAISE EXCEPTION 'El audio no es un podcast, debe insertarse en _AudioToEtiquetaCancion';
+        END IF;
+    END IF;
+
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
