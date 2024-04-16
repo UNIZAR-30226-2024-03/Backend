@@ -128,3 +128,50 @@ export async function usuarioModifyLastAudioPrisma(idUsuario: number,idUltimoAud
       segFinAudio: segFinAudio },
   });
 }
+
+
+export async function usuarioGetAudios(userId: number, cancion: boolean, podcast: boolean, privada: boolean) {
+  let where = {};
+  if (!privada) {
+      where = {...where, esPrivada: false};
+  }
+  if (cancion && !podcast) {
+      where = {...where, esPodcast: false};
+  } else if (!cancion && podcast) {
+      where = {...where, esPodcast: true};
+  }
+  const audios = await prisma.audio.findMany({
+    where: {
+      ...where,
+      Artistas: {
+          some: {
+              idUsuario: userId,
+          },
+      },
+    },
+    select: {
+      idAudio: true,
+      titulo: true,
+      duracionSeg: true,
+      esPodcast: true,
+      imgAudio: true,
+      Artistas: {
+          select: {
+              idUsuario: true,
+              nombreUsuario: true,
+          },
+      },
+    },
+  });
+
+  const dividedAudios = audios.reduce<{ cancion: typeof audios; podcast: typeof audios }>((acc, lista) => {
+      if (lista.esPodcast) {
+          acc.podcast.push(lista);
+      } else {
+          acc.cancion.push(lista);
+      }
+      return acc;
+  }, { cancion: [], podcast: [] });
+
+  return dividedAudios;
+}

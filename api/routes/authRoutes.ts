@@ -19,7 +19,7 @@ const router = Router();
  *  get:
  *    summary: Sending credentials issued by Google
  *    description: Verifies the credentials issued by Google to authenticate the user.
- *    tags: [Auth, User]
+ *    tags: [Auth]
  *    responses:
  *      200:
  *        description: Success, returns the authentication token
@@ -40,7 +40,7 @@ router.get(
  *  post:
  *    summary: User login
  *    description: Authenticates the user with the provided login credentials.
- *    tags: [Auth, User]
+ *    tags: [Auth]
  *    parameters:
  *      - in: body
  *        name: email
@@ -73,7 +73,7 @@ router.post(
  *  post:
  *    summary: User signup
  *    description: Creates a new user account with the provided signup details.
- *    tags: [Auth, User]
+ *    tags: [Auth]
  *    parameters:
  *      - in: body
  *        name: email

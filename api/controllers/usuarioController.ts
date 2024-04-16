@@ -4,6 +4,7 @@ import { Request } from "express-jwt";
 import * as usuarioTypesJs from "../utils/types/usuarioTypes.js";
 import { hashPassword } from "../utils/hashContrasegna.js";
 import * as usuarioDbJs from "../../db/usuarioDb.js";
+import { toBoolean } from "../utils/toBoolean.js";
 
 export async function usuarioModify(
   req: usuarioTypesJs.ModifyRequest,
@@ -59,6 +60,43 @@ export async function usuarioGet(
   }
 }
 
+/**
+ * Usuario controller that gets the current usuario based on the JWT given.
+ * @param req Request with an authenticated usuario on the auth property.
+ * @param res Response
+ * @param next NextFunction
+ * @returns void
+ */
+export async function usuarioGetAudios(
+  req: usuarioTypesJs.GetRequest,
+  res: Response,
+  next: NextFunction,
+) {
+  try {
+    const idUsuario = Number.isNaN(req.query.idUsuario) || req.query.idUsuario == undefined 
+      ? Number(req.auth?.idUsuario) 
+      : Number(req.query.idUsuario);
+    if (idUsuario == undefined) return res.status(400).json({ message: "Bad request. Missing idUsuario" });
+    const privada = req.query.idUsuario == undefined;
+
+    let cancion, podcast;
+    try {
+      cancion = toBoolean(req.query, 'canciones');
+      podcast = toBoolean(req.query, 'podcasts');
+      if (cancion == null && podcast == null) {
+        cancion = true; podcast = true;
+      }
+    } catch (error: any) {
+      return res.status(400).json({ message: error.message });
+    }
+    const audios = await usuarioDbJs.usuarioGetAudios(idUsuario, cancion as boolean, podcast as boolean, privada);
+
+    return res.status(200).json(audios);
+  } catch (error) {
+    return next(error);
+  }
+}
+
 export async function usuarioFollow(
   req: Request,
   res: Response,
@@ -72,7 +110,6 @@ export async function usuarioFollow(
       return res.sendStatus(404);
 
     await usuarioDbJs.usuarioFollowPrisma(idUsuario, idSeguido);
-    console.log("Usuario followed");
     return res.sendStatus(201);
   } catch (error) {
     return next(error);

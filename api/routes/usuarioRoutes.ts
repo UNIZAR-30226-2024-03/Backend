@@ -36,7 +36,27 @@
  *                 description: Id del último audio escuchado por el usuario.
  *              segFinAudio:
  *                 type: number
- *                 description: Segundos escuchados del último audio. 
+ *                 description: Segundos escuchados del último audio.
+ *      ReducedAudio:
+ *          type: object
+ *          properties:
+ *              idAudio:
+ *                  type: boolean
+ *              titulo:
+ *                  type: boolean
+ *              duracionSeg:
+ *                  type: boolean
+ *              esAlbum:
+ *                  type: boolean
+ *              imgAudio:
+ *                  type: boolean
+ *              Artistas:
+ *                  type: object
+ *                  properties:
+ *                      idUsuario:
+ *                          type: boolean
+ *                      nombreUsuario:
+ *                          type: boolean
  */
 import { Router } from "express";
 
@@ -89,6 +109,57 @@ router.get(
   auth.optionalAuthenticate,
   validate(usuarioValidatorJs.usuarioGetSchema),
   usuarioCon.usuarioGet,
+);
+
+/**
+ * @swagger
+ * /usuario/audios:
+ *  get:
+ *    summary: Obtiene los audios de un usuario
+ *    description: Obtiene los audios de un usuario, si el usuario no está autenticado solo se devuelven los audios públicos.
+ *    security:
+ *      - bearerAuth: []
+ *    tags: [Usuario]
+ *    parameters:
+ *       - in: query
+ *         name: idUsuario
+ *         required: false
+ *         description: Busca al usuario por su id.
+ *         schema:
+ *           type: string
+ *       - in: query
+ *         name: canciones
+ *         required: false
+ *         description: False si no se quieren obtener las canciones del usuario.
+ *         schema:
+ *           type: boolean
+ *       - in: query
+ *         name: podcasts
+ *         required: false
+ *         description: False si no se quieren obtener los podcasts del usuario.
+ *         schema:
+ *           type: boolean
+ *    responses:
+ *      200:
+ *        description: Éxito, devuelve los audios del usuario
+ *        content:
+ *          application/json:
+ *            schema:
+ *              type: array
+ *              items:
+ *                $ref: '#/components/schemas/ReducedAudio'
+ *      400:
+ *        description: Error en la petición.
+ *      401:
+ *        description: No autorizado, el usuario no tiene permiso para acceder.
+ *      500:
+ *        description: Error interno del servidor.
+ */
+router.get(
+  "/audios",
+  auth.optionalAuthenticate,
+  validate(usuarioValidatorJs.usuarioGetAudiosSchema),
+  usuarioCon.usuarioGetAudios,
 );
 
 /**

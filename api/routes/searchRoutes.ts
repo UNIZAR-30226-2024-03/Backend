@@ -27,31 +27,31 @@ const router = Router();
  *         schema:
  *           type: string
  *       - in: query
- *         name: quieroUsuario
+ *         name: usuario
  *         required: false
  *         description: Buscar usuarios.
  *         schema:
  *           type: boolean
  *       - in: query
- *         name: quieroLista
+ *         name: lista
  *         required: false
  *         description: Buscar listas.
  *         schema:
  *           type: boolean
  *       - in: query
- *         name: quieroAlbum
+ *         name: album
  *         required: false
  *         description: Buscar album.
  *         schema:
  *           type: boolean
  *       - in: query
- *         name: quieroCancion
+ *         name: cancion
  *         required: false
  *         description: Buscar cancion.
  *         schema:
  *           type: boolean
  *       - in: query
- *         name: quieroPodcast
+ *         name: podcast
  *         required: false
  *         description: Buscar podcast.
  *         schema:
