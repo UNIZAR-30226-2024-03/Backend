@@ -16,6 +16,14 @@ export const usuarioGetSchema = z.object({
   }),
 });
 
+export const usuarioGetAudiosSchema = z.object({
+  query: z.object({
+    idUsuario: z.coerce.number().int().optional().transform(Number),
+    canciones: z.any().optional(),
+    podcasts: z.any().optional(),
+  }),
+});
+
 export const usuarioFollowSchema = z.object({
   params: z.object({
     seguido: z.coerce.number().int(),

@@ -2,6 +2,7 @@ import { Response , NextFunction} from "express";
 import { Request } from 'express-jwt';
 
 import { searchInDb } from "../../db/searchDb.js";
+import { toBoolean } from "../utils/toBoolean.js";
 
 export async function searchGet(
     req: Request,
@@ -9,24 +10,23 @@ export async function searchGet(
     next: NextFunction,
 ) {
     try {
+        const idUsuario = Number(req.auth?.idUsuario);
         const query = String(req.query.q);
-        console.log(query);
         if (!query || query == "") return res.sendStatus(400);
-
-        let quieroUsuario = Boolean(req.query.quieroUsuario);
-        let quieroLista = Boolean(req.query.quieroLista);
-        let quieroAlbum = Boolean(req.query.quieroAlbum);
-        let quieroCancion = Boolean(req.query.quieroCancion);
-        let quieroPodcast = Boolean(req.query.quieroPodcast);
-
-        if (!quieroUsuario && !quieroLista && !quieroAlbum && !quieroCancion && !quieroPodcast) {
-            quieroUsuario = true;
-            quieroLista = true;
-            quieroAlbum = true;
-            quieroCancion = true;
-            quieroPodcast = true;
+        let usuario, lista, album, cancion, podcast;
+        try {
+            usuario = toBoolean(req.query, 'usuario');
+            lista = toBoolean(req.query, 'lista');
+            album = toBoolean(req.query, 'album');
+            cancion = toBoolean(req.query, 'cancion');
+            podcast = toBoolean(req.query, 'podcast');
+            if (usuario == null && lista == null && album == null && cancion == null && podcast == null) {
+                usuario = true; lista = true; album = true; cancion = true; podcast = true;
+            }
+        } catch (error: any) {
+            return res.status(400).json({ message: error.message });
         }
-        const results = await searchInDb(query, quieroUsuario, quieroLista, quieroAlbum, quieroCancion, quieroPodcast);
+        const results = await searchInDb(query, idUsuario, usuario as boolean, lista as boolean, album as boolean, cancion as boolean, podcast as boolean);
         return res.status(200).json(results);
 
     } catch (error) {

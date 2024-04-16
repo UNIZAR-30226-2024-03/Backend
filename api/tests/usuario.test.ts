@@ -5,6 +5,10 @@ import {
   usuarioDeleteEmailPrisma,
   usuarioFollowPrisma,
 } from "../../db/usuarioDb.js";
+import {
+  createAudioDB,
+  deleteAudioById,
+} from "../../db/audioDb.js";
 import { createUsuarioToken } from "../utils/auth/createUsuarioToken.js";
 
 describe("Usuario routes", () => {
@@ -13,6 +17,9 @@ describe("Usuario routes", () => {
   let user2_id: number | undefined = undefined;
   let user3_id: number | undefined = undefined;
   const audio_id: number | undefined = 99;
+  let cancion1_id: number | undefined = undefined;
+  let cancion2_id: number | undefined = undefined;
+  let podcast1_id: number | undefined = undefined;
 
   beforeAll(async () => {
     const user1 = await usuarioCreatePrisma(
@@ -30,19 +37,65 @@ describe("Usuario routes", () => {
       "test3@testing.com",
       "password",
     );
-
     user1_id = user1.idUsuario;
     user2_id = user2.idUsuario;
     user3_id = user3.idUsuario;
     bearer = createUsuarioToken(user1);
+
+    // publico, propiedad de user1 y user2
+    const cancion1 = await createAudioDB(
+      "cancion1",
+      "cancion1.mp3",
+      100,
+      new Date().toISOString(),
+      false,
+      false,
+      [user1_id, user2_id],
+      "img",
+      false
+    );
+    // privado, propiedad de user1
+    const cancion2 = await createAudioDB(
+      "cancion2",
+      "cancion2.mp3",
+      100,
+      new Date().toISOString(),
+      false,
+      false,
+      [user1_id],
+      "img",
+      false
+    );
+    // publico, propiedad de user1
+    const podcast1 = await createAudioDB(
+      "podcast",
+      "podcast.mp3",
+      100,
+      new Date().toISOString(),
+      false,
+      false,
+      [user1_id],
+      "img",
+      true
+    );
+    cancion1_id = cancion1.idAudio;
+    cancion2_id = cancion2.idAudio;
+    podcast1_id = podcast1.idAudio;
+
   });
   afterAll(async () => {
-    await usuarioDeleteEmailPrisma("test@testing.com");
-    await usuarioDeleteEmailPrisma("test2@testing.com");
-    await usuarioDeleteEmailPrisma("test3@testing.com");
+    return await Promise.all([
+      usuarioDeleteEmailPrisma("test@testing.com"),
+      usuarioDeleteEmailPrisma("test2@testing.com"),
+      usuarioDeleteEmailPrisma("test3@testing.com"),
+      deleteAudioById(cancion1_id ?? 0),
+      deleteAudioById(cancion2_id ?? 0),
+      deleteAudioById(podcast1_id ?? 0),
+    ]);
   });
 
   const USUARIO_ROUTE = "/usuario";
+  const USUARIO_AUDIO_ROUTE = "/usuario/audios";
   const USUARIO_FOLLOW_ROUTE = "/usuario/follow/";
   const USUARIO_UNFOLLOW_ROUTE = "/usuario/unfollow/";
 
@@ -79,6 +132,72 @@ describe("Usuario routes", () => {
         .get(USUARIO_ROUTE)
         .set("Authorization", `Bearer ${bearer}`)
         .expect(200);
+    });
+  });
+
+  // creo audio publico y audio privado, creo otro publico que 
+  // sea podcast, x ejemplo, linkado a user1 y user2 uno de ellos
+  // si pongo parametro de query deberia devolver solo el publico,
+  // si pongo user3 no deberia devolver ningun audio
+  describe(`GET ${USUARIO_AUDIO_ROUTE}`, () => {
+    it("returns 400 bad params", async () => {
+      await supertest(app)
+        .get(USUARIO_AUDIO_ROUTE)
+        .query({
+          idUsuario: "invalid_number",
+          podcasts: "invalid_boolean",
+        })
+        .expect(400);
+    });
+  
+    it("returns 200 ok bearer no filter", async () => {
+      const response = await supertest(app)
+        .get(USUARIO_AUDIO_ROUTE)
+        .set("Authorization", `Bearer ${bearer}`)
+        .expect(200);
+      const { cancion, podcast } = response.body;
+      expect(cancion.length).toBe(2);
+      expect(podcast.length).toBe(1);
+    });
+
+    it("returns 200 ok bearer with filter", async () => {
+      const response = await supertest(app)
+        .get(USUARIO_AUDIO_ROUTE)
+        .query({
+          idUsuario: user1_id,
+          canciones: "true",
+        })
+        .expect(200);
+      
+      const { cancion, podcast } = response.body;
+      expect(cancion.length).toBe(2);
+      expect(podcast.length).toBe(0);
+    });
+
+    it("returns 200 ok query audio belongs to user", async () => {
+      const response = await supertest(app)
+        .get(USUARIO_AUDIO_ROUTE)
+        .query({
+          idUsuario: user2_id,
+        })
+        .expect(200);
+      
+      const { cancion, podcast } = response.body;
+      expect(cancion.length).toBe(1);
+      expect(podcast.length).toBe(0);
+    });
+
+    it("returns 200 ok query user does not have audios", async () => {
+      const response = await supertest(app)
+        .get(USUARIO_AUDIO_ROUTE)
+        .query({
+          idUsuario: user3_id,
+        })
+        .expect(200);
+      
+      const { cancion, podcast } = response.body;
+      expect(cancion.length).toBe(0);
+      expect(podcast.length).toBe(0);
     });
   });
 

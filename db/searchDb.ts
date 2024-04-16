@@ -19,10 +19,18 @@ async function searchUsuarios(query: string)
     return { usuarios: res };
 };
 
-async function searchListas(query: string, lista: boolean, album: boolean)
+async function searchListas(idUsuarioQuery: number, query: string, lista: boolean, album: boolean)
 : Promise<{ listas: Partial<Lista>[]; albums: Partial<Lista>[] }> {
     const where = []
     where.push({ nombre: { contains: query } })
+    where.push({ OR: [
+        { esPrivada: false }, 
+        { Propietarios: { 
+            some: { 
+                idUsuario: idUsuarioQuery
+            } 
+        } }
+    ] });
     if (lista && !album) {
         where.push({ esAlbum: false })
     } else if (!lista && album) {
@@ -54,14 +62,22 @@ async function searchListas(query: string, lista: boolean, album: boolean)
     return dividedListas;
 };
 
-async function searchAudios (query: string, cancion: boolean, podcast: boolean)
+async function searchAudios (idUsuarioQuery: number, query: string, cancion: boolean, podcast: boolean)
 : Promise<{ canciones: Partial<Audio>[]; podcasts: Partial<Audio>[] }> {
     const where = []
     where.push({ titulo: { contains: query } })
+    where.push({ OR: [
+        { esPrivada: false }, 
+        { Artistas: { 
+            some: { 
+                idUsuario: idUsuarioQuery
+            } 
+        } }
+    ] });
     if (cancion && !podcast) {
-        where.push({ esAlbum: false })
+        where.push({ esPodcast: false })
     } else if (!cancion && podcast) {
-        where.push({ esAlbum: true })
+        where.push({ esPodcast: true })
     }
 
     const res = await prisma.audio.findMany({
@@ -71,13 +87,13 @@ async function searchAudios (query: string, cancion: boolean, podcast: boolean)
         select: {
             idAudio: true,
             titulo: true,
-            esAlbum: true,
+            esPodcast: true,
             imgAudio: true,
         },
         take: MAX_TAKE,
     });
     const dividedAudios = res.reduce<{ canciones: typeof res; podcasts: typeof res }>((acc, audio) => {
-        if (audio.esAlbum) {
+        if (audio.esPodcast) {
             acc.podcasts.push(audio);
         } else {
             acc.canciones.push(audio);
@@ -90,17 +106,18 @@ async function searchAudios (query: string, cancion: boolean, podcast: boolean)
 
 export async function searchInDb(
     query: string, 
-    quieroUsuario: boolean, 
-    quieroLista: boolean,
-    quieroAlbum: boolean,
-    quieroCancion: boolean,
-    quieroPodcast: boolean,
+    idUsuario: number,
+    usuario: boolean, 
+    lista: boolean,
+    album: boolean,
+    cancion: boolean,
+    podcast: boolean,
 ): Promise<any> {
     try {
         const [usuarios, listas, audios] = await Promise.all([
-            quieroUsuario ? searchUsuarios(query) : Promise.resolve([]),
-            quieroLista || quieroAlbum ? searchListas(query, quieroLista, quieroAlbum) : Promise.resolve([]),
-            quieroCancion || quieroPodcast ? searchAudios(query, quieroCancion, quieroPodcast) : Promise.resolve([]),
+            usuario ? searchUsuarios(query) : Promise.resolve({ usuarios: [] }),
+            lista || album ? searchListas(idUsuario, query, lista, album) : Promise.resolve( { listas: [], albums: [] }),
+            cancion || podcast ? searchAudios(idUsuario, query, cancion, podcast) : Promise.resolve( { canciones: [], podcasts: [] }),
         ]);
         return { ...usuarios, ...listas, ...audios };
 
