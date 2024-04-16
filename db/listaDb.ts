@@ -82,9 +82,13 @@ export const getListaByIdWithExtras = async (id: number): Promise<any> => {
     return prisma.lista.findUnique({
       where: { idLista: id },
       include: {
-        Audios: true,
-        Propietarios: true,
-        Seguidores: true
+        Audios: {
+          include: {
+            Artistas: true
+         }
+        },
+      Propietarios: true,
+      Seguidores: true
       }
     });
   } catch (error) {
