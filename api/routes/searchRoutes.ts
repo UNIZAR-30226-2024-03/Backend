@@ -18,6 +18,8 @@ const router = Router();
  * /search:
  *   get:
  *     summary: Busca elementos en la base de datos.
+ *     security:
+ *       - bearerAuth: []
  *     tags: [Busqueda]
  *     parameters:
  *       - in: query
