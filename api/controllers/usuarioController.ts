@@ -18,7 +18,7 @@ export async function usuarioModify(
 
     const { contrasegna, imgPerfil, idUltimoAudio, segFinAudio } = req.body;
     console.log(contrasegna)
-    const hashed = contrasegna === null ? 
+    const hashed = contrasegna == null ? 
       null :
       hashPassword(contrasegna);
 
