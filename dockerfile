@@ -11,7 +11,5 @@ COPY . .
 
 RUN npm install
 
-VOLUME /app/audios
-
 EXPOSE 3000
 CMD ["npm", "start"]

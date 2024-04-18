@@ -116,8 +116,13 @@ export async function createAudio(req: Request, res: Response) {
             img = req.body.img;
         }
         console.log(req.body)
-        fs.rename(path.join(projectRootPath,'tmp',req.file.filename), path.join(projectRootPath,'audios',req.file.filename), function() {
-            console.log('File moved');
+        // Se copia el archivo del audio, debido a que al moverlo produce un error con el volumen de Docker.
+        fs.copyFile(path.join(projectRootPath,'tmp',req.file.filename), path.join(projectRootPath,'audios',req.file.filename), (error) => {
+            if (error) {
+                    console.error('Error al mover el archivo:', error);
+            } else {
+                    console.log('Archivo movido exitosamente.');
+            }
         });
         const audio = await audioDatabase.createAudioDB(req.body.titulo, req.file.filename, parseInt(req.body.duracionSeg, 10), fechaFormateada, (req.body.esAlbum === 'true'), (req.body.esPrivada === 'true'), idsUsuarios2, img, (req.body.esPodcast === 'true'));
     

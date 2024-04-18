@@ -55,30 +55,36 @@ export async function tagsOfAudio (id: number): Promise<any> {
 
 export async function addTagToAudio(idAudio: number, idLabel: number, tipoEtiqueta: string) {
 
-  if (tipoEtiqueta == 'Podcast') {
-    await prisma.etiquetaPodcast.update({
-      where: { idEtiqueta: idLabel },
-      data: {
-        Audios: {
-          connect: { idAudio: idAudio },
+  try {
+    if (tipoEtiqueta == 'Podcast') {
+      await prisma.etiquetaPodcast.update({
+        where: { idEtiqueta: idLabel },
+        data: {
+          Audios: {
+            connect: { idAudio: idAudio },
+          },
         },
-      },
-    });
-  } else if (tipoEtiqueta == 'Cancion') {
-    await prisma.etiquetaCancion.update({
-      where: { idEtiqueta: idLabel },
-      data: {
-        Audios: {
-          connect: { idAudio: idAudio },
+      });
+    } else if (tipoEtiqueta == 'Cancion') {
+      await prisma.etiquetaCancion.update({
+        where: { idEtiqueta: idLabel },
+        data: {
+          Audios: {
+            connect: { idAudio: idAudio },
+          },
         },
-      },
-    });
+      });
+    }
+  } catch (error) {
+    console.error(error);
+    throw new Error("Error conectando etiqueta a Audio en Base de Datos");
   }
 }
 
 
 export async function removeTagFromAudio(idAudio: number, idLabel: number, tipoEtiqueta: string) {
   
+  try {
     if (tipoEtiqueta == 'Podcast') {
       await prisma.etiquetaPodcast.update({
         where: { idEtiqueta: idLabel },
@@ -98,6 +104,10 @@ export async function removeTagFromAudio(idAudio: number, idLabel: number, tipoE
         },
       });
     }
+  } catch (error) { 
+    console.error(error);
+    throw new Error("Error desconectando etiqueta de Audio en Base de Datos");
+  }
 }
 
 export async function createTagSong (name: string): Promise<number> {
