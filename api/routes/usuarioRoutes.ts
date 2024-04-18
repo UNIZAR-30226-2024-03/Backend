@@ -37,6 +37,29 @@
  *              segFinAudio:
  *                 type: number
  *                 description: Segundos escuchados del último audio.
+ *      UsuarioReduced:
+ *          type: object
+ *          required:
+ *             - idUsuario
+ *             - nombreUsuario
+ *             - esAdmin
+ *             - contrasegna
+ *             - imgPerfil
+ *             - idUltimoAudio
+ *             - segFinAudio 
+ *          properties:
+ *              contrasegna:
+ *                 type: string
+ *                 description: Contraseña del usuario.
+ *              imgPerfil:
+ *                 type: string
+ *                 description: Imagen de perfil del usuario.
+ *              idUltimoAudio:
+ *                 type: number
+ *                 description: Id del último audio escuchado por el usuario.
+ *              segFinAudio:
+ *                 type: number
+ *                 description: Segundos escuchados del último audio.
  *      ReducedAudio:
  *          type: object
  *          properties:
@@ -180,7 +203,7 @@ router.get(
  *        content:
  *          application/json:
  *            schema:
- *              $ref: '#/components/schemas/Usuario'
+ *              $ref: '#/components/schemas/UsuarioReduced'
  *      400:
  *        description: Error en la petición.
  *      401:

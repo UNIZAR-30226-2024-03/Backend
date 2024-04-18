@@ -17,7 +17,10 @@ export async function usuarioModify(
       return res.sendStatus(404);
 
     const { contrasegna, imgPerfil, idUltimoAudio, segFinAudio } = req.body;
-    const hashed = contrasegna === null ? hashPassword(contrasegna) : null;
+    console.log(contrasegna)
+    const hashed = contrasegna == null ? 
+      null :
+      hashPassword(contrasegna);
 
     const usuario = await usuarioDbJs.usuarioModifyPrisma(
       idUsuario,
@@ -26,11 +29,17 @@ export async function usuarioModify(
       idUltimoAudio,
       segFinAudio,
     );
+    if (usuario) {
+      usuario.contrasegna = null;
+    } 
     return res.status(201).json({ usuario: usuario });
   } catch (error) {
     return next(error);
   }
 }
+
+// $2b$10$7qHYgeKhM561uuqj4Ya4xuCxIXobbL3famnV88c3.YmHjd5qno//6
+// $2b$10$7qHYgeKhM561uuqj4Ya4xuCxIXobbL3famnV88c3.YmHjd5qno//6
 
 /**
  * Usuario controller that gets the current usuario based on the JWT given.

@@ -27,8 +27,8 @@ model Usuario {
   ListasPropias Lista[]
   Audios        Audio[]
   Escuchas      Escucha[]
-  Seguidores    Seguir[]     @relation("Seguidor")
-  Seguidos      Seguir[]     @relation("Seguido")
+  Seguidores    Seguir[]     @relation("Seguido")
+  Seguidos      Seguir[]     @relation("Seguidor")
 }
 
 model Seguir {
