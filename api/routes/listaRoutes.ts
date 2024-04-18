@@ -473,7 +473,36 @@ listaRouter.get("/extra/Seguidores/:idLista", auth.authenticate, listaController
  *                       Audios:
  *                          type: array
  *                          items:
- *                             $ref: '#/components/schemas/Audio'
+ *                            type: object
+ *                            properties:
+ *                               idAudio:
+ *                                  type: number
+ *                                  description: Identificador del audio
+ *                               titulo:
+ *                                  type: string
+ *                                  description: Título del audio
+ *                               path:
+ *                                  type: string
+ *                                  description: uri del audio
+ *                               duracion:
+ *                                  type: number
+ *                                  description: Duración del audio en segundos
+ *                               fechaLanz:
+ *                                  type: string
+ *                                  description: Fecha de subida del audio
+ *                               esAlbum:
+ *                                  type: boolean
+ *                                  description: Indica si el audio es un album
+ *                               imgAudio:
+ *                                  type: string
+ *                                  description: uri de la imagen del audio
+ *                               esPrivada:
+ *                                  type: boolean
+ *                                  description: Indica si el audio es privado
+ *                               Artistas:
+ *                                  type: array
+ *                                  items:
+ *                                     $ref: '#/components/schemas/Usuario'
  *                       Propietarios:
  *                          type: array
  *                          items:
@@ -482,6 +511,7 @@ listaRouter.get("/extra/Seguidores/:idLista", auth.authenticate, listaController
  *                          type: array
  *                          items:
  *                             $ref: '#/components/schemas/SigueLista'
+ *                    
  *        400:
  *           description: Error en la petición.
  *        401:
