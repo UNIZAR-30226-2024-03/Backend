@@ -154,6 +154,7 @@ export async function usuarioGetAudios(userId: number, cancion: boolean, podcast
       titulo: true,
       duracionSeg: true,
       esPodcast: true,
+      esAlbum: true,
       imgAudio: true,
       Artistas: {
           select: {

@@ -71,6 +71,8 @@
  *                  type: boolean
  *              esAlbum:
  *                  type: boolean
+ *              esPodcast:
+ *                  type: boolean
  *              imgAudio:
  *                  type: boolean
  *              Artistas:
@@ -167,10 +169,18 @@ router.get(
  *        description: Éxito, devuelve los audios del usuario
  *        content:
  *          application/json:
- *            schema:
- *              type: array
- *              items:
- *                $ref: '#/components/schemas/ReducedAudio'
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 cancion:
+ *                   type: array
+ *                   items:
+ *                      $ref: '#/components/schemas/ReducedAudio'
+ *                 podcast:
+ *                   type: array
+ *                   items:
+ *                      $ref: '#/components/schemas/ReducedAudio'
+ *                
  *      400:
  *        description: Error en la petición.
  *      401:
