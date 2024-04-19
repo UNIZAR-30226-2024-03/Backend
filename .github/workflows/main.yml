@@ -57,11 +57,31 @@ jobs:
           ssh-private-key: ${{ secrets.AZURE_SECRET_KEY }}
           host: ${{ secrets.AZURE_HOST }}
           username: ${{ secrets.AZURE_USER }}
+      - name: Checkout repository
+        uses: actions/checkout@v2
+      
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+      
+      - name: Build Docker image
+        run: docker build --tag playbeat .
+      
+      - name: Save Docker image as tar
+        run: docker save playbeat -o playbeat.tar
+      
+      - name: Copy Docker image to Azure VM
+        uses: appleboy/scp-action@master
+        with:
+          host: ${{ secrets.AZURE_HOST }}
+          username: ${{ secrets.AZURE_USER }}
+          key: ${{ secrets.AZURE_SECRET_KEY }}
+          source: "playbeat.tar"
+          target: "/home${{ secrets.RUTA_PLAYBEAT }}playbeat.tar"
 
       - name: Desplegar a Azure
         run: |
-          ssh -o StrictHostKeyChecking=no -t ${{ secrets.AZURE_USER }}@${{ secrets.AZURE_HOST }} "cd playbeat/Backend && git pull origin main && 
-          docker stop playbeat_container && docker rm playbeat_container && docker rmi playbeat && docker build -t playbeat:latest . && 
+          ssh -o StrictHostKeyChecking=no -t ${{ secrets.AZURE_USER }}@${{ secrets.AZURE_HOST }} "cd playbeat/Backend &&  docker load -i playbeat.tar &&
+          docker stop playbeat_container && docker rm playbeat_container && docker rmi playbeat && 
           docker run -v audios_playbeat:/app/audios -d --name playbeat_container -p 3000:3000 -p 3001:3001 playbeat:latest"
 
 
