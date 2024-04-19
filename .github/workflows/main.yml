@@ -65,6 +65,9 @@ jobs:
       
       - name: Build Docker image
         run: docker build --tag playbeat .
+
+      - name: List files after build
+        run: ls -la
       
       - name: Save Docker image as tar
         run: docker save playbeat -o playbeat.tar
