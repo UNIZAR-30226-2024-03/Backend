@@ -62,7 +62,19 @@ jobs:
         uses: docker/setup-buildx-action@v1
       
       - name: Build Docker image
-        run: docker build --tag playbeat .
+        run: |
+          docker build \
+            --tag playbeat \
+            --build-arg DATABASE_URL="${{ secrets.DATABASE_URL_PRODUCTION }}" \
+            --build-arg PGHOST="${{ secrets.PGHOST }}" \
+            --build-arg PGUSER="${{ secrets.PGUSER }}" \
+            --build-arg PGPORT="${{ secrets.PGPORT }}" \
+            --build-arg PGDATABASE="${{ secrets.PGDATABASE }}" \
+            --build-arg PGPASSWORD="${{ secrets.PGPASSWORD }}" \
+            --build-arg GOOGLE_CLIENT_ID="${{ secrets.GOOGLE_CLIENT_ID }}" \
+            --build-arg GOOGLE_CLIENT_SECRET="${{ secrets.GOOGLE_CLIENT_SECRET }}" \
+            --build-arg JWT_SECRET="${{ secrets.JWT_SECRET }}" \
+            .
       
       - name: Save Docker image as tar
         run: docker save playbeat -o playbeat.tar
@@ -90,7 +102,7 @@ jobs:
 
       - name: Desplegar a Azure
         run: |
-          ssh -o StrictHostKeyChecking=no -t ${{ secrets.AZURE_USER }}@${{ secrets.AZURE_HOST }} "cd playbeat/Backend/playbeat.tar && docker load -i playbeat.tar &&
+          ssh -o StrictHostKeyChecking=no -t ${{ secrets.AZURE_USER }}@${{ secrets.AZURE_HOST }} "cd playbeat/Backend && docker load -i playbeat.tar &&
           docker stop playbeat_container && docker rm playbeat_container && 
           docker run -v audios_playbeat:/app/audios -d --name playbeat_container -p 3000:3000 -p 3001:3001 playbeat:latest"
 
