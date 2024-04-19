@@ -76,7 +76,7 @@ jobs:
           username: ${{ secrets.AZURE_USER }}
           key: ${{ secrets.AZURE_SECRET_KEY }}
           source: "playbeat.tar"
-          target: "/home/azureuser/playbeat/Backend/playbeat.tar"
+          target: "/home${{ secrets.RUTA_PLAYBEAT }}playbeat.tar"
 
       - name: Desplegar a Azure
         run: |
