@@ -69,6 +69,9 @@ jobs:
       - name: Save Docker image as tar
         run: docker save playbeat -o playbeat.tar
 
+      - name: Dar permisos de lectura
+        run: chmod +r playbeat.tar
+      
       - name: List files after build
         run: ls -la
       
