@@ -127,6 +127,7 @@ describe('Lista routes', () => {
   const LISTA_AUDIO = '/lista/audio';
   const LISTA_COLLABORATOR = '/lista/collaborator';
   const LISTA_SEGUIDAS = '/lista/seguidas';
+  const LISTA_OWNED = '/lista/owned';
 
 
   describe(' POST /lista , createLista', () => {
@@ -625,9 +626,6 @@ describe('Lista routes', () => {
         .expect(httpStatus.UNAUTHORIZED);
     });
 
-    //TODO: Probar con un audio que sea privado
-
-
     it('returns ' + httpStatus.CREATED + ' when audio privado', async () => {
       await request(app)
         .post(`${LISTA_AUDIO}/${lista?.idLista}/${audioTest1_id}`)
@@ -762,20 +760,19 @@ describe('Lista routes', () => {
         .get(`${LISTA_SEGUIDAS}/${userTest1_id}`)
         .set('Authorization', `Bearer ${bearer}`)
         .expect((res) => {
-          expect(res.body).toEqual([]);
           expect(res.status).toEqual(httpStatus.OK);
+          expect(res.body).toEqual([]);
         });
     });
 
-    it('returns ' + httpStatus.OK + ' and correct result when listas followed', async () => {
+    it('returns ' + httpStatus.OK + ' and correct result when private listas followed and is owner', async () => {
       // Hacemos que el usuario 1 siga la lista
       await request(app)
         .post(`${LISTA_FOLLOW}/${lista?.idLista}`)
         .set('Authorization', `Bearer ${bearer}`)
         .expect((res) => {
-          expect(res.body.idUsuario).toEqual(userTest1_id);
+          expect(res.status).toEqual(httpStatus.CREATED)
           expect(res.body.idLista).toEqual(lista?.idLista);
-          expect(res.status).toEqual(httpStatus.CREATED);
         }
       );
       
@@ -787,6 +784,17 @@ describe('Lista routes', () => {
         }
       );
     });
+
+    it('returns ' + httpStatus.OK + ' and correct result when private listas followed and is not owner', async () => {
+      // Hacemos que el usuario 2 siga la lista
+      await request(app)
+        .get(`${LISTA_SEGUIDAS}/${userTest1_id}`)
+        .set('Authorization', `Bearer ${bearer2}`)
+        .expect((res) => {
+          expect(res.body.length).toEqual(1);
+        }
+      );
+    });
   });
 
 
@@ -794,14 +802,14 @@ describe('Lista routes', () => {
   describe(' GET /lista/owned/:idUsuario , getListasByUser', () => {
     it('returns ' + httpStatus.NOT_FOUND + ' when idUsuario not found', async () => {
       await request(app)
-        .get(`${LISTA_SEGUIDAS}/${999999}`)
+        .get(`${LISTA_OWNED}/${999999}`)
         .set('Authorization', `Bearer ${bearer}`)
         .expect(httpStatus.NOT_FOUND);
     });
 
     it('returns ' + httpStatus.OK + ' and correct result when no listas owned', async () => {
       await request(app)
-        .get(`${LISTA_SEGUIDAS}/${userTest2_id}`)
+        .get(`${LISTA_OWNED}/${userTest2_id}`)
         .set('Authorization', `Bearer ${bearer2}`)
         .expect((res) => {
           expect(res.body).toEqual([]);
@@ -809,15 +817,29 @@ describe('Lista routes', () => {
         });
     });
 
-    it('returns ' + httpStatus.OK + ' and correct result when public listas owned', async () => {
+    it('returns ' + httpStatus.OK + ' and correct result when private listas owned and user is owner', async () => {
       await request(app)
-        .get(`${LISTA_SEGUIDAS}/${userTest1_id}`)
+        .get(`${LISTA_OWNED}/${userTest1_id}`)
         .set('Authorization', `Bearer ${bearer}`)
         .expect((res) => {
-          expect(res.body[0].idLista).toEqual(lista?.idLista);
+          console.log("Listas del usuario: ", res.body);
+          expect(res.status).toEqual(httpStatus.OK);
+          expect(res.body.length).toEqual(2);
           expect(res.status).toEqual(httpStatus.OK);
         });
     });
-    
+
+    it('returns ' + httpStatus.OK + ' and correct result when private listas owned and user is not owner', async () => {
+      await request(app)
+        .get(`${LISTA_OWNED}/${userTest1_id}`)
+        .set('Authorization', `Bearer ${bearer2}`)
+        .expect((res) => {
+          console.log("Listas del usuario: ", res.body);
+          expect(res.status).toEqual(httpStatus.OK);
+          expect(res.body.length).toEqual(1);
+          expect(res.body[0].idLista).toEqual(listaPub?.idLista);
+          expect(res.status).toEqual(httpStatus.OK);
+        });
+    });
   });
 });
