@@ -323,10 +323,10 @@ listaRouter.put("/:idLista", auth.authenticate, listaController.updateLista);
  */
 listaRouter.get("/:idLista", auth.authenticate, listaController.getListaById);
 
-//[GET]/lista/extra/Audios/<idLista>/ : Devuelve los audios de una lista.
+//[GET]/lista/extra/audios/<idLista>/ : Devuelve los audios de una lista.
 /**
  * @swagger
- * /lista/extra/Audios/{idLista}:
+ * /lista/extra/audios/{idLista}:
  *   get:
  *     tags: [Listas]
  *     summary: Devuelve los audios de una lista.
@@ -353,9 +353,9 @@ listaRouter.get("/:idLista", auth.authenticate, listaController.getListaById);
  *           description: No se ha encontrado la lista.
  * 
  */
-listaRouter.get("/extra/Audios/:idLista", auth.authenticate, listaController.getAudiosFromLista);
+listaRouter.get("/extra/audios/:idLista", auth.authenticate, listaController.getAudiosFromLista);
 
-//[GET]/lista/extra/Propietarios/<idLista>/ : Devuelve los propietarios de una lista.
+//[GET]/lista/extra/propietarios/<idLista>/ : Devuelve los propietarios de una lista.
 /**
  * @swagger
  * /lista/extra/Propietarios/{idLista}:
@@ -388,12 +388,12 @@ listaRouter.get("/extra/Audios/:idLista", auth.authenticate, listaController.get
  *           description: No se ha encontrado la lista.
  * 
  */
-listaRouter.get("/extra/Propietarios/:idLista", auth.authenticate, listaController.getPropietariosFromLista);
+listaRouter.get("/extra/propietarios/:idLista", auth.authenticate, listaController.getPropietariosFromLista);
 
-//[GET]/lista/extra/Seguidores/<idLista>/ : Devuelve los seguidores de una lista.
+//[GET]/lista/extra/seguidores/<idLista>/ : Devuelve los seguidores de una lista.
 /**
  * @swagger
- * /lista/extra/Seguidores/{idLista}:
+ * /lista/extra/seguidores/{idLista}:
  *   get:
  *     tags: [Listas]
  *     summary: Devuelve los seguidores de una lista.
@@ -422,7 +422,7 @@ listaRouter.get("/extra/Propietarios/:idLista", auth.authenticate, listaControll
  *           description: No se ha encontrado la lista.
  * 
  */
-listaRouter.get("/extra/Seguidores/:idLista", auth.authenticate, listaController.getSeguidoresFromLista);
+listaRouter.get("/extra/seguidores/:idLista", auth.authenticate, listaController.getSeguidoresFromLista);
 
 //[GET]/lista/extra/<idLista>/ : Devuelve la información de una lista (con audios, propietarios y seguidores)
 /**
@@ -734,10 +734,10 @@ listaRouter.post("/collaborator/:idLista/:idUsuario", auth.authenticate, listaCo
  */
 listaRouter.delete("/collaborator/:idLista/:idUsuario", auth.authenticate, listaController.deleteCollaboratorFromLista);
 
-//[GET]listas/seguidas/<idUsuario>/: Devuelve las listas seguidas por un usuario.
+//[GET]lista/seguidas/<idUsuario>/: Devuelve las listas seguidas por un usuario.
 /**
  * @swagger
- * /listas/seguidas/{idUsuario}:
+ * /lista/seguidas/{idUsuario}:
  *   get:
  *     tags: [Listas]
  *     summary: Devuelve las listas seguidas por un usuario.
@@ -767,10 +767,10 @@ listaRouter.delete("/collaborator/:idLista/:idUsuario", auth.authenticate, lista
  */
 listaRouter.get("/seguidas/:idUsuario", auth.authenticate, listaController.getFollowedLists);
 
-//[GET]listas/owned/<idUsuario>/: Devuelve las listas de las que un usuario es propietario.
+//[GET]lista/owned/<idUsuario>/: Devuelve las listas de las que un usuario es propietario.
 /**
  * @swagger
- * /listas/owned/{idUsuario}:
+ * /lista/owned/{idUsuario}:
  *   get:
  *     tags: [Listas]
  *     summary: Devuelve las listas de las que un usuario es propietario.
