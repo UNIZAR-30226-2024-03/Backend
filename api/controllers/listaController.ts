@@ -388,7 +388,15 @@ export const getFollowedLists = catchAsync(async (req : Request, res : Response)
     }));
     
     // Solo se devuelven las listas públicas y las privadas si el usuario es propietario o admin
-    listas.filter((lista) => !lista?.esPrivada || isOwnerOrAdmin(lista.idLista, parseInt(req.auth?.idUsuario), req.auth?.esAdmin));
+    let listasRes = [];
+    if (listas) {
+      for (let i = 0; i < listas.length; i++) {
+        if (!listas[i]?.esPrivada || await isOwnerOrAdmin(Number(listas[i]?.idLista), parseInt(req.auth?.idUsuario), req.auth?.esAdmin)) {
+          listasRes.push(listas[i]);
+        }
+      }
+    }
+    // listas.filter((lista) => !lista?.esPrivada || isOwnerOrAdmin(lista.idLista, parseInt(req.auth?.idUsuario), req.auth?.esAdmin));
     res.send(listas);
   } catch (error) {
     res.status(httpStatus.BAD_REQUEST).send(error);
@@ -541,7 +549,16 @@ export const getListasByPropietario = catchAsync(async (req : Request, res : Res
     }
 
     const listas = await listasDb.getListasByPropietario(parseInt(req.params.idUsuario));
-    res.send(listas);
+
+    // Solo se devuelven las listas públicas y las privadas si el usuario es propietario o admin
+    let listasRes = [];
+    for (let i = 0; i < listas.length; i++) {
+      if (!listas[i].esPrivada || await isOwnerOrAdmin(listas[i].idLista, parseInt(req.auth?.idUsuario), req.auth?.esAdmin)) {
+        listasRes.push(listas[i]);
+      }
+    }
+    res.send(listasRes);
+
   } catch (error) {
     // console.log(error);
     res.status(httpStatus.BAD_REQUEST).send(error);
