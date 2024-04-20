@@ -60,21 +60,29 @@
  *              segFinAudio:
  *                 type: number
  *                 description: Segundos escuchados del último audio.
- *      ReducedAudio:
+ *      Audio:
  *          type: object
  *          properties:
  *              idAudio:
  *                  type: boolean
  *              titulo:
  *                  type: boolean
+ *              path:
+ *                  type: boolean
+ *              fechaLanz:
+ *                  type: date
  *              duracionSeg:
  *                  type: boolean
  *              esAlbum:
  *                  type: boolean
  *              esPodcast:
  *                  type: boolean
+ *              esPrivada:
+ *                  type: boolean
  *              imgAudio:
  *                  type: boolean
+ *              vecesEscuchada:
+ *                  type: number 
  *              Artistas:
  *                  type: object
  *                  properties:
@@ -175,11 +183,11 @@ router.get(
  *                 cancion:
  *                   type: array
  *                   items:
- *                      $ref: '#/components/schemas/ReducedAudio'
+ *                      $ref: '#/components/schemas/Audio'
  *                 podcast:
  *                   type: array
  *                   items:
- *                      $ref: '#/components/schemas/ReducedAudio'
+ *                      $ref: '#/components/schemas/Audio'
  *                
  *      400:
  *        description: Error en la petición.

@@ -149,13 +149,7 @@ export async function usuarioGetAudios(userId: number, cancion: boolean, podcast
           },
       },
     },
-    select: {
-      idAudio: true,
-      titulo: true,
-      duracionSeg: true,
-      esPodcast: true,
-      esAlbum: true,
-      imgAudio: true,
+    include: {
       Artistas: {
           select: {
               idUsuario: true,
@@ -165,13 +159,22 @@ export async function usuarioGetAudios(userId: number, cancion: boolean, podcast
     },
   });
 
-  const dividedAudios = audios.reduce<{ cancion: typeof audios; podcast: typeof audios }>((acc, lista) => {
-      if (lista.esPodcast) {
-          acc.podcast.push(lista);
-      } else {
-          acc.cancion.push(lista);
-      }
-      return acc;
+  const audiosWithCount = await Promise.all(audios.map(async (audio) => {
+    const vecesEscuchada = await prisma.escucha.count({
+      where: {
+        idAudio: audio.idAudio,
+      },
+    });
+    return { ...audio, vecesEscuchada };
+  }));
+
+  const dividedAudios = audiosWithCount.reduce<{ cancion: typeof audiosWithCount; podcast: typeof audiosWithCount }>((acc, lista) => {
+    if (lista.esPodcast) {
+      acc.podcast.push(lista);
+    } else {
+      acc.cancion.push(lista);
+    }
+    return acc;
   }, { cancion: [], podcast: [] });
 
   return dividedAudios;
