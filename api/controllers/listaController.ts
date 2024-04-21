@@ -59,9 +59,11 @@ export const createLista = catchAsync(async (req : Request, res : Response) => {
 
   // createLista puede lanzar un error si el nombre de la lista ya existe por o que se debe capturar
   try {
+    console.log("lista", nombre, descripcion, esPrivada, imgLista, esAlbum, tipoLista, audios)
     const lista = await listasDb.createLista(nombre, descripcion, esPrivada, esAlbum, imgLista, tipoLista, req.auth?.idUsuario, audios);
     res.status(httpStatus.CREATED).send(lista);
   } catch (error) {
+    console.log(error);
     res.status(httpStatus.BAD_REQUEST).send(error)
   }
 
