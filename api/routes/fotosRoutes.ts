@@ -15,7 +15,7 @@ const router = Router();
 
 /**
  * @swagger
- * /fotos:
+ * /foto:
  *   post:
  *     summary: Sube una foto
  *     description: Sube una foto al servidor.
@@ -60,7 +60,7 @@ router.post(
 
 /**
  * @swagger
- * /fotos/{id}:
+ * /foto/{id}:
  *   get:
  *     summary: Obtiene una foto
  *     description: Obtiene una foto del servidor.
