@@ -6,6 +6,28 @@ import { compareWithHash, hashPassword } from "../utils/hashContrasegna.js";
 import { createUsuarioToken } from "../utils/auth/createUsuarioToken.js";
 import { verify } from "../utils/auth/googleVerification.js";
 
+import {createLista} from "../../db/listaDb.js";
+
+
+
+// Crear listas por defecto para un usuario
+const createDefaultListas = async (idUsuario: number) => {
+  const imgListaFav = "";
+  const imgListaAudios = "";
+  const imgListaPodcast = "";
+
+  const listaFavoritos = await createLista("Mis Favoritos", "Todos tus audios favoritos en una única playlist", true, false, imgListaFav, "MIS_FAVORITOS", idUsuario, []);
+  const listaMisAudios = await createLista("Mis Canciones", "Todos los audios que has subido", true, false, imgListaAudios, "MIS_AUDIOS", idUsuario, []);
+  const listaMisPodcast = await createLista("Mis Podcast", "Todos los podcast que has subido", true, false, imgListaPodcast, "MIS_PODCAST", idUsuario, []);
+
+  return [listaFavoritos, listaMisAudios, listaMisPodcast];
+};
+
+
+
+
+
+
 export async function authGoogleLogin(
   req: Request,
   res: Response,
@@ -31,6 +53,8 @@ export async function authGoogleLogin(
       );
 
       const token = createUsuarioToken(usuario);
+      
+      await createDefaultListas(usuario.idUsuario);
       return res.status(201).send(token);
     }
   } catch (error) {
@@ -60,6 +84,7 @@ export async function authSignup(
     );
 
     const token = createUsuarioToken(usuario);
+    await createDefaultListas(usuario.idUsuario);
     return res.status(201).send(token);
   } catch (error) {
     return next(error);

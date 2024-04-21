@@ -18,7 +18,7 @@ const router = Router();
  * /google:
  *  get:
  *    summary: Sending credentials issued by Google
- *    description: Verifies the credentials issued by Google to authenticate the user.
+ *    description: Verifies the credentials issued by Google to authenticate the user. If the user is already registered, it returns the authentication token. If the user is not registered, it creates a new user account and returns the authentication token.
  *    tags: [Auth]
  *    responses:
  *      200:
@@ -72,7 +72,7 @@ router.post(
  * /signup:
  *  post:
  *    summary: User signup
- *    description: Creates a new user account with the provided signup details.
+ *    description: Creates a new user account with the provided signup details. This includes the creation of the default lists.
  *    tags: [Auth]
  *    parameters:
  *      - in: body
