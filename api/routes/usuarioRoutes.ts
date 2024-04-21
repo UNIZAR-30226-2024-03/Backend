@@ -134,7 +134,7 @@ const router = Router();
  *                    nEscuchas:
  *                      type: number  
  *                      description: Número de escuchas totales del usuario.
- *                    oyentes:
+ *                    oyentesMensuales:
  *                      type: number
  *                      description: Número de oyentes del usuario.
  *      400:
@@ -262,7 +262,7 @@ router.put(
  *         schema:
  *           type: string
  *    responses:
- *      200:
+ *      201:
  *        description: Éxito, el usuario autenticado sigue al usuario especificado
  *      400:
  *        description: Error en la petición.
@@ -295,7 +295,7 @@ router.put(
  *         schema:
  *           type: string
  *    responses:
- *      200:
+ *      201:
  *        description: Éxito, el usuario autenticado sigue al usuario especificado
  *      400:
  *        description: Error en la petición.
