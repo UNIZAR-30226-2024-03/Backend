@@ -22,7 +22,7 @@ export async function getAudio(req: Request, res: Response) {
         if (req.body.audioConsulta.esPrivada && !await isOwnerOrAdmin(req)) { //Falta lógica de verificación de usarios
             res.status(403).send("Permission denied, unsifficient permissions");
         }else{
-            const artistas = await audioDatabase.getArtistaAudioById(id);
+            const artistas = await audioDatabase.getArtistasAudioById(id);
             const vecesEscuchada = await audioDatabase.getVecesEscuchada(id);
             res.json({...req.body.audioConsulta, artistas, vecesEscuchada});
         }
@@ -31,6 +31,8 @@ export async function getAudio(req: Request, res: Response) {
         res.status(500).send(error); // Internal server error
     }
 }
+
+
 
 //Se encarga de verificar que los usuarios existan en la base de datos
 export async function verifyUsersList(req: Request, res: Response, next: NextFunction) {
@@ -343,7 +345,7 @@ function deleteFile(filePath: string) {
 
 async function isOwnerOrAdmin(req: Request){
         if (!req.auth?.esAdmin) {
-            const propietarios = await audioDatabase.getArtistaAudioById(parseInt(req.params.idaudio));
+            const propietarios = await audioDatabase.getIdArtistaAudioById(parseInt(req.params.idaudio));
 
             if (propietarios.length === 0) {
                 throw new Error("Audio no encontrado");

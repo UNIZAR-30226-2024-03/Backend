@@ -58,8 +58,8 @@ export async function updateAudioById(id: number, audioData: any) {
 
 
 //PRE: Se recibe un id de audio correcto
-//POST: Se devuelven los artistas que han participado en el audio con el id correspondiente en un array
-export async function getArtistaAudioById(id: number) {
+//POST: Se devuelven los ids de los artistas que han participado en el audio con el id correspondiente en un array
+export async function getIdArtistaAudioById(id: number) {
     const audio = await prisma.audio.findMany({
         where: {
             idAudio: id,
@@ -70,6 +70,23 @@ export async function getArtistaAudioById(id: number) {
     });
 
     const artistas = audio.flatMap((audio) => audio.Artistas.map((artista) => artista.idUsuario));
+
+    return artistas;
+}
+
+//PRE: Se recibe un id de audio correcto
+//POST: Se devuelven los artistas que han participado en el audio con el id correspondiente en un array
+export async function getArtistasAudioById(id: number) {
+    const audio = await prisma.audio.findMany({
+        where: {
+            idAudio: id,
+        },
+        include: {
+            Artistas: true,
+        },
+    });
+
+    const artistas = audio.flatMap((audio) => audio.Artistas.map((artista) => artista));
 
     return artistas;
 }

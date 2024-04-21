@@ -21,7 +21,7 @@ const isOwnerOrAdmin = async (idItem : number, idUsuario : number, esAdmin : Boo
   // Comprobamos si el usuario del jwt es propietario de la lista o admin
   if (!esAdmin) {
     if (esAudio) {
-      const artistas = await audioDb.getArtistaAudioById(idItem);
+      const artistas = await audioDb.getIdArtistaAudioById(idItem);
       if (!artistas) {
         throw new Error("Audio no encontrado");
       }
@@ -97,7 +97,7 @@ export const deleteLista = catchAsync(async (req : Request, res : Response) => {
       // que sea propietario de esos audios
       for (let i = 0; i < lista.Audios.length; i++) {
         if (lista.Audios[i].esPrivada) {
-          const artistas = await audioDb.getArtistaAudioById(lista.Audios[i].idAudio);
+          const artistas = await audioDb.getIdArtistaAudioById(lista.Audios[i].idAudio);
           // Miramos si otro propietario de la lista es artista del audio
           if (!artistas.some((artista) => artista!= req.auth?.idUsuario && propietarios.includes(artista))) {
             await listasDb.deleteAudioFromLista(parseInt(req.params.idLista), lista.Audios[i].idAudio);
