@@ -83,7 +83,7 @@ const upload = multer(
  *                artistas:
  *                  type: array
  *                  items:
- *                    type: integer
+ *                    $ref: '#/components/schemas/Usuario'
  *                vecesEscuchada:
  *                 type: integer
  *      400:
