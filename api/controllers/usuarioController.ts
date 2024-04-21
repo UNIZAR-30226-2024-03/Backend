@@ -60,10 +60,13 @@ export async function usuarioGet(
       idUsuario,
       rrss,
     );
+    
     if (!currentUsuario) return res.sendStatus(404);
     currentUsuario.contrasegna = null;
+    const nEscuchas = await usuarioDbJs.usuarioGetNEscuchas(idUsuario);
+    const oyentesMensuales = await usuarioDbJs.usuarioGetOyentesMensuales(idUsuario);
 
-    return res.status(200).json({ usuario: currentUsuario });
+    return res.status(200).json({ usuario: currentUsuario,nEscuchas:nEscuchas,oyentesMensuales:oyentesMensuales });
   } catch (error) {
     return next(error);
   }
@@ -142,6 +145,48 @@ export async function usuarioUnfollow(
       idSeguido,
     );
     return res.status(201).json({ usuario: usuario });
+  } catch (error) {
+    return next(error);
+  }
+}
+
+
+export async function lastAudios(
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) {
+  try {
+    const idUsuario = Number(req.auth?.idUsuario);
+    if(!req.params.numAudios){
+      return res.status(400).json({ message: "Bad request. Missing numAudios" });
+    }
+    if (Number(req.params.numaudios) <= 0) {
+      return res.status(400).json({ message: "Bad request. numAudios must be a positive number" });
+    }
+    const audios = await usuarioDbJs.usuarioGetLastAudiosAndPodcasts(idUsuario,Number(req.params.numAudios));
+    return res.status(200).json(audios);
+  } catch (error) {
+    return next(error);
+  }
+}
+
+
+export async function topAudios(
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) {
+  try {
+    if(!req.query.numAudios){
+      return res.status(400).json({ message: "Bad request. Missing numAudios" });
+    }
+    if (Number(req.query.numaudios) <= 0) {
+      return res.status(400).json({ message: "Bad request. numAudios must be a positive number" });
+    }
+    const usuarioTarget = Number(req.query.userId);
+    const audios = await usuarioDbJs.usuarioGetTopAudios(usuarioTarget,Number(req.query.numAudios));
+    return res.status(200).json(audios);
   } catch (error) {
     return next(error);
   }

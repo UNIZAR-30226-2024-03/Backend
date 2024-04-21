@@ -127,7 +127,16 @@ const router = Router();
  *        content:
  *          application/json:
  *            schema:
- *              $ref: '#/components/schemas/Usuario'
+ *              allOf:
+ *               - $ref: '#/components/schemas/Usuario'
+ *               - type: object
+ *                 properties:
+ *                    nEscuchas:
+ *                      type: number  
+ *                      description: Número de escuchas totales del usuario.
+ *                    oyentes:
+ *                      type: number
+ *                      description: Número de oyentes del usuario.
  *      400:
  *        description: Error en la petición.
  *      401:
@@ -303,5 +312,205 @@ router.put(
   validate(usuarioValidatorJs.usuarioUnfollowSchema),
   usuarioCon.usuarioUnfollow,
 );
+
+
+/**
+ * @swagger
+ * /usuario/lastAudios/{numAudios}:
+ *   get:
+ *     summary: Obtiene las ultimas canciones y podcast escuchados por el usuario
+ *     tags: [Usuario]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: numAudios
+ *         required: true
+ *         description: Número de audios a obtener
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Éxito, devuelve los últimos audios escuchados
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 cancion:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       idUsuario:
+ *                         type: number
+ *                         description: ID del usuario
+ *                       idAudio:
+ *                         type: number
+ *                         description: ID del audio
+ *                       fecha:
+ *                         type: string
+ *                         format: date-time
+ *                         description: Fecha en que se escuchó el audio
+ *                       Audio:
+ *                         type: object
+ *                         properties:
+ *                           idAudio:
+ *                             type: number
+ *                             description: ID del audio
+ *                           titulo:
+ *                             type: string
+ *                             description: Título del audio
+ *                           path:
+ *                             type: string
+ *                             description: Ruta del audio
+ *                           duracionSeg:
+ *                             type: number
+ *                             description: Duración del audio en segundos
+ *                           fechaLanz:
+ *                             type: string
+ *                             format: date-time
+ *                             description: Fecha de lanzamiento del audio
+ *                           esAlbum:
+ *                             type: boolean
+ *                             description: Indica si el audio es parte de un álbum
+ *                           imgAudio:
+ *                             type: string
+ *                             description: Imagen del audio
+ *                           esPrivada:
+ *                             type: boolean
+ *                             description: Indica si el audio es privado
+ *                           esPodcast:
+ *                             type: boolean
+ *                             description: Indica si el audio es un podcast
+ *                 podcast:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       idUsuario:
+ *                         type: number
+ *                         description: ID del usuario
+ *                       idAudio:
+ *                         type: number
+ *                         description: ID del audio
+ *                       fecha:
+ *                         type: string
+ *                         format: date-time
+ *                         description: Fecha en que se escuchó el audio
+ *                       Audio:
+ *                         type: object
+ *                         properties:
+ *                           idAudio:
+ *                             type: number
+ *                             description: ID del audio
+ *                           titulo:
+ *                             type: string
+ *                             description: Título del audio
+ *                           path:
+ *                             type: string
+ *                             description: Ruta del audio
+ *                           duracionSeg:
+ *                             type: number
+ *                             description: Duración del audio en segundos
+ *                           fechaLanz:
+ *                             type: string
+ *                             format: date-time
+ *                             description: Fecha de lanzamiento del audio
+ *                           esAlbum:
+ *                             type: boolean
+ *                             description: Indica si el audio es parte de un álbum
+ *                           imgAudio:
+ *                             type: string
+ *                             description: Imagen del audio
+ *                           esPrivada:
+ *                             type: boolean
+ *                             description: Indica si el audio es privado
+ *                           esPodcast:
+ *                             type: boolean
+ *                             description: Indica si el audio es un podcast
+ *       400:
+ *         description: Error en la petición, faltan parámetros o el número de audios debe ser mayor que 0.
+ *       500:
+ *         description: Error interno del servidor.
+ */
+router.get("/lastAudios/:numAudios", auth.authenticate, usuarioCon.lastAudios);
+router.get("/lastAudios/:numAudios", auth.authenticate, usuarioCon.lastAudios);
+
+
+
+/**
+ * @swagger
+ * /usuario/topAudios:
+ *   get:
+ *     summary: Obtiene los audios más escuchados de un usuario
+ *     tags: [Usuario]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: numAudios
+ *         required: true
+ *         description: Número de audios a obtener
+ *         schema:
+ *           type: number
+ *       - in: query
+ *         name: userId
+ *         required: true
+ *         description: ID del usuario
+ *         schema:
+ *           type: number
+ *     responses:
+ *       200:
+ *         description: Éxito, devuelve los audios más escuchados
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   count:
+ *                     type: number
+ *                     description: Número de veces que se ha escuchado el audio
+ *                   audio:
+ *                     type: object
+ *                     properties:
+ *                       idAudio:
+ *                         type: number
+ *                         description: ID del audio
+ *                       titulo:
+ *                         type: string
+ *                         description: Título del audio
+ *                       path:
+ *                         type: string
+ *                         description: Ruta del audio
+ *                       duracionSeg:
+ *                         type: number
+ *                         description: Duración del audio en segundos
+ *                       fechaLanz:
+ *                         type: string
+ *                         format: date-time
+ *                         description: Fecha de lanzamiento del audio
+ *                       esAlbum:
+ *                         type: boolean
+ *                         description: Indica si el audio es parte de un álbum
+ *                       imgAudio:
+ *                         type: string
+ *                         description: Imagen del audio
+ *                       esPrivada:
+ *                         type: boolean
+ *                         description: Indica si el audio es privado
+ *                       esPodcast:
+ *                         type: boolean
+ *                         description: Indica si el audio es un podcast
+ *       400:
+ *         description: Error en la petición, faltan parámetros o el número de audios debe ser mayor que 0.
+ *       500:
+ *         description: Error interno del servidor.
+ */
+router.get("/topAudios", auth.authenticate, usuarioCon.topAudios);
+
+
 
 export default router;

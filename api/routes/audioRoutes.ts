@@ -76,7 +76,7 @@ const upload = multer(
  *                  type: string
  *                esAlbum:
  *                  type: boolean
- *                imgAudio:
+ *                img:
  *                  type: string
  *                esPrivada:
  *                  type: boolean
@@ -159,7 +159,7 @@ router.get('/play/:idaudio', auth.authenticate,audioController.verifyAudio, audi
  *                type: boolean
  *              esPodcast:
  *               type: boolean
- *              imgAudio (opcional):
+ *              img (opcional):
  *                type: string
  *              idsUsuarios (opcional):
  *                type: string
@@ -253,7 +253,7 @@ router.delete('/delete/:idaudio', auth.authenticate,audioController.verifyAudio,
  *                type: boolean
  *              esPrivada (opcional):
  *                type: boolean
- *              imgAudio (opcional):
+ *              img (opcional):
  *                type: string
  *              idsUsuarios (opcional):
  *                type: string
@@ -279,6 +279,7 @@ router.delete('/delete/:idaudio', auth.authenticate,audioController.verifyAudio,
  *        description: Error interno del servidor
  */
 router.put('/update/:idaudio', auth.authenticate,audioController.deleteTmpFiles,upload.single('cancion'),audioController.verifyAudio,audioController.verifyUsersList,audioController.updateAudio);
+
 
 
 export default router;
