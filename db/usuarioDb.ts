@@ -179,3 +179,99 @@ export async function usuarioGetAudios(userId: number, cancion: boolean, podcast
 
   return dividedAudios;
 }
+
+export async function usuarioGetLastAudiosAndPodcasts(userId: number, numberAudios: number) {
+  const cancion = await prisma.escucha.findMany({
+    where: {
+      idUsuario: userId,
+      Audio: {
+        esPodcast: false
+      }
+    },
+    orderBy: {
+      fecha: 'desc'
+    },
+    take: numberAudios,
+    include: {
+      Audio: true
+    }
+  });
+
+  const podcast = await prisma.escucha.findMany({
+    where: {
+      idUsuario: userId,
+      Audio: {
+        esPodcast: true
+      }
+    },
+    orderBy: {
+      fecha: 'desc'
+    },
+    take: numberAudios,
+    include: {
+      Audio: true
+    }
+  });
+
+  return { cancion, podcast };
+}
+
+export async function usuarioGetNEscuchas(userId: number) {
+  const nEscuchas = await prisma.escucha.count({
+    where: {
+      idUsuario: userId,
+    },
+  });
+
+  return nEscuchas;
+}
+
+export async function usuarioGetOyentesMensuales(userId: number) {
+  const fecha = new Date();
+  fecha.setMonth(fecha.getMonth() - 1);
+  const oyentesMensuales = await prisma.escucha.count({
+    where: {
+      idUsuario: userId,
+      fecha: {
+        gte: fecha,
+      },
+    },
+  });
+
+  return oyentesMensuales;
+}
+
+export async function usuarioGetTopAudios(userId: number, numberAudios: number) {
+  const audios = await prisma.escucha.groupBy({
+    by: ['idAudio'],
+    where: {
+      idUsuario: userId,
+    },
+    _count: {
+      _all: true,
+    },
+  });
+
+  // Ordena los audios por el recuento en orden descendente y toma los primeros 'numberAudios'
+  audios.sort((a, b) => (b._count._all ?? 0) - (a._count._all ?? 0));
+  const topAudios = audios.slice(0, numberAudios);
+
+  // Obtiene los detalles de los audios
+  const audioDetails = await Promise.all(
+    topAudios.map(audio =>
+      prisma.audio.findUnique({
+        where: {
+          idAudio: audio.idAudio,
+        },
+      })
+    )
+  );
+
+  // Combina los detalles de los audios con los recuentos
+  const result = topAudios.map((audio, index) => ({
+    count: audio._count._all,
+    audio: audioDetails[index],
+  }));
+
+  return result;
+}
