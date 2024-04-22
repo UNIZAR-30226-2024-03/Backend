@@ -40,6 +40,11 @@ const swaggerOptions = {
 
 const swaggerDocs = swaggerjsdoc(swaggerOptions);
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
+app.get('/api-docs.json', (req, res): void => {
+  res.setHeader('Content-Type', 'application/json')
+  res.send(swaggerDocs)
+})
+
 dotenv.config();
 
 // Allows parsing of json in the body of the request.
