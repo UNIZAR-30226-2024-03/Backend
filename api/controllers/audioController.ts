@@ -7,6 +7,7 @@ import fs from 'fs';
 import mediaserver from 'mediaserver'; //Variable para manejar archivos de audio, usa chunks para enviar el archivo
 import * as etiquetasDatabase from "../../db/etiquetasDb.js";
 import * as audioDatabase from "../../db/audioDb.js";
+import * as listasDb from '../../db/listaDb.js';
 import { promisify } from 'util';
 const projectRootPath = process.cwd(); // Devuelve el directorio raíz del proyecto y se almacena en una constante
 
@@ -127,7 +128,22 @@ export async function createAudio(req: Request, res: Response) {
             }
         });
         const audio = await audioDatabase.createAudioDB(req.body.titulo, req.file.filename, parseInt(req.body.duracionSeg, 10), fechaFormateada, (req.body.esAlbum === 'true'), (req.body.esPrivada === 'true'), idsUsuarios2, img, (req.body.esPodcast === 'true'));
-    
+        
+        const listas = await listasDb.getListasByPropietario(parseInt(req.auth?.idUsuario));
+        let idLista = -1;
+        for (const lista of listas) {
+            if(req.body.esPodcast == 'true' && lista.tipoLista === 'MIS_PODCAST'){
+                idLista = lista.idLista;
+            }else if(req.body.esPodcast == 'false' && lista.tipoLista === 'MIS_AUDIOS'){
+                idLista = lista.idLista;
+            }
+        }
+        if (idLista != -1) {
+            await listasDb.addAudioToLista(idLista, audio.idAudio);
+        }else{
+            return res.status(500).send('No existe una lista de MIS_AUDIOS para el usuario actual');
+        }
+        
         if (req.body.etiquetas) {
             const etiquetas = req.body.etiquetas.split(',').map(Number);
             for (const idEtiqueta of etiquetas) {
@@ -174,8 +190,8 @@ export async function deleteAudio(req: Request, res: Response) {
         if (!await isOwnerOrAdmin(req)){
             return res.status(403).send("Permission denied, unsifficient permissions");
         }
-        audioDatabase.deleteAudioById(id);
         try{
+            audioDatabase.deleteAudioById(id);
             deleteFile(path.join(projectRootPath,req.body.audioConsulta.path));
         }catch (error){
             return res.status(404).send(error);            
