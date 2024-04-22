@@ -281,5 +281,55 @@ router.delete('/delete/:idaudio', auth.authenticate,audioController.verifyAudio,
 router.put('/update/:idaudio', auth.authenticate,audioController.deleteTmpFiles,upload.single('cancion'),audioController.verifyAudio,audioController.verifyUsersList,audioController.updateAudio);
 
 
+/**
+ * @swagger
+ * /audio/stats/{idaudio}:
+ *   get:
+ *     summary: Obtiene las estadísticas de un audio
+ *     tags: [Audio]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: idaudio
+ *         required: true
+ *         description: Identificador del audio
+ *         schema:
+ *           type: integer
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               date:
+ *                 type: string
+ *                 format: MM-YYYY
+ *                 description: Fecha en la que se quieren obtener las estadísticas
+ *     responses:
+ *       200:
+ *         description: Estadísticas del audio
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   month:
+ *                     type: integer
+ *                   year:
+ *                     type: integer
+ *                   listens:
+ *                     type: integer
+ *       400:
+ *         description: Falta parámetro date, formato de fecha incorrecto o fecha no válida
+ *       403:
+ *         description: No se tiene permiso para acceder a este recurso
+ *       404:
+ *         description: No se ha encontrado el audio con el id indicado
+ */
+router.get('/stats/:idaudio', auth.authenticate, audioController.verifyAudio, audioController.audioStats);
 
 export default router;
