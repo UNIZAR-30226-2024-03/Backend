@@ -53,16 +53,15 @@ const isOwnerOrAdmin = async (idItem : number, idUsuario : number, esAdmin : Boo
   * @returns {Promise<Lista>}
  */
 export const createLista = catchAsync(async (req : Request, res : Response) => {
-  const { nombre, descripcion, esPrivada, imgLista, esAlbum, tipoLista, audios } = req.body; 
+  const { nombre, descripcion, esPrivada, esAlbum, tipoLista, audios } = req.body; 
   // No se necesita Seguidores porque al crear una lista no tiene seguidores
   // No necesita fechaUltimaMod porque se crea en el momento de la creación
-
+  let imgLista = req.body.imgLista;
   // createLista puede lanzar un error si el nombre de la lista ya existe por o que se debe capturar
   try {
     // console.log("lista", nombre, descripcion, esPrivada, imgLista, esAlbum, tipoLista, audios)
     // imgLista es el valor de la variable de entorno IMG_LISTA_DEFECTO si no se ha pasado
-    let imgLista;
-    if (!imgLista) {
+    if (!req.body.imgLista) {
       imgLista = esAlbum ? process.env.IMG_ALBUM_DEFAULT : process.env.IMG_LISTA_DEFAULT;
     }
     const lista = await listasDb.createLista(nombre, descripcion, esPrivada, esAlbum, imgLista, tipoLista, req.auth?.idUsuario, audios);
