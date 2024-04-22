@@ -4,7 +4,7 @@
  *   name: Usuario
  *   description: Operaciones relacionadas con los usuarios de la aplicación
  * components:
- *  schemas:
+ *   schemas:
  *      Usuario:
  *          type: object
  *          required:
@@ -37,6 +37,14 @@
  *              segFinAudio:
  *                 type: number
  *                 description: Segundos escuchados del último audio.
+ *              Seguidores:
+ *                 type: array
+ *                 items:
+ *                   type: number
+ *              Seguidos:
+ *                 type: array
+ *                 items:
+ *                   type: number
  *      UsuarioReduced:
  *          type: object
  *          required:
