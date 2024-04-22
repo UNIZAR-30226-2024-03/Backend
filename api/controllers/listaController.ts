@@ -59,11 +59,16 @@ export const createLista = catchAsync(async (req : Request, res : Response) => {
 
   // createLista puede lanzar un error si el nombre de la lista ya existe por o que se debe capturar
   try {
-    console.log("lista", nombre, descripcion, esPrivada, imgLista, esAlbum, tipoLista, audios)
+    // console.log("lista", nombre, descripcion, esPrivada, imgLista, esAlbum, tipoLista, audios)
+    // imgLista es el valor de la variable de entorno IMG_LISTA_DEFECTO si no se ha pasado
+    let imgLista;
+    if (!imgLista) {
+      imgLista = esAlbum ? process.env.IMG_ALBUM_DEFAULT : process.env.IMG_LISTA_DEFAULT;
+    }
     const lista = await listasDb.createLista(nombre, descripcion, esPrivada, esAlbum, imgLista, tipoLista, req.auth?.idUsuario, audios);
     res.status(httpStatus.CREATED).send(lista);
   } catch (error) {
-    console.log(error);
+    // console.log(error);
     res.status(httpStatus.BAD_REQUEST).send(error)
   }
 
