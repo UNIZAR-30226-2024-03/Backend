@@ -235,11 +235,15 @@ export async function updateAudio(req: Request, res: Response) {
         }
         let audioData: any = {};
         if (req.file){
-            fs.rename(path.join(projectRootPath,'tmp',req.file.filename), path.join(projectRootPath,'audios',req.file.filename), function(err) {
-                if (err) throw err;
-                console.log('File moved');
+            fs.copyFile(path.join(projectRootPath,'tmp',req.file.filename), path.join(projectRootPath,'audios',req.file.filename), (error) => {
+                if (error) {
+                    console.error('Error al mover el archivo para actualizar audio:', error);
+                    throw error;
+                } else {
+                    console.log('Archivo actualizado y movido exitosamente.');
+                }
             });
-
+            
             audioData.path = "/audios/"+req.file.filename;
             try{
                 deleteFile(path.join(projectRootPath,req.body.audioConsulta.path)); // Acceder a audioConsulta desde req
