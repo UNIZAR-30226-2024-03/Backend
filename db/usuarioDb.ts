@@ -26,9 +26,9 @@ export async function usuarioGetPrisma(
   idUsuario: number,
   rrss: boolean = false,
   listas: boolean = false,
-): Promise<Usuario | null> {
+): Promise<any | null> {
   if (!idUsuario) return null;
-  const usuario = await prisma.usuario.findUnique({
+  const usuario: any = await prisma.usuario.findUnique({
     where: { idUsuario: idUsuario },
     include: {
       Seguidores: rrss,
@@ -37,7 +37,33 @@ export async function usuarioGetPrisma(
       // ListasPropias: listas,
     },
   });
+
+  if (rrss && usuario) {
+    usuario.Seguidores = usuario.Seguidores.map((seguidor: any) => {
+      return seguidor.seguidorId;
+    });
+
+    usuario.Seguidos = usuario.Seguidos.map((seguido: any) => {
+      return seguido.seguidoId;
+    });
+  }
+
   return usuario;
+}
+
+export async function usuarioCountSeguidoresAndSeguidos(
+  idUsuario: number,
+): Promise<Array<number>> {
+  const [seguidores, seguidos] = await Promise.all([
+    prisma.seguir.count({
+      where: { seguidoId: idUsuario },
+    }),
+    prisma.seguir.count({
+      where: { seguidorId: idUsuario },
+    }),
+  ]);
+
+  return [seguidores, seguidos];
 }
 
 export async function usuarioGetEmailPrisma(

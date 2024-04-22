@@ -32,7 +32,7 @@ export async function usuarioModify(
     if (usuario) {
       usuario.contrasegna = null;
     } 
-    return res.status(201).json({ usuario: usuario });
+    return res.status(201).json({ usuario });
   } catch (error) {
     return next(error);
   }
@@ -56,17 +56,19 @@ export async function usuarioGet(
   try {
     const idUsuario = Number.isNaN(req.query.idUsuario) ? Number(req.auth?.idUsuario) : req.query.idUsuario;
     const rrss = Boolean(req.query.rrss);
-    const currentUsuario = await usuarioDbJs.usuarioGetPrisma(
-      idUsuario,
-      rrss,
-    );
     
+    const [currentUsuario, nEscuchas, oyentesMensuales] = await Promise.all([
+      usuarioDbJs.usuarioGetPrisma(
+        idUsuario,
+        rrss,
+      ),
+      usuarioDbJs.usuarioGetNEscuchas(idUsuario),
+      usuarioDbJs.usuarioGetOyentesMensuales(idUsuario)
+    ]);
     if (!currentUsuario) return res.sendStatus(404);
     currentUsuario.contrasegna = null;
-    const nEscuchas = await usuarioDbJs.usuarioGetNEscuchas(idUsuario);
-    const oyentesMensuales = await usuarioDbJs.usuarioGetOyentesMensuales(idUsuario);
 
-    return res.status(200).json({ ...currentUsuario,nEscuchas:nEscuchas,oyentesMensuales:oyentesMensuales });
+    return res.status(200).json({ ...currentUsuario, nEscuchas, oyentesMensuales});
   } catch (error) {
     return next(error);
   }
@@ -144,7 +146,7 @@ export async function usuarioUnfollow(
       idUsuario,
       idSeguido,
     );
-    return res.status(201).json({ usuario: usuario });
+    return res.status(201).json({ usuario });
   } catch (error) {
     return next(error);
   }
