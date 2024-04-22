@@ -32,7 +32,7 @@ export async function usuarioModify(
     if (usuario) {
       usuario.contrasegna = null;
     } 
-    return res.status(201).json({ usuario: usuario });
+    return res.status(201).json({ usuario });
   } catch (error) {
     return next(error);
   }
@@ -63,7 +63,7 @@ export async function usuarioGet(
     if (!currentUsuario) return res.sendStatus(404);
     currentUsuario.contrasegna = null;
 
-    return res.status(200).json({ usuario: currentUsuario });
+    return res.status(200).json({ currentUsuario });
   } catch (error) {
     return next(error);
   }
@@ -141,7 +141,7 @@ export async function usuarioUnfollow(
       idUsuario,
       idSeguido,
     );
-    return res.status(201).json({ usuario: usuario });
+    return res.status(201).json({ usuario });
   } catch (error) {
     return next(error);
   }
