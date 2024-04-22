@@ -150,6 +150,7 @@ export async function createAudio(req: Request, res: Response) {
                 console.log("Se va a linkar etiqueta a audio con tipo "+req.body.tipoEtiqueta+" y id "+idEtiqueta+" y id audio "+audio.idAudio);
                 await audioDatabase.linkLabelToAudio(audio.idAudio, idEtiqueta, req.body.tipoEtiqueta);
             }
+            
 
         }
 
