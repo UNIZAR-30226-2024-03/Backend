@@ -115,7 +115,7 @@ export async function createAudio(req: Request, res: Response) {
             idsUsuarios2 = req.body.idsUsuarios.split(',').map(Number);
         }
         idsUsuarios2.push(req.auth?.idUsuario);
-        let img = "null";
+        let img = process.env.IMG_AUDIO_DEFAULT || 'null';
         if (req.body.img ) {
             img = req.body.img;
         }
