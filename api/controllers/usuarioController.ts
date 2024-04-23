@@ -65,8 +65,9 @@ export async function usuarioGet(
     currentUsuario.contrasegna = null;
     const nEscuchas = await usuarioDbJs.usuarioGetNEscuchas(idUsuario);
     const oyentesMensuales = await usuarioDbJs.usuarioGetOyentesMensuales(idUsuario);
+    const ultimoLanzamiento = await usuarioDbJs.usuarioGetUltimoLanzamiento(idUsuario);
 
-    return res.status(200).json({ ...currentUsuario,nEscuchas:nEscuchas,oyentesMensuales:oyentesMensuales });
+    return res.status(200).json({ ...currentUsuario,nEscuchas:nEscuchas,oyentesMensuales:oyentesMensuales,ultimoLanzamiento:ultimoLanzamiento });
   } catch (error) {
     return next(error);
   }

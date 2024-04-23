@@ -252,6 +252,8 @@ export async function usuarioGetTopAudios(userId: number, numberAudios: number) 
     },
   });
 
+
+
   // Ordena los audios por el recuento en orden descendente y toma los primeros 'numberAudios'
   audios.sort((a, b) => (b._count._all ?? 0) - (a._count._all ?? 0));
   const topAudios = audios.slice(0, numberAudios);
@@ -263,15 +265,52 @@ export async function usuarioGetTopAudios(userId: number, numberAudios: number) 
         where: {
           idAudio: audio.idAudio,
         },
+        include: {
+          Artistas: {
+              select: {
+                  idUsuario: true,
+                  nombreUsuario: true,
+              },
+          },
+        },
       })
     )
   );
 
+  // Cambia la clave 'Artistas' a 'artistas' en los detalles del audio
+  const audioDetailsWithArtistas = audioDetails.map(audio => {
+    if (audio) {
+      return {
+        ...audio,
+        artistas: audio.Artistas,
+        Artistas: undefined,
+      };
+    }
+    return null;
+  });
+
   // Combina los detalles de los audios con los recuentos
   const result = topAudios.map((audio, index) => ({
     count: audio._count._all,
-    audio: audioDetails[index],
+    ...audioDetailsWithArtistas[index],
   }));
 
   return result;
+}
+
+export async function usuarioGetUltimoLanzamiento(userId: number) {
+  const audio = await prisma.audio.findFirst({
+    where: {
+      Artistas: {
+        some: {
+          idUsuario: userId,
+        },
+      },
+    },
+    orderBy: {
+      fechaLanz: 'desc',
+    },
+  });
+
+  return audio;
 }
