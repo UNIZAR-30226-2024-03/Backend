@@ -55,8 +55,8 @@ export async function usuarioGet(
 ) {
   try {
     const idUsuario = Number.isNaN(req.query.idUsuario) ? Number(req.auth?.idUsuario) : req.query.idUsuario;
-    const rrss = Boolean(req.query.rrss);
-    
+    const rrss = req.query.rrss;
+        
     const [currentUsuario, nEscuchas, oyentesMensuales, ultimoLanzamiento] = await Promise.all([
       usuarioDbJs.usuarioGetPrisma(
         idUsuario,

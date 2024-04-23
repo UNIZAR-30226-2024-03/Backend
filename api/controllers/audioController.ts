@@ -225,7 +225,7 @@ export async function verifyAudio(req: Request, res: Response, next: NextFunctio
             if (error.stack) {
                 console.error(`Stack trace: ${error.stack}`);
             }
-            res.status(500).send(error);
+            res.status(500).send(error.message);
         }
     }
 }
