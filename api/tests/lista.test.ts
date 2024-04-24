@@ -1,6 +1,7 @@
 import request from 'supertest';
 import app from '../app'; // Importa tu aplicación Express aquí
 import * as listasDb from '../../db/listaDb.js';
+import {createDefaultListas} from '../controllers/authController.js';
 import httpStatus from 'http-status';
 import {
   usuarioCreatePrisma,
@@ -40,7 +41,11 @@ describe('Lista routes', () => {
       'password'
     );
 
-    listaFavsUser1 = await listasDb.getListaFavsByUser(userTest1.idUsuario);
+    // Como no se ha hecho la petición a la API de auth para registrar el user sino que se
+    // ha creado directamente en la base de datos, no se han creado las listas por defecto
+    let listasDefault = await createDefaultListas(userTest1.idUsuario);
+    listaFavsUser1 = listasDefault[0];
+
 
     const userTest2 = await usuarioCreatePrisma(
       'test2',
@@ -825,9 +830,8 @@ describe('Lista routes', () => {
         .get(`${LISTA_OWNED}/${userTest1_id}`)
         .set('Authorization', `Bearer ${bearer}`)
         .expect((res) => {
-          console.log("Listas del usuario: ", res.body);
           expect(res.status).toEqual(httpStatus.OK);
-          expect(res.body.length).toEqual(2);
+          expect(res.body.length).toEqual(2 + 3);
           expect(res.status).toEqual(httpStatus.OK);
         });
     });
@@ -837,7 +841,6 @@ describe('Lista routes', () => {
         .get(`${LISTA_OWNED}/${userTest1_id}`)
         .set('Authorization', `Bearer ${bearer2}`)
         .expect((res) => {
-          console.log("Listas del usuario: ", res.body);
           expect(res.status).toEqual(httpStatus.OK);
           expect(res.body.length).toEqual(1);
           expect(res.body[0].idLista).toEqual(listaPub?.idLista);

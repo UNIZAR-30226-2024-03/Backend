@@ -584,9 +584,6 @@ export const addAudioToFavorites = catchAsync(async (req : Request, res : Respon
     }
 
     const listaFavs = await listasDb.getListaFavsByUser(req.auth?.idUsuario);
-    const listasUser = await listasDb.getListasByPropietario(req.auth?.idUsuario);
-    console.log("listaFavs", listaFavs);
-    console.log("listasUser", listasUser);
 
     if (!listaFavs) {
       res.status(httpStatus.NOT_FOUND).send("Lista de favoritos no encontrada");
@@ -613,9 +610,6 @@ export const deleteAudioFromFavorites = catchAsync(async (req : Request, res : R
     }
 
     const listaFavs = await listasDb.getListaFavsByUser(req.auth?.idUsuario);
-    const listasUser = await listasDb.getListasByPropietario(req.auth?.idUsuario);
-    console.log("listaFavs", listaFavs);
-    console.log("listasUser", listasUser);
     if (!listaFavs) {
       res.status(httpStatus.NOT_FOUND).send("Lista de favoritos no encontrada");
       return;

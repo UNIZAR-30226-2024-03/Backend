@@ -11,7 +11,7 @@ import {createLista} from "../../db/listaDb.js";
 
 
 // Crear listas por defecto para un usuario
-const createDefaultListas = async (idUsuario: number) => {
+export const createDefaultListas = async (idUsuario: number) => {
   const imgListaFav = process.env.IMG_MIS_FAVORITOS_DEFAULT;
   const imgListaAudios = process.env.IMG_MIS_CANCIONES_DEFAULT;
   const imgListaPodcast = process.env.IMG_MIS_PODCAST_DEFAULT;

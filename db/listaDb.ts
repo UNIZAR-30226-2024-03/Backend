@@ -372,9 +372,7 @@ export const getListaFavsByUser = async (idUsuario: number): Promise<Lista | nul
   try {
     const lista = await prisma.lista.findFirst({
       where: { 
-        Propietarios: {
-          some: { idUsuario } 
-        } ,
+        Propietarios: { some: { idUsuario } },
         tipoLista: 'MIS_FAVORITOS'
       }
     });
