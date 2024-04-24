@@ -287,7 +287,7 @@ export async function usuarioGetTopAudios(userId: number, numberAudios: number) 
     },
   });
 
-  // Obtén el recuento de escuchas para cada audio
+  // Obtener el recuento de escuchas para cada audio
   const audioCounts = await prisma.escucha.groupBy({
     by: ['idAudio'],
     _count: {
