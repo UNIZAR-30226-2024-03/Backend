@@ -60,7 +60,8 @@ app.use("/etiquetas", etiquetasRouter);
 app.use("/search", searchRouter);
 
 app.get("/", function (_req, res) {
-  return res.send("Backend for Playbeat.");
+  //return res.send("Backend for Playbeat.");
+  res.redirect('/api-docs');
 });
 
 

@@ -145,6 +145,37 @@ const router = Router();
  *                    oyentesMensuales:
  *                      type: number
  *                      description: Número de oyentes del usuario.
+ *                    ultimoLanzamiento:
+ *                      type: object
+ *                      properties:
+ *                        idAudio:
+ *                          type: number
+ *                          description: Id del último audio lanzado por el usuario.
+ *                        titulo:
+ *                          type: string
+ *                          description: Título del último audio lanzado por el usuario.
+ *                        path:
+ *                          type: string
+ *                          description: Ruta del último audio lanzado por el usuario.
+ *                        duracionSeg:
+ *                          type: number
+ *                          description: Duración en segundos del último audio lanzado por el usuario.
+ *                        fechaLanz:
+ *                          type: string
+ *                          format: date-time
+ *                          description: Fecha de lanzamiento del último audio lanzado por el usuario.
+ *                        esAlbum:
+ *                          type: boolean
+ *                          description: Indica si el último lanzamiento es un álbum.
+ *                        imgAudio:
+ *                          type: string
+ *                          description: Imagen del último audio lanzado por el usuario.
+ *                        esPrivada:
+ *                          type: boolean
+ *                          description: Indica si el último lanzamiento es privado.
+ *                        esPodcast:
+ *                          type: boolean
+ *                          description: Indica si el último lanzamiento es un podcast.
  *      400:
  *        description: Error en la petición.
  *      401:
@@ -443,7 +474,6 @@ router.put(
  *         description: Error interno del servidor.
  */
 router.get("/lastAudios/:numAudios", auth.authenticate, usuarioCon.lastAudios);
-router.get("/lastAudios/:numAudios", auth.authenticate, usuarioCon.lastAudios);
 
 
 
@@ -481,37 +511,45 @@ router.get("/lastAudios/:numAudios", auth.authenticate, usuarioCon.lastAudios);
  *                   count:
  *                     type: number
  *                     description: Número de veces que se ha escuchado el audio
- *                   audio:
- *                     type: object
- *                     properties:
- *                       idAudio:
- *                         type: number
- *                         description: ID del audio
- *                       titulo:
- *                         type: string
- *                         description: Título del audio
- *                       path:
- *                         type: string
- *                         description: Ruta del audio
- *                       duracionSeg:
- *                         type: number
- *                         description: Duración del audio en segundos
- *                       fechaLanz:
- *                         type: string
- *                         format: date-time
- *                         description: Fecha de lanzamiento del audio
- *                       esAlbum:
- *                         type: boolean
- *                         description: Indica si el audio es parte de un álbum
- *                       imgAudio:
- *                         type: string
- *                         description: Imagen del audio
- *                       esPrivada:
- *                         type: boolean
- *                         description: Indica si el audio es privado
- *                       esPodcast:
- *                         type: boolean
- *                         description: Indica si el audio es un podcast
+ *                   idAudio:
+ *                     type: number
+ *                     description: ID del audio
+ *                   titulo:
+ *                     type: string
+ *                     description: Título del audio
+ *                   path:
+ *                     type: string
+ *                     description: Ruta del audio
+ *                   duracionSeg:
+ *                     type: number
+ *                     description: Duración del audio en segundos
+ *                   fechaLanz:
+ *                     type: string
+ *                     format: date-time
+ *                     description: Fecha de lanzamiento del audio
+ *                   esAlbum:
+ *                     type: boolean
+ *                     description: Indica si el audio es parte de un álbum
+ *                   imgAudio:
+ *                     type: string
+ *                     description: Imagen del audio
+ *                   esPrivada:
+ *                     type: boolean
+ *                     description: Indica si el audio es privado
+ *                   esPodcast:
+ *                     type: boolean
+ *                     description: Indica si el audio es un podcast
+ *                   artistas:
+ *                     type: array
+ *                     items:
+ *                       type: object
+ *                       properties:
+ *                         idUsuario:
+ *                           type: number
+ *                           description: ID del usuario
+ *                         nombreUsuario:
+ *                           type: string
+ *                           description: Nombre del usuario
  *       400:
  *         description: Error en la petición, faltan parámetros o el número de audios debe ser mayor que 0.
  *       500:
