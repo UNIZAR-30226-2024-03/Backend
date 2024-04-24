@@ -268,60 +268,53 @@ export async function usuarioGetOyentesMensuales(userId: number) {
 }
 
 export async function usuarioGetTopAudios(userId: number, numberAudios: number) {
-  const audios = await prisma.escucha.groupBy({
-    by: ['idAudio'],
+  // Obtén todos los audios del usuario
+  const userAudios = await prisma.audio.findMany({
     where: {
-      idUsuario: userId,
+      Artistas: {
+        some: {
+          idUsuario: userId,
+        },
+      },
     },
+    include: {
+      Artistas: {
+        select: {
+          idUsuario: true,
+          nombreUsuario: true,
+        },
+      },
+    },
+  });
+
+  // Obtener el recuento de escuchas para cada audio
+  const audioCounts = await prisma.escucha.groupBy({
+    by: ['idAudio'],
     _count: {
       _all: true,
     },
   });
 
-
-
-  // Ordena los audios por el recuento en orden descendente y toma los primeros 'numberAudios'
-  audios.sort((a, b) => (b._count._all ?? 0) - (a._count._all ?? 0));
-  const topAudios = audios.slice(0, numberAudios);
-
-  // Obtiene los detalles de los audios
-  const audioDetails = await Promise.all(
-    topAudios.map(audio =>
-      prisma.audio.findUnique({
-        where: {
-          idAudio: audio.idAudio,
-        },
-        include: {
-          Artistas: {
-              select: {
-                  idUsuario: true,
-                  nombreUsuario: true,
-              },
-          },
-        },
-      })
-    )
-  );
-
-  // Cambia la clave 'Artistas' a 'artistas' en los detalles del audio
-  const audioDetailsWithArtistas = audioDetails.map(audio => {
-    if (audio) {
-      return {
-        ...audio,
-        artistas: audio.Artistas,
-        Artistas: undefined,
-      };
-    }
-    return null;
-  });
-
-  // Combina los detalles de los audios con los recuentos
-  const result = topAudios.map((audio, index) => ({
-    count: audio._count._all,
-    ...audioDetailsWithArtistas[index],
+  // Asigna el recuento de escuchas a cada audio
+  const audiosWithCount = userAudios.map(audio => ({
+    ...audio,
+    count: audioCounts.find(count => count.idAudio === audio.idAudio)?._count._all ?? 0,
   }));
 
-  return result;
+  // Ordena los audios por el recuento en orden descendente
+  audiosWithCount.sort((a, b) => b.count - a.count);
+
+  // Toma los primeros 'numberAudios'
+  const topAudios = audiosWithCount.slice(0, numberAudios);
+
+  // Cambia la clave 'Artistas' a 'artistas' en los detalles del audio
+  const topAudiosWithArtistas = topAudios.map(audio => ({
+    ...audio,
+    artistas: audio.Artistas,
+    Artistas: undefined,
+  }));
+
+  return topAudiosWithArtistas;
 }
 
 export async function usuarioGetUltimoLanzamiento(userId: number) {
