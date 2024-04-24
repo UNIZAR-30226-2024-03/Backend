@@ -820,6 +820,10 @@ listaRouter.get("/owned/:idUsuario", auth.authenticate, listaController.getLista
  *    responses:
  *      201:
  *        description: Audio añadido a favoritos correctamente.
+ *        content:
+ *          application/json:
+ *            schema:
+ *              $ref: '#/components/schemas/Listas'
  *      400:
  *        description: Error en la petición.
  *      404:
