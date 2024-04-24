@@ -363,3 +363,24 @@ export const deletePropietarioFromLista = async (
 }
 
 
+/**
+ * Devuelve la lista de con TipoLista = 'MIS_FAVORITOS' de un usuario
+ * @param {ObjectId} idUsuario
+ * @returns {Promise<Lista>}
+ */
+export const getListaFavsByUser = async (idUsuario: number): Promise<Lista | null> => {
+  try {
+    const lista = await prisma.lista.findFirst({
+      where: { 
+        Propietarios: {
+          some: { idUsuario } 
+        } ,
+        tipoLista: 'MIS_FAVORITOS'
+      }
+    });
+    return lista;
+  } catch (error) {
+    //  console.log(error);
+    throw error;
+  }
+}

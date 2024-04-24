@@ -27,6 +27,7 @@ describe('Lista routes', () => {
   let lista: Lista | undefined = undefined;
   let listaPub: Lista | undefined = undefined;
   let listaToDeleteId: number | undefined = undefined;
+  let listaFavsUser1: Lista | null = null;
 
   let bearer: string | undefined = undefined;
   let bearer2: string | undefined = undefined;
@@ -38,6 +39,8 @@ describe('Lista routes', () => {
       'test1@test.com',
       'password'
     );
+
+    listaFavsUser1 = await listasDb.getListaFavsByUser(userTest1.idUsuario);
 
     const userTest2 = await usuarioCreatePrisma(
       'test2',
@@ -842,4 +845,42 @@ describe('Lista routes', () => {
         });
     });
   });
+
+
+  describe(' POST /lista/favorites/:idAudio , addAudioToFavorites', () => {
+    it('returns ' + httpStatus.NOT_FOUND + ' when idAudio not found', async () => {
+      await request(app)
+        .post(`${LISTA_ROUTE}/favorites/${999999}`)
+        .set('Authorization', `Bearer ${bearer}`)
+        .expect(httpStatus.NOT_FOUND);
+    });
+
+    it('returns ' + httpStatus.CREATED + ' and correct result when all params are ok', async () => {
+      await request(app)
+        .post(`${LISTA_ROUTE}/favorites/${audioTest1_id}`)
+        .set('Authorization', `Bearer ${bearer}`)
+        .expect((res) => {
+          expect(res.body.idLista).toEqual(listaFavsUser1?.idLista);
+          expect(res.status).toEqual(httpStatus.CREATED);
+        });
+    });
+  });
+
+  describe(' DELETE /lista/favorites/:idAudio , deleteAudioFromFavorites', () => {
+    it('returns ' + httpStatus.NOT_FOUND + ' when idAudio not found', async () => {
+      await request(app)
+        .delete(`${LISTA_ROUTE}/favorites/${999999}`)
+        .set('Authorization', `Bearer ${bearer}`)
+        .expect(httpStatus.NOT_FOUND);
+    });
+
+    it('returns ' + httpStatus.NO_CONTENT + ' and correct result when all params are ok', async () => {
+      await request(app)
+        .delete(`${LISTA_ROUTE}/favorites/${audioTest1_id}`)
+        .set('Authorization', `Bearer ${bearer}`)
+        .expect(httpStatus.NO_CONTENT);
+    });
+  });
+
+
 });

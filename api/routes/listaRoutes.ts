@@ -801,4 +801,58 @@ listaRouter.get("/seguidas/:idUsuario", auth.authenticate, listaController.getFo
 listaRouter.get("/owned/:idUsuario", auth.authenticate, listaController.getListasByPropietario);
 
 
+/**
+ * @swagger
+ * /lista/addToFavorites/{idLista}:
+ *  post:
+ *    tags: [Listas]
+ *    summary: Añade un audio a la lista de favoritos.
+ *    description: Añade un audio a la lista de favoritos del usuario del jwt.
+ *    parameters:
+ *      - in: path
+ *        name: idAudio
+ *        required: true
+ *        description: Id del audio a añadir a favoritos.
+ *        schema:
+ *          type: number
+ *    security:
+ *      - bearerAuth: []
+ *    responses:
+ *      201:
+ *        description: Audio añadido a favoritos correctamente.
+ *      400:
+ *        description: Error en la petición.
+ *      404:
+ *        description: No se ha encontrado el audio o la lista de favoritos del usuario.
+ * 
+ */
+listaRouter.post("/favorites/:idAudio", auth.authenticate, listaController.addAudioToFavorites);
+
+
+/**
+ * @swagger
+ * /lista/favorites/{idUsuario}:
+ *  delete:
+ *    tags: [Listas]
+ *    summary: Elimina un audio de la lista de favoritos.
+ *    description: Elimina un audio de la lista de favoritos del usuario del jwt.
+ *    parameters:
+ *      - in: path
+ *        name: idAudio
+ *        required: true
+ *        description: Id del audio a eliminar de favoritos.
+ *        schema:
+ *          type: number
+ *    security:
+ *      - bearerAuth: []
+ *    responses:
+ *      204:
+ *        description: Audio eliminado de favoritos correctamente.
+ *      400:
+ *        description: Error en la petición.
+ *      404:
+ *        description: No se ha encontrado el audio o la lista de favoritos del usuario.
+ *
+ */
+listaRouter.delete("/favorites/:idAudio", auth.authenticate, listaController.deleteAudioFromFavorites);
 export default listaRouter;
