@@ -173,3 +173,28 @@ export async function getVecesEscuchada(audioId: number) {
     });
     return vecesEscuchada;
 }
+
+export async function getAudioStats(audioId: number, month: number, year: number) {
+    const startDate = new Date(year, month - 1); // JavaScript months are 0-indexed
+    const endDate = new Date();
+    const stats = [];
+  
+    for (let date = startDate; date <= endDate; date.setMonth(date.getMonth() + 1)) {
+      const month = date.getMonth() + 1; // JavaScript months are 0-indexed
+      const year = date.getFullYear();
+  
+      const listens = await prisma.escucha.count({
+        where: {
+          idAudio: audioId,
+          fecha: {
+            gte: new Date(year, month - 1, 1),
+            lt: new Date(year, month % 12, 1), // First day of the next month
+          },
+        },
+      });
+  
+      stats.push({ month, year, listens });
+    }
+  
+    return stats;
+  }

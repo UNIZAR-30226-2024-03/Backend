@@ -11,13 +11,13 @@ import {createLista} from "../../db/listaDb.js";
 
 
 // Crear listas por defecto para un usuario
-const createDefaultListas = async (idUsuario: number) => {
-  const imgListaFav = "";
-  const imgListaAudios = "";
-  const imgListaPodcast = "";
+export const createDefaultListas = async (idUsuario: number) => {
+  const imgListaFav = process.env.IMG_MIS_FAVORITOS_DEFAULT;
+  const imgListaAudios = process.env.IMG_MIS_CANCIONES_DEFAULT;
+  const imgListaPodcast = process.env.IMG_MIS_PODCAST_DEFAULT;
 
   const listaFavoritos = await createLista("Mis Favoritos", "Todos tus audios favoritos en una única playlist", true, false, imgListaFav, "MIS_FAVORITOS", idUsuario, []);
-  const listaMisAudios = await createLista("Mis Canciones", "Todos los audios que has subido", true, false, imgListaAudios, "MIS_AUDIOS", idUsuario, []);
+  const listaMisAudios = await createLista("Mis Canciones", "Todas las canciones que has subido", true, false, imgListaAudios, "MIS_AUDIOS", idUsuario, []);
   const listaMisPodcast = await createLista("Mis Podcast", "Todos los podcast que has subido", true, false, imgListaPodcast, "MIS_PODCAST", idUsuario, []);
 
   return [listaFavoritos, listaMisAudios, listaMisPodcast];
@@ -50,6 +50,7 @@ export async function authGoogleLogin(
         nombreUsuario,
         email,
         null,
+        process.env.IMG_USER_DEFAULT,
       );
 
       const token = createUsuarioToken(usuario);
@@ -81,6 +82,7 @@ export async function authSignup(
       nombreUsuario,
       email,
       hashed,
+      process.env.IMG_USER_DEFAULT,
     );
 
     const token = createUsuarioToken(usuario);

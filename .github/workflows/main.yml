@@ -61,4 +61,4 @@ jobs:
         run: |
           ssh -o StrictHostKeyChecking=no -t ${{ secrets.AZURE_USER }}@${{ secrets.AZURE_HOST }} "cd playbeat/Backend && git pull origin main && 
           docker stop playbeat_container && docker rm playbeat_container && docker rmi playbeat && docker build -t playbeat:latest . && 
-          docker run -v audios_playbeat:/app/audios -d --name playbeat_container -p 3000:3000 -p 3001:3001 playbeat:latest"
+          docker run -v audios_playbeat:/app/audios -v img_playbeat:/app/img -d --name playbeat_container -p 3000:3000 -p 3001:3001 playbeat:latest"

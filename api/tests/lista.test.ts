@@ -1,6 +1,7 @@
 import request from 'supertest';
 import app from '../app'; // Importa tu aplicación Express aquí
 import * as listasDb from '../../db/listaDb.js';
+import {createDefaultListas} from '../controllers/authController.js';
 import httpStatus from 'http-status';
 import {
   usuarioCreatePrisma,
@@ -27,6 +28,7 @@ describe('Lista routes', () => {
   let lista: Lista | undefined = undefined;
   let listaPub: Lista | undefined = undefined;
   let listaToDeleteId: number | undefined = undefined;
+  let listaFavsUser1: Lista | null = null;
 
   let bearer: string | undefined = undefined;
   let bearer2: string | undefined = undefined;
@@ -38,6 +40,12 @@ describe('Lista routes', () => {
       'test1@test.com',
       'password'
     );
+
+    // Como no se ha hecho la petición a la API de auth para registrar el user sino que se
+    // ha creado directamente en la base de datos, no se han creado las listas por defecto
+    let listasDefault = await createDefaultListas(userTest1.idUsuario);
+    listaFavsUser1 = listasDefault[0];
+
 
     const userTest2 = await usuarioCreatePrisma(
       'test2',
@@ -822,9 +830,8 @@ describe('Lista routes', () => {
         .get(`${LISTA_OWNED}/${userTest1_id}`)
         .set('Authorization', `Bearer ${bearer}`)
         .expect((res) => {
-          console.log("Listas del usuario: ", res.body);
           expect(res.status).toEqual(httpStatus.OK);
-          expect(res.body.length).toEqual(2);
+          expect(res.body.length).toEqual(2 + 3);
           expect(res.status).toEqual(httpStatus.OK);
         });
     });
@@ -834,7 +841,6 @@ describe('Lista routes', () => {
         .get(`${LISTA_OWNED}/${userTest1_id}`)
         .set('Authorization', `Bearer ${bearer2}`)
         .expect((res) => {
-          console.log("Listas del usuario: ", res.body);
           expect(res.status).toEqual(httpStatus.OK);
           expect(res.body.length).toEqual(1);
           expect(res.body[0].idLista).toEqual(listaPub?.idLista);
@@ -842,4 +848,42 @@ describe('Lista routes', () => {
         });
     });
   });
+
+
+  describe(' POST /lista/favorites/:idAudio , addAudioToFavorites', () => {
+    it('returns ' + httpStatus.NOT_FOUND + ' when idAudio not found', async () => {
+      await request(app)
+        .post(`${LISTA_ROUTE}/favorites/${999999}`)
+        .set('Authorization', `Bearer ${bearer}`)
+        .expect(httpStatus.NOT_FOUND);
+    });
+
+    it('returns ' + httpStatus.CREATED + ' and correct result when all params are ok', async () => {
+      await request(app)
+        .post(`${LISTA_ROUTE}/favorites/${audioTest1_id}`)
+        .set('Authorization', `Bearer ${bearer}`)
+        .expect((res) => {
+          expect(res.body.idLista).toEqual(listaFavsUser1?.idLista);
+          expect(res.status).toEqual(httpStatus.CREATED);
+        });
+    });
+  });
+
+  describe(' DELETE /lista/favorites/:idAudio , deleteAudioFromFavorites', () => {
+    it('returns ' + httpStatus.NOT_FOUND + ' when idAudio not found', async () => {
+      await request(app)
+        .delete(`${LISTA_ROUTE}/favorites/${999999}`)
+        .set('Authorization', `Bearer ${bearer}`)
+        .expect(httpStatus.NOT_FOUND);
+    });
+
+    it('returns ' + httpStatus.NO_CONTENT + ' and correct result when all params are ok', async () => {
+      await request(app)
+        .delete(`${LISTA_ROUTE}/favorites/${audioTest1_id}`)
+        .set('Authorization', `Bearer ${bearer}`)
+        .expect(httpStatus.NO_CONTENT);
+    });
+  });
+
+
 });

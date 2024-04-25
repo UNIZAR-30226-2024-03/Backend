@@ -9,6 +9,7 @@ import * as etiquetasDatabase from "../../db/etiquetasDb.js";
 import * as audioDatabase from "../../db/audioDb.js";
 import * as listasDb from '../../db/listaDb.js';
 import { promisify } from 'util';
+import { json } from "stream/consumers";
 const projectRootPath = process.cwd(); // Devuelve el directorio raíz del proyecto y se almacena en una constante
 
 
@@ -114,7 +115,7 @@ export async function createAudio(req: Request, res: Response) {
             idsUsuarios2 = req.body.idsUsuarios.split(',').map(Number);
         }
         idsUsuarios2.push(req.auth?.idUsuario);
-        let img = "null";
+        let img = process.env.IMG_AUDIO_DEFAULT || 'null';
         if (req.body.img ) {
             img = req.body.img;
         }
@@ -150,7 +151,7 @@ export async function createAudio(req: Request, res: Response) {
                 console.log("Se va a linkar etiqueta a audio con tipo "+req.body.tipoEtiqueta+" y id "+idEtiqueta+" y id audio "+audio.idAudio);
                 await audioDatabase.linkLabelToAudio(audio.idAudio, idEtiqueta, req.body.tipoEtiqueta);
             }
-            
+
 
         }
 
@@ -224,7 +225,7 @@ export async function verifyAudio(req: Request, res: Response, next: NextFunctio
             if (error.stack) {
                 console.error(`Stack trace: ${error.stack}`);
             }
-            res.status(500).send(error);
+            res.status(500).send(error.message);
         }
     }
 }
@@ -355,6 +356,26 @@ export function deleteTmpFiles(req: Request, res: Response, next: NextFunction){
     next();
 }
 
+
+export async function audioStats(req: Request, res: Response) {
+    try {
+        const id = Number(req.params.idaudio);
+        const date = req.body.date; //formato "MM-YYYY"
+
+        if (!date || !/^([0-9]{2})-([0-9]{4})$/.test(date)) {
+            return res.status(400).send('Bad Parameters, falta parámetro date o formato de fecha incorrecto');
+        }else{
+            const [month, year] = date.split('-').map(Number);
+            if (month < 1 || month > 12 || year < 1800) {
+                return res.status(400).send('Bad Parameters, fecha no válida');
+            }
+            const stats = await audioDatabase.getAudioStats(id, month, year);
+            res.json(stats);
+        }
+    } catch (error) {
+        res.status(500).send(error);
+    }
+}
 
 function deleteFile(filePath: string) {
     try {

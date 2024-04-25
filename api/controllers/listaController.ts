@@ -53,17 +53,21 @@ const isOwnerOrAdmin = async (idItem : number, idUsuario : number, esAdmin : Boo
   * @returns {Promise<Lista>}
  */
 export const createLista = catchAsync(async (req : Request, res : Response) => {
-  const { nombre, descripcion, esPrivada, imgLista, esAlbum, tipoLista, audios } = req.body; 
+  const { nombre, descripcion, esPrivada, esAlbum, tipoLista, audios } = req.body; 
   // No se necesita Seguidores porque al crear una lista no tiene seguidores
   // No necesita fechaUltimaMod porque se crea en el momento de la creación
-
+  let imgLista = req.body.imgLista;
   // createLista puede lanzar un error si el nombre de la lista ya existe por o que se debe capturar
   try {
-    console.log("lista", nombre, descripcion, esPrivada, imgLista, esAlbum, tipoLista, audios)
+    // console.log("lista", nombre, descripcion, esPrivada, imgLista, esAlbum, tipoLista, audios)
+    // imgLista es el valor de la variable de entorno IMG_LISTA_DEFECTO si no se ha pasado
+    if (!req.body.imgLista) {
+      imgLista = esAlbum ? process.env.IMG_ALBUM_DEFAULT : process.env.IMG_LISTA_DEFAULT;
+    }
     const lista = await listasDb.createLista(nombre, descripcion, esPrivada, esAlbum, imgLista, tipoLista, req.auth?.idUsuario, audios);
     res.status(httpStatus.CREATED).send(lista);
   } catch (error) {
-    console.log(error);
+    // console.log(error);
     res.status(httpStatus.BAD_REQUEST).send(error)
   }
 
@@ -568,3 +572,52 @@ export const getListasByPropietario = catchAsync(async (req : Request, res : Res
 });
 
 
+/**
+ * Añade el audio a la lista de favoritos del usuario
+ * @param {ObjectId} idAudio
+ */
+export const addAudioToFavorites = catchAsync(async (req : Request, res : Response) => {
+  try {
+    if(!await audioDb.findAudioById(parseInt(req.params.idAudio))) {
+      res.status(httpStatus.NOT_FOUND).send("Audio no encontrado");
+      return;
+    }
+
+    const listaFavs = await listasDb.getListaFavsByUser(req.auth?.idUsuario);
+
+    if (!listaFavs) {
+      res.status(httpStatus.NOT_FOUND).send("Lista de favoritos no encontrada");
+      return;
+    }
+
+    await listasDb.addAudioToLista(listaFavs.idLista, parseInt(req.params.idAudio));
+    res.status(httpStatus.CREATED).send(listaFavs);
+  } catch (error) {
+    res.status(httpStatus.BAD_REQUEST).send(error);
+  }
+});
+
+
+/**
+ * Elimina el audio de la lista de favoritos del usuario
+ * @param {ObjectId} idAudio
+ */
+export const deleteAudioFromFavorites = catchAsync(async (req : Request, res : Response) => {
+  try {
+    if(!await audioDb.findAudioById(parseInt(req.params.idAudio))) {
+      res.status(httpStatus.NOT_FOUND).send("Audio no encontrado");
+      return;
+    }
+
+    const listaFavs = await listasDb.getListaFavsByUser(req.auth?.idUsuario);
+    if (!listaFavs) {
+      res.status(httpStatus.NOT_FOUND).send("Lista de favoritos no encontrada");
+      return;
+    }
+
+    await listasDb.deleteAudioFromLista(listaFavs.idLista, parseInt(req.params.idAudio));
+    res.status(httpStatus.NO_CONTENT).send();
+  } catch (error) {
+    res.status(httpStatus.BAD_REQUEST).send(error);
+  }
+});
