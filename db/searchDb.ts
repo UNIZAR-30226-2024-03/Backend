@@ -41,12 +41,6 @@ async function searchListas(idUsuarioQuery: number, query: string, lista: boolea
         where: {
             AND: where
         },
-        select: {
-            idLista: true,
-            nombre: true,
-            esAlbum: true,
-            imgLista: true,
-        },
         take: MAX_TAKE,
     });
 
@@ -83,12 +77,6 @@ async function searchAudios (idUsuarioQuery: number, query: string, cancion: boo
     const res = await prisma.audio.findMany({
         where: {
             AND: where
-        },
-        select: {
-            idAudio: true,
-            titulo: true,
-            esPodcast: true,
-            imgAudio: true,
         },
         take: MAX_TAKE,
     });
