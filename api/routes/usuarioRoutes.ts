@@ -567,7 +567,7 @@ router.get("/topAudios", auth.authenticate, usuarioCon.topAudios);
 /**
  * @swagger
  * /usuario/historico:
- *   get:
+ *   post:
  *     summary: Obtiene el historico del número de usuarios que han escuchado al usuario que hace la petición como mínimo una vez por fecha y el historico de escuchas totales de un usuario por fecha
  *     tags: [Usuario]
  *     security:
@@ -626,7 +626,7 @@ router.get("/topAudios", auth.authenticate, usuarioCon.topAudios);
  *       404:
  *         description: No se ha encontrado el audio con el id indicado
  */
-router.get("/historico", auth.authenticate, usuarioCon.historico);
+router.post("/historico", auth.authenticate, usuarioCon.historico);
 
 
 
