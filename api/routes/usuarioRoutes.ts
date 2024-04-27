@@ -176,6 +176,9 @@ const router = Router();
  *                        esPodcast:
  *                          type: boolean
  *                          description: Indica si el último lanzamiento es un podcast.
+ *                    usuariosAlcanzados:
+ *                      type: number
+ *                      description: Número de usuarios que han escuchado como mínimo una vez al usuario.
  *      400:
  *        description: Error en la petición.
  *      401:
@@ -556,6 +559,72 @@ router.get("/lastAudios/:numAudios", auth.authenticate, usuarioCon.lastAudios);
  *         description: Error interno del servidor.
  */
 router.get("/topAudios", auth.authenticate, usuarioCon.topAudios);
+
+
+/**
+ * @swagger
+ * /usuario/historico:
+ *   get:
+ *     summary: Obtiene el historico del número de usuarios que han escuchado al usuario que hace la petición como mínimo una vez por fecha y el historico de escuchas totales de un usuario por fecha
+ *     tags: [Usuario]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               date:
+ *                 type: string
+ *                 format: MM-YYYY
+ *                 description: Fecha en la que se quieren obtener las estadísticas
+ *     responses:
+ *       200:
+ *         description: Éxito, devuelve el historico de escuchas
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 alcanceMensual:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       month:
+ *                         type: number
+ *                         description: Mes del historico
+ *                       year:
+ *                         type: number
+ *                         description: Año del historico
+ *                       alcance:
+ *                         type: number
+ *                         description: Número de usuarios distintos que han escuchado al usuario mínimo una vez en el mes y año especificados
+ *                 escuchasUsuarioMensuales:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       month:
+ *                         type: number
+ *                         description: Mes del historico
+ *                       year:
+ *                         type: number
+ *                         description: Año del historico
+ *                       escuchas:
+ *                         type: number
+ *                         description: Número de escuchas totales del usuario en el mes y año especificados
+ *       400:
+ *         description: Falta parámetro date, formato de fecha incorrecto o fecha no válida
+ *       403:
+ *         description: No se tiene permiso para acceder a este recurso
+ *       404:
+ *         description: No se ha encontrado el audio con el id indicado
+ */
+router.get("/historico", auth.authenticate, usuarioCon.historico);
+
 
 
 
