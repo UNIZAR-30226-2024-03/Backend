@@ -17,7 +17,7 @@ async function searchUsuarios(query: string)
         take: MAX_TAKE,
     });
     return { usuarios: res };
-};
+}
 
 async function searchListas(idUsuarioQuery: number, query: string, lista: boolean, album: boolean)
 : Promise<{ listas: Partial<Lista>[]; albums: Partial<Lista>[] }> {
@@ -41,11 +41,13 @@ async function searchListas(idUsuarioQuery: number, query: string, lista: boolea
         where: {
             AND: where
         },
-        select: {
-            idLista: true,
-            nombre: true,
-            esAlbum: true,
-            imgLista: true,
+        include: {
+            Propietarios: {
+                select: {
+                    idUsuario: true,
+                    nombreUsuario: true,
+                }
+            },
         },
         take: MAX_TAKE,
     });
@@ -84,11 +86,13 @@ async function searchAudios (idUsuarioQuery: number, query: string, cancion: boo
         where: {
             AND: where
         },
-        select: {
-            idAudio: true,
-            titulo: true,
-            esPodcast: true,
-            imgAudio: true,
+        include: {
+            Artistas: {
+                select: {
+                    idUsuario: true,
+                    nombreUsuario: true,
+                }
+            },
         },
         take: MAX_TAKE,
     });
