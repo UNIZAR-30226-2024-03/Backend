@@ -17,7 +17,7 @@ async function searchUsuarios(query: string)
         take: MAX_TAKE,
     });
     return { usuarios: res };
-};
+}
 
 async function searchListas(idUsuarioQuery: number, query: string, lista: boolean, album: boolean)
 : Promise<{ listas: Partial<Lista>[]; albums: Partial<Lista>[] }> {
@@ -40,6 +40,14 @@ async function searchListas(idUsuarioQuery: number, query: string, lista: boolea
     const res = await prisma.lista.findMany({
         where: {
             AND: where
+        },
+        include: {
+            Propietarios: {
+                select: {
+                    idUsuario: true,
+                    nombreUsuario: true,
+                }
+            },
         },
         take: MAX_TAKE,
     });
@@ -77,6 +85,14 @@ async function searchAudios (idUsuarioQuery: number, query: string, cancion: boo
     const res = await prisma.audio.findMany({
         where: {
             AND: where
+        },
+        include: {
+            Artistas: {
+                select: {
+                    idUsuario: true,
+                    nombreUsuario: true,
+                }
+            },
         },
         take: MAX_TAKE,
     });
