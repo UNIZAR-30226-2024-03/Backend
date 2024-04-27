@@ -245,7 +245,13 @@ export async function usuarioGetLastAudiosAndPodcasts(userId: number, numberAudi
 export async function usuarioGetNEscuchas(userId: number) {
   const nEscuchas = await prisma.escucha.count({
     where: {
-      idUsuario: userId,
+      Audio: {
+        Artistas: {
+          some: {
+            idUsuario: userId,
+          },
+        },
+      },
     },
   });
 
@@ -257,7 +263,13 @@ export async function usuarioGetOyentesMensuales(userId: number) {
   fecha.setDate(fecha.getDate() - 30); // Ajusta la fecha para que sea 30 días antes
   const oyentesMensuales = await prisma.escucha.count({
     where: {
-      idUsuario: userId,
+      Audio: {
+        Artistas: {
+            some: {
+                idUsuario: userId,
+            },
+        },
+      },
       fecha: {
         gte: fecha,
       },
@@ -344,6 +356,31 @@ export async function usuarioGetPersonasHanEscuchado(userId: number) {
             idUsuario: userId,
           },
         },
+      },
+    },
+    _count: {
+      _all: true,
+    },
+  });
+  const newpersonas = personas.length > 0 ? personas[0]._count._all : 0;
+  return newpersonas;
+}
+
+export async function usuarioGetPersonasHanEscuchadoUltimoMes(userId: number) {
+  const fecha = new Date();
+  fecha.setDate(fecha.getDate() - 30); // Ajusta la fecha para que sea 30 días antes
+  const personas = await prisma.escucha.groupBy({
+    by: ['idUsuario'],
+    where: {
+      Audio: {
+        Artistas: {
+          some: {
+            idUsuario: userId,
+          },
+        },
+      },
+      fecha: {
+        gte: fecha,
       },
     },
     _count: {

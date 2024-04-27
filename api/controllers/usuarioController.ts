@@ -57,7 +57,7 @@ export async function usuarioGet(
     const idUsuario = Number.isNaN(req.query.idUsuario) ? Number(req.auth?.idUsuario) : req.query.idUsuario;
     const rrss = req.query.rrss;
         
-    const [currentUsuario, nEscuchas, oyentesMensuales, ultimoLanzamiento,usuariosAlcanzados] = await Promise.all([
+    const [currentUsuario, nEscuchas, oyentesMensuales, ultimoLanzamiento,usuariosAlcanzados,usuariosAlcanzadosUltimoMes] = await Promise.all([
       usuarioDbJs.usuarioGetPrisma(
         idUsuario,
         rrss,
@@ -66,12 +66,13 @@ export async function usuarioGet(
       usuarioDbJs.usuarioGetOyentesMensuales(idUsuario),
       usuarioDbJs.usuarioGetUltimoLanzamiento(idUsuario),
       usuarioDbJs.usuarioGetPersonasHanEscuchado(idUsuario),
+      usuarioDbJs.usuarioGetPersonasHanEscuchadoUltimoMes(idUsuario),
     ]);
     if (!currentUsuario) return res.sendStatus(404);
     currentUsuario.contrasegna = null;
 
 
-    return res.status(200).json({ ...currentUsuario,nEscuchas:nEscuchas,oyentesMensuales:oyentesMensuales,ultimoLanzamiento:ultimoLanzamiento, usuariosAlcanzados:usuariosAlcanzados });
+    return res.status(200).json({ ...currentUsuario,nEscuchas:nEscuchas,oyentesMensuales:oyentesMensuales,ultimoLanzamiento:ultimoLanzamiento, usuariosAlcanzados:usuariosAlcanzados,usuariosAlcanzadosUltimoMes: usuariosAlcanzadosUltimoMes });
   } catch (error) {
     return next(error);
   }
