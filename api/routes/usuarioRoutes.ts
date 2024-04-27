@@ -178,7 +178,10 @@ const router = Router();
  *                          description: Indica si el último lanzamiento es un podcast.
  *                    usuariosAlcanzados:
  *                      type: number
- *                      description: Número de usuarios que han escuchado como mínimo una vez al usuario.
+ *                      description: Número de usuarios distintos que han escuchado como mínimo una vez al usuario.
+ *                    usuariosAlcanzadosUltimoMes:
+ *                      type: number
+ *                      description: Número de usuarios distintos que han escuchado al usuario en el último mes.
  *      400:
  *        description: Error en la petición.
  *      401:
