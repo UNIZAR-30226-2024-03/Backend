@@ -284,7 +284,7 @@ router.put('/update/:idaudio', auth.authenticate,audioController.deleteTmpFiles,
 /**
  * @swagger
  * /audio/stats/{idaudio}:
- *   get:
+ *   post:
  *     summary: Obtiene las estadísticas de un audio
  *     tags: [Audio]
  *     security:
@@ -330,6 +330,6 @@ router.put('/update/:idaudio', auth.authenticate,audioController.deleteTmpFiles,
  *       404:
  *         description: No se ha encontrado el audio con el id indicado
  */
-router.get('/stats/:idaudio', auth.authenticate, audioController.verifyAudio, audioController.audioStats);
+router.post('/stats/:idaudio', auth.authenticate, audioController.verifyAudio, audioController.audioStats);
 
 export default router;
