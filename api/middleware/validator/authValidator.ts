@@ -15,8 +15,3 @@ export const authLoginSchema = z.object({
   }),
 });
 
-export const authGoogleSchema = z.object({
-  params: z.object({
-    credential: z.string(),
-  }),
-});

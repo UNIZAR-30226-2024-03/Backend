@@ -11,7 +11,7 @@ export async function searchGet(
 ) {
     try {
         const idUsuario = Number(req.auth?.idUsuario);
-        const query = String(req.query.q);
+        const query = String(req.query.q).toLowerCase();
         if (!query || query == "") return res.sendStatus(400);
         let usuario, lista, album, cancion, podcast;
         try {

@@ -15,17 +15,13 @@ export const createDefaultListas = async (idUsuario: number) => {
   const imgListaFav = process.env.IMG_MIS_FAVORITOS_DEFAULT;
   const imgListaAudios = process.env.IMG_MIS_CANCIONES_DEFAULT;
   const imgListaPodcast = process.env.IMG_MIS_PODCAST_DEFAULT;
-
-  const listaFavoritos = await createLista("Mis Favoritos", "Todos tus audios favoritos en una única playlist", true, false, imgListaFav, "MIS_FAVORITOS", idUsuario, []);
-  const listaMisAudios = await createLista("Mis Canciones", "Todas las canciones que has subido", true, false, imgListaAudios, "MIS_AUDIOS", idUsuario, []);
-  const listaMisPodcast = await createLista("Mis Podcast", "Todos los podcast que has subido", true, false, imgListaPodcast, "MIS_PODCAST", idUsuario, []);
-
+  const [listaFavoritos, listaMisAudios, listaMisPodcast] = await Promise.all([
+    createLista("Mis Favoritos", "Todos tus audios favoritos en una única playlist", true, false, imgListaFav, "MIS_FAVORITOS", idUsuario, []),
+    createLista("Mis Canciones", "Todas las canciones que has subido", true, false, imgListaAudios, "MIS_AUDIOS", idUsuario, []),
+    createLista("Mis Podcast", "Todos los podcast que has subido", true, false, imgListaPodcast, "MIS_PODCAST", idUsuario, [])
+  ]);
   return [listaFavoritos, listaMisAudios, listaMisPodcast];
 };
-
-
-
-
 
 
 export async function authGoogleLogin(
@@ -34,11 +30,9 @@ export async function authGoogleLogin(
   next: NextFunction,
 ) {
   try {
-    const payload = await verify(req.params.credential);
-    if (!payload) return res.sendStatus(401);
-
-    const { email, name } = payload;
-
+    // const payload = await verify(req.params.credential);
+    const { email, name } = req.body.user;
+    
     if (!email) return res.sendStatus(401);
     const usuario = await usuarioDbJs.usuarioGetEmailPrisma(email);
     if (usuario) {
