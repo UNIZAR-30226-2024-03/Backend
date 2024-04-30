@@ -16,7 +16,7 @@ datasource db {
 model Usuario {
   idUsuario     Int     @id @default(autoincrement())
   email         String  @unique
-  nombreUsuario String  @unique
+  nombreUsuario String
   esAdmin       Boolean @default(false)
   contrasegna   String?
   imgPerfil     String?
