@@ -207,7 +207,7 @@ export async function usuarioGetAudios(userId: number, cancion: boolean, podcast
 }
 
 export async function usuarioGetLastAudiosAndPodcasts(userId: number, numberAudios: number) {
-  const cancion = await prisma.escucha.findMany({
+  const cancionPre = await prisma.escucha.findMany({
     where: {
       idUsuario: userId,
       Audio: {
@@ -219,11 +219,31 @@ export async function usuarioGetLastAudiosAndPodcasts(userId: number, numberAudi
     },
     take: numberAudios,
     include: {
-      Audio: true
+      Audio: {
+        include: {
+          Artistas: {
+            select: {
+              idUsuario: true,
+              nombreUsuario: true,
+            },
+          },
+        },
+      },
     }
   });
+  const cancion = cancionPre.map(escucha => {
+    const { Artistas, ...restoAudio } = escucha.Audio;
+    return {
+      ...escucha,
+      Audio: {
+        ...restoAudio,
+        artistas: Artistas,
+      },
+    };
+  });
 
-  const podcast = await prisma.escucha.findMany({
+
+  const prepodcast = await prisma.escucha.findMany({
     where: {
       idUsuario: userId,
       Audio: {
@@ -235,8 +255,27 @@ export async function usuarioGetLastAudiosAndPodcasts(userId: number, numberAudi
     },
     take: numberAudios,
     include: {
-      Audio: true
+      Audio: {
+        include: {
+          Artistas: {
+            select: {
+              idUsuario: true,
+              nombreUsuario: true,
+            },
+          },
+        },
+      },
     }
+  });
+  const podcast = prepodcast.map(escucha => {
+    const { Artistas, ...restoAudio } = escucha.Audio;
+    return {
+      ...escucha,
+      Audio: {
+        ...restoAudio,
+        artistas: Artistas,
+      },
+    };
   });
 
   return { cancion, podcast };

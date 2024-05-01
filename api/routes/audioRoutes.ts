@@ -41,6 +41,79 @@ const upload = multer(
 
 
 
+
+/**
+ * @swagger
+ *  /audio/lastuploadedaudios:
+ *  get:
+ *    summary: obtiene los últimos audios subidos a la plataforma
+ *    tags: [Audio]
+ *    security:
+ *      - bearerAuth: []
+ *    responses:
+ *      200:
+ *        description: Lista de los últimos audios subidos
+ *        content:
+ *          application/json:
+ *            schema:
+ *              type: object
+ *              properties:
+ *                cancion:
+ *                  type: array
+ *                  items:
+ *                    type: object
+ *                    properties:
+ *                      idAudio:
+ *                        type: integer
+ *                      titulo:
+ *                        type: string
+ *                      path:
+ *                        type: string
+ *                      duracionSeg:
+ *                        type: integer
+ *                      fechaLanz:
+ *                        type: string
+ *                        format: date-time
+ *                      esAlbum:
+ *                        type: boolean
+ *                      imgAudio:
+ *                        type: string
+ *                      esPrivada:
+ *                        type: boolean
+ *                      esPodcast:
+ *                        type: boolean
+ *                podcast:
+ *                  type: array
+ *                  items:
+ *                    type: object
+ *                    properties:
+ *                      idAudio:
+ *                        type: integer
+ *                      titulo:
+ *                        type: string
+ *                      path:
+ *                        type: string
+ *                      duracionSeg:
+ *                        type: integer
+ *                      fechaLanz:
+ *                        type: string
+ *                        format: date-time
+ *                      esAlbum:
+ *                        type: boolean
+ *                      imgAudio:
+ *                        type: string
+ *                      esPrivada:
+ *                        type: boolean
+ *                      esPodcast:
+ *                        type: boolean
+ *      403:
+ *        description: No se tiene permiso para acceder a este recurso
+ *      500:
+ *        description: Error interno del servidor
+ */
+router.get('/lastuploadedaudios', auth.authenticate, audioController.getLastUploadedAudios);
+
+
 /**
  * @swagger
  *  /audio/{idaudio}:
@@ -331,5 +404,7 @@ router.put('/update/:idaudio', auth.authenticate,audioController.deleteTmpFiles,
  *         description: No se ha encontrado el audio con el id indicado
  */
 router.post('/stats/:idaudio', auth.authenticate, audioController.verifyAudio, audioController.audioStats);
+
+
 
 export default router;
