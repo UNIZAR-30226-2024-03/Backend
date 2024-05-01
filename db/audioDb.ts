@@ -286,6 +286,14 @@ export async function getMostListenedAudios() {
     const audios = await prisma.audio.findMany({
       skip: randomSeed,
       take: n,
+      include: {
+        Artistas: {
+          select: {
+            idUsuario: true,
+            nombreUsuario: true,
+          }
+        }
+      },
     });
 
 
