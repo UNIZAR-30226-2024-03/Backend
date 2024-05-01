@@ -28,9 +28,8 @@ const router = Router();
  *      500:
  *        description: Server error.
  */
-router.get(
+router.post(
   "/google", 
-  validate(authValidatorJs.authGoogleSchema),
   controller.authGoogleLogin
 );
 
