@@ -428,6 +428,14 @@ router.put(
  *                           esPodcast:
  *                             type: boolean
  *                             description: Indica si el audio es un podcast
+ *                           artistas:
+ *                             type: array
+ *                             items:
+ *                               type: object
+ *                               properties:
+ *                                 idUsuario:
+ *                                   type: number
+ *                                   description: ID del usuario
  *                 podcast:
  *                   type: array
  *                   items:
@@ -474,6 +482,14 @@ router.put(
  *                           esPodcast:
  *                             type: boolean
  *                             description: Indica si el audio es un podcast
+ *                           artistas:
+ *                             type: array
+ *                             items:
+ *                               type: object
+ *                               properties:
+ *                                 idUsuario:
+ *                                   type: number
+ *                                   description: ID del usuario
  *       400:
  *         description: Error en la petición, faltan parámetros o el número de audios debe ser mayor que 0.
  *       500:

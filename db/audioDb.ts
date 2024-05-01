@@ -198,3 +198,28 @@ export async function getAudioStats(audioId: number, month: number, year: number
   
     return stats;
   }
+
+
+export async function getLastUploadedAudios() {
+  const cancion = await prisma.audio.findMany({
+    where: {
+      esPodcast: false,
+    },
+    orderBy: {
+      fechaLanz: 'desc',
+    },
+    take: 10,
+  });
+
+  const podcast = await prisma.audio.findMany({
+    where: {
+      esPodcast: true,
+    },
+    orderBy: {
+      fechaLanz: 'desc',
+    },
+    take: 10,
+  });
+
+  return { cancion, podcast };
+}

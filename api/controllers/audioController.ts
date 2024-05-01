@@ -377,6 +377,16 @@ export async function audioStats(req: Request, res: Response) {
     }
 }
 
+
+export async function getLastUploadedAudios(req: Request, res: Response) {
+    try {
+        const audios = await audioDatabase.getLastUploadedAudios();
+        res.json(audios);
+    } catch (error) {
+        res.status(500).send(error);
+    }
+}
+
 function deleteFile(filePath: string) {
     try {
         fs.unlinkSync(filePath); // Borra el archivo del servidor
