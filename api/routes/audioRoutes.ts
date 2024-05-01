@@ -116,6 +116,48 @@ router.get('/lastuploadedaudios', auth.authenticate, audioController.getLastUplo
 
 /**
  * @swagger
+ *  /audio/mostlistenedaudios:
+ *  get:
+ *    summary: obtiene los audios más escuchados de la plataforma
+ *    tags: [Audio]
+ *    security:
+ *      - bearerAuth: []
+ *    responses:
+ *      200:
+ *        description: Lista de los audios más escuchados
+ *        content:
+ *          application/json:
+ *            schema:
+ *              type: object
+ *              properties:
+ *                audio:
+ *                  type: array
+ *                  items:
+ *                    type: object
+ *                    properties:
+ *                      count:
+ *                        type: integer
+ *                      idAudio:
+ *                        type: integer
+ *                podcast:
+ *                  type: array
+ *                  items:
+ *                    type: object
+ *                    properties:
+ *                      count:
+ *                        type: integer
+ *                      idAudio:
+ *                        type: integer
+ *      403:
+ *        description: No se tiene permiso para acceder a este recurso
+ *      500:
+ *        description: Error interno del servidor
+ */
+router.get('/mostlistenedaudios', auth.authenticate, audioController.getMostListenedAudios);
+
+
+/**
+ * @swagger
  *  /audio/{idaudio}:
  *  get:
  *    summary: Obtiene información del audio indicado en la URL
@@ -404,6 +446,8 @@ router.put('/update/:idaudio', auth.authenticate,audioController.deleteTmpFiles,
  *         description: No se ha encontrado el audio con el id indicado
  */
 router.post('/stats/:idaudio', auth.authenticate, audioController.verifyAudio, audioController.audioStats);
+
+
 
 
 
