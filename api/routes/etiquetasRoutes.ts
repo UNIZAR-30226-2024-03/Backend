@@ -195,4 +195,86 @@ router.post(
   etiquetas.tagsOfAudios,
 );
 
+
+
+/**
+ * @swagger
+ * /etiquetas/infinite/{nAudiosToGetTagsFrom}/{nAudiosResult}:
+ *   get:
+ *     summary: Obtiene nAudiosResult audios que contengan etiquetas de las últimas nAudiosToGetTagsFrom escuchas
+ *     description: Obtienes nAudiosResult audios que contengan etiquetas de las últimas nAudiosToGetTagsFrom escuchas del usuario.
+ *     tags: [Etiquetas]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: nAudiosToGetTagsFrom
+ *         required: true
+ *         description: Número de audios de los que se obtendrán las etiquetas.
+ *         schema:
+ *           type: integer
+ *       - in: path
+ *         name: nAudiosResult
+ *         required: true
+ *         description: Número de audios que se devolverán.
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       '200':
+ *         description: Éxito, devuelve las etiquetas de los últimos n audios escuchados.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/Audio'
+ *       '401':
+ *         description: No autorizado, el usuario no tiene permiso para acceder.
+ *       '500':
+ *         description: Error interno del servidor.
+ */
+router.get("/infinite/:nAudiosToGetTagsFrom/:nAudiosResult", auth.authenticate, validate, etiquetas.getNAudiosByTags);
+
+
+/**
+ * @swagger
+ * /etiquetas/tagsnlastlistened/{numEscuchas}:
+ *   get:
+ *     summary: Obtiene las etiquetas de los últimos n audios escuchados
+ *     description: Obtiene las etiquetas de los últimos n audios escuchados por el usuario.
+ *     tags: [Etiquetas]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: numEscuchas
+ *         required: true
+ *         description: Número de audios de los que se obtendrán las etiquetas.
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       '200':
+ *         description: Éxito, devuelve las etiquetas de los últimos n audios escuchados.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: string
+ *       '400':
+ *         description: Solicitud incorrecta, el número de audios a obtener debe ser un número positivo.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Bad request. numEscuchas must be a positive number"
+ *       '401':
+ *         description: No autorizado, el usuario no tiene permiso para acceder.
+ *       '500':
+ *         description: Error interno del servidor.
+ */
+router.get("/tagsnlastlistened/:numEscuchas", auth.authenticate, validate, etiquetas.tagsNUltimasEscuchas);
 export default router;

@@ -273,3 +273,30 @@ export async function getMostListenedAudios() {
   
     return { audio, podcast };
   }
+
+
+  export async function getNRandomAudios(n: number) {
+    const totalAudios = await prisma.audio.count();
+    const randomSeed = Math.floor(Math.random() * totalAudios);
+
+    if (n > totalAudios) {
+      throw new Error('Not enough audios in the database');
+    }
+
+    const audios = await prisma.audio.findMany({
+      skip: randomSeed,
+      take: n,
+      include: {
+        Artistas: {
+          select: {
+            idUsuario: true,
+            nombreUsuario: true,
+          }
+        }
+      },
+    });
+
+
+    return audios;
+
+  }
