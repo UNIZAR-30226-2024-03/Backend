@@ -173,6 +173,8 @@ export async function existsTag (id: number): Promise<boolean> {
 
 // Devuelve la lista con los nombres de las etiquetas de las últimas nEscuchas del usuario
 export async function tagsNLastListened(userId: number, nEscuchas: number) {
+  console.log("userId: ", userId);
+  console.log("nEscuchas: ", nEscuchas);
   const escuchas = await prisma.escucha.findMany({
     where: {
       idUsuario: userId,

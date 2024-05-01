@@ -83,6 +83,9 @@ export const tagsNUltimasEscuchas = async (req: Request, res: Response) => {
   try {
     const idUsuario = Number(req.auth?.idUsuario);
     const nAudios = Number(req.params.numEscuchas);
+    
+    console.log("idUsuario: ", idUsuario);
+    console.log("nAudios: ", nAudios);
 
     if (!nAudios || nAudios <= 0) {
       return res.status(400).json({ message: 'Bad request. numEscuchas must be a positive number' });
@@ -107,6 +110,10 @@ export const getNAudiosByTags = async (req: Request, res: Response) => {
     const nAudiosToGetTagsFrom = Number(req.params.nAudiosToGetTagsFrom);
     const nAudios = Number(req.params.nAudiosResult);
 
+    console.log("idUsuario: ", idUsuario);
+    console.log("nAudiosToGetTagsFrom: ", nAudiosToGetTagsFrom);
+    console.log("nAudios: ", nAudios);
+
     if (!nAudiosToGetTagsFrom || nAudiosToGetTagsFrom <= 0) {
       return res.status(400).json({ message: 'Bad request. numEscuchas must be a positive number' });
     }
@@ -115,6 +122,7 @@ export const getNAudiosByTags = async (req: Request, res: Response) => {
     }
 
     const tags = await etiquetasDbJs.tagsNLastListened(idUsuario, nAudiosToGetTagsFrom);
+    console.log(tags);
     const audios = await etiquetasDbJs.getNAudiosByTags(nAudios, tags);
 
     res.json(audios);

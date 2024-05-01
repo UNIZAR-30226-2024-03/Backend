@@ -450,5 +450,5 @@ router.post('/stats/:idaudio', auth.authenticate, audioController.verifyAudio, a
 
 
 
-
+router.get('/random/:nAudios', auth.authenticate, audioController.getNRandomAudios);
 export default router;
