@@ -223,3 +223,53 @@ export async function getLastUploadedAudios() {
 
   return { cancion, podcast };
 }
+
+export async function getMostListenedAudios() {
+    const audios = await prisma.escucha.groupBy({
+      by: ['idAudio'],
+      where: {
+        Audio: {
+          esPodcast: false
+        }
+      },
+      _count: {
+        idAudio: true
+      },
+      orderBy: {
+        _count: {
+          idAudio: 'desc'
+        }
+      },
+      take: 10
+    });
+  
+    const podcasts = await prisma.escucha.groupBy({
+      by: ['idAudio'],
+      where: {
+        Audio: {
+          esPodcast: true
+        }
+      },
+      _count: {
+        idAudio: true
+      },
+      orderBy: {
+        _count: {
+          idAudio: 'desc'
+        }
+      },
+      take: 10
+    });
+  
+    const audio = audios.map(a => ({
+      count: a._count.idAudio,
+      idAudio: a.idAudio
+    }));
+  
+    const podcast = podcasts.map(p => ({
+      count: p._count.idAudio,
+      idAudio: p.idAudio
+    }));
+  
+    return { audio, podcast };
+  }
