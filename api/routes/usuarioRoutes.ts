@@ -72,15 +72,15 @@
  *          type: object
  *          properties:
  *              idAudio:
- *                  type: boolean
+ *                  type: number
  *              titulo:
- *                  type: boolean
+ *                  type: string
  *              path:
- *                  type: boolean
+ *                  type: string
  *              fechaLanz:
  *                  type: date
  *              duracionSeg:
- *                  type: boolean
+ *                  type: number
  *              esAlbum:
  *                  type: boolean
  *              esPodcast:
@@ -88,16 +88,16 @@
  *              esPrivada:
  *                  type: boolean
  *              imgAudio:
- *                  type: boolean
+ *                  type: string
  *              vecesEscuchada:
  *                  type: number 
  *              Artistas:
  *                  type: object
  *                  properties:
  *                      idUsuario:
- *                          type: boolean
+ *                          type: number
  *                      nombreUsuario:
- *                          type: boolean
+ *                          type: string
  */
 import { Router } from "express";
 

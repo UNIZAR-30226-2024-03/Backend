@@ -55,48 +55,6 @@
  *          type: string
  *          enum: ["MIS_AUDIOS", "MIS_FAVORITOS", "MIS_PODCAST", "NORMAL"]
  *          description: Tipo de lista, "MIS_AUDIOS", "MIS_FAVORITOS", "MIS_PODCAST" están reservados para las listas creadas por defecto para un usuario al crear su cuenta.
- *      Audio:
- *          type: object
- *          required:
- *             - idAudio
- *             - titulo
- *             - duracion
- *             - fechaSubida
- *             - idUsuario
- *          properties:
- *              idAudio:
- *                  type: number
- *                  description: Identificador del audio
- *              titulo:
- *                  type: string
- *                  description: Título del audio
- *              path:
- *                  type: string
- *                  description: uri del audio
- *              duracion:
- *                  type: number
- *                  description: Duración del audio en segundos
- *              fechaLanz:
- *                  type: string
- *                  description: Fecha de subida del audio
- *              esAlbum:
- *                  type: boolean
- *                  description: Indica si el audio es un album
- *              imgAudio:
- *                  type: string
- *                  description: uri de la imagen del audio
- *              esPrivada:
- *                  type: boolean
- *                  description: Indica si el audio es privado
- *          example:
- *              idAudio: 1
- *              titulo: "Audio de ejemplo"
- *              path: "adsfas-asdfaijlk-a"
- *              duracion: 120
- *              fechaLanz: "2021-06-01T12:00:00Z"
- *              esAlbum: false
- *              imgAudio: "adsfas-asdfaijlk-a"
- *              esPrivada: false
  *      Usuario:
  *          type: object
  *          required:
@@ -803,7 +761,7 @@ listaRouter.get("/owned/:idUsuario", auth.authenticate, listaController.getLista
 
 /**
  * @swagger
- * /lista/addToFavorites/{idLista}:
+ * /lista/favorites/{idAudio}:
  *  post:
  *    tags: [Listas]
  *    summary: Añade un audio a la lista de favoritos.
@@ -823,7 +781,7 @@ listaRouter.get("/owned/:idUsuario", auth.authenticate, listaController.getLista
  *        content:
  *          application/json:
  *            schema:
- *              $ref: '#/components/schemas/Listas'
+ *              $ref: '#/components/schemas/Lista'
  *      400:
  *        description: Error en la petición.
  *      404:
@@ -835,7 +793,7 @@ listaRouter.post("/favorites/:idAudio", auth.authenticate, listaController.addAu
 
 /**
  * @swagger
- * /lista/favorites/{idUsuario}:
+ * /lista/favorites/{idAudio}:
  *  delete:
  *    tags: [Listas]
  *    summary: Elimina un audio de la lista de favoritos.
