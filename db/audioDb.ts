@@ -276,7 +276,6 @@ export async function getMostListenedAudios() {
 
 
   export async function getNRandomAudios(n: number) {
-    // To ensure that the same audio is not selected twice, we first get the total number of audios
     const totalAudios = await prisma.audio.count();
     const randomSeed = Math.floor(Math.random() * totalAudios);
 

@@ -448,7 +448,37 @@ router.put('/update/:idaudio', auth.authenticate,audioController.deleteTmpFiles,
 router.post('/stats/:idaudio', auth.authenticate, audioController.verifyAudio, audioController.audioStats);
 
 
-
-
+/**
+ * @swagger
+ * /random/{nAudios}:
+ *   post:
+ *     summary:Devuelve una lista con nAudios audios aleatorios de la base de datos
+ *     tags: [Audio]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: nAudios
+ *         required: true
+ *         description: Número de audios a devolver
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Audios devueltos correctamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/Audio'
+ *
+ *       400:
+ *         description: No se ha recibido el número de audios a devolver
+ *       403:
+ *         description: No se tiene permiso para acceder a este recurso
+ *       500:
+ *         description: Error interno del servidor
+ */
 router.get('/random/:nAudios', auth.authenticate, audioController.getNRandomAudios);
 export default router;
