@@ -201,8 +201,8 @@ router.post(
  * @swagger
  * /etiquetas/infinite/{nAudiosToGetTagsFrom}/{nAudiosResult}:
  *   get:
- *     summary: Obtiene las etiquetas de las últimas n audios escuchados
- *     description: Obtiene las etiquetas de las últimas n audios escuchados por el usuario.
+ *     summary: Obtiene nAudiosResult audios que contengan etiquetas de las últimas nAudiosToGetTagsFrom escuchas
+ *     description: Obtienes nAudiosResult audios que contengan etiquetas de las últimas nAudiosToGetTagsFrom escuchas del usuario.
  *     tags: [Etiquetas]
  *     security:
  *       - bearerAuth: []
@@ -240,8 +240,8 @@ router.get("/infinite/:nAudiosToGetTagsFrom/:nAudiosResult", auth.authenticate, 
  * @swagger
  * /etiquetas/tagsnlastlistened/{numEscuchas}:
  *   get:
- *     summary: Obtiene las etiquetas de las últimas n audios escuchados
- *     description: Obtiene las etiquetas de las últimas n audios escuchados por el usuario.
+ *     summary: Obtiene las etiquetas de los últimos n audios escuchados
+ *     description: Obtiene las etiquetas de los últimos n audios escuchados por el usuario.
  *     tags: [Etiquetas]
  *     security:
  *       - bearerAuth: []
