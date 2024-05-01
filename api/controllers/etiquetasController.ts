@@ -1,6 +1,9 @@
-import e, { Request, Response, NextFunction } from "express";
 import path from "path";
 import * as etiquetasDbJs from "../../db/etiquetasDb.js";
+import e, { Request} from 'express-jwt';
+import { Response } from 'express';
+import httpStatus from 'http-status';
+
 
 
 // PRE: Verdad
@@ -73,5 +76,50 @@ export const tagsOfAudios = async (req: Request, res: Response) => {
   }
 };
 
+// Dado en el path el parámetro nAudios
+// Devuelve un array con el nombre de las etiquetas de los últimos nAudios escuchados
+// por el usuario del jwt
+export const tagsNUltimasEscuchas = async (req: Request, res: Response) => {
+  try {
+    const idUsuario = Number(req.auth?.idUsuario);
+    const nAudios = Number(req.params.numEscuchas);
 
+    if (!nAudios || nAudios <= 0) {
+      return res.status(400).json({ message: 'Bad request. numEscuchas must be a positive number' });
+    }
 
+    const etiquetas = await etiquetasDbJs.tagsNLastListened(idUsuario, nAudios);
+
+    res.json(etiquetas);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Error obteniendo etiquetas de las últimas escuchas" });
+  }
+};
+
+// Dados en el path el número de escuchas a tener en cuenta <nAudiosToGetTagsFrom> y el número
+// de audios deseado <nAudiosResult>
+// Devuelve un array con hasta <nAudiosResult> audio que contengan etiquetas de las últimas <nAudiosToGetTagsFrom> escuchas
+// del usuario del jwt
+export const getNAudiosByTags = async (req: Request, res: Response) => {
+  try {
+    const idUsuario = Number(req.auth?.idUsuario);
+    const nAudiosToGetTagsFrom = Number(req.params.nAudiosToGetTagsFrom);
+    const nAudios = Number(req.params.nAudiosResult);
+
+    if (!nAudiosToGetTagsFrom || nAudiosToGetTagsFrom <= 0) {
+      return res.status(400).json({ message: 'Bad request. numEscuchas must be a positive number' });
+    }
+    if (!nAudios || nAudios <= 0) {
+      return res.status(400).json({ message: 'Bad request. numAudios must be a positive number' });
+    }
+
+    const tags = await etiquetasDbJs.tagsNLastListened(idUsuario, nAudiosToGetTagsFrom);
+    const audios = await etiquetasDbJs.getNAudiosByTags(nAudios, tags);
+
+    res.json(audios);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Error obteniendo audios por etiquetas" });
+  }
+}
