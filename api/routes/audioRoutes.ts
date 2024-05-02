@@ -41,6 +41,121 @@ const upload = multer(
 
 
 
+
+/**
+ * @swagger
+ *  /audio/lastuploadedaudios:
+ *  get:
+ *    summary: obtiene los últimos audios subidos a la plataforma
+ *    tags: [Audio]
+ *    security:
+ *      - bearerAuth: []
+ *    responses:
+ *      200:
+ *        description: Lista de los últimos audios subidos
+ *        content:
+ *          application/json:
+ *            schema:
+ *              type: object
+ *              properties:
+ *                cancion:
+ *                  type: array
+ *                  items:
+ *                    type: object
+ *                    properties:
+ *                      idAudio:
+ *                        type: integer
+ *                      titulo:
+ *                        type: string
+ *                      path:
+ *                        type: string
+ *                      duracionSeg:
+ *                        type: integer
+ *                      fechaLanz:
+ *                        type: string
+ *                        format: date-time
+ *                      esAlbum:
+ *                        type: boolean
+ *                      imgAudio:
+ *                        type: string
+ *                      esPrivada:
+ *                        type: boolean
+ *                      esPodcast:
+ *                        type: boolean
+ *                podcast:
+ *                  type: array
+ *                  items:
+ *                    type: object
+ *                    properties:
+ *                      idAudio:
+ *                        type: integer
+ *                      titulo:
+ *                        type: string
+ *                      path:
+ *                        type: string
+ *                      duracionSeg:
+ *                        type: integer
+ *                      fechaLanz:
+ *                        type: string
+ *                        format: date-time
+ *                      esAlbum:
+ *                        type: boolean
+ *                      imgAudio:
+ *                        type: string
+ *                      esPrivada:
+ *                        type: boolean
+ *                      esPodcast:
+ *                        type: boolean
+ *      403:
+ *        description: No se tiene permiso para acceder a este recurso
+ *      500:
+ *        description: Error interno del servidor
+ */
+router.get('/lastuploadedaudios', auth.authenticate, audioController.getLastUploadedAudios);
+
+
+/**
+ * @swagger
+ *  /audio/mostlistenedaudios:
+ *  get:
+ *    summary: obtiene los audios más escuchados de la plataforma
+ *    tags: [Audio]
+ *    security:
+ *      - bearerAuth: []
+ *    responses:
+ *      200:
+ *        description: Lista de los audios más escuchados
+ *        content:
+ *          application/json:
+ *            schema:
+ *              type: object
+ *              properties:
+ *                audio:
+ *                  type: array
+ *                  items:
+ *                    type: object
+ *                    properties:
+ *                      count:
+ *                        type: integer
+ *                      idAudio:
+ *                        type: integer
+ *                podcast:
+ *                  type: array
+ *                  items:
+ *                    type: object
+ *                    properties:
+ *                      count:
+ *                        type: integer
+ *                      idAudio:
+ *                        type: integer
+ *      403:
+ *        description: No se tiene permiso para acceder a este recurso
+ *      500:
+ *        description: Error interno del servidor
+ */
+router.get('/mostlistenedaudios', auth.authenticate, audioController.getMostListenedAudios);
+
+
 /**
  * @swagger
  *  /audio/{idaudio}:
@@ -332,4 +447,37 @@ router.put('/update/:idaudio', auth.authenticate,audioController.deleteTmpFiles,
  */
 router.post('/stats/:idaudio', auth.authenticate, audioController.verifyAudio, audioController.audioStats);
 
+
+/**
+ * @swagger
+ * /audio/random/{nAudios}:
+ *   get:
+ *     summary: Devuelve una lista con nAudios audios aleatorios de la base de datos
+ *     tags: [Audio]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: nAudios
+ *         required: true
+ *         description: Número de audios a devolver
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Audios devueltos correctamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/Audio'
+ *       400:
+ *         description: No se ha recibido el número de audios a devolver
+ *       403:
+ *         description: No se tiene permiso para acceder a este recurso
+ *       500:
+ *           description: Error interno del servidor
+ */
+router.get('/random/:nAudios', auth.authenticate, audioController.getNRandomAudios);
 export default router;

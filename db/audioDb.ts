@@ -198,3 +198,105 @@ export async function getAudioStats(audioId: number, month: number, year: number
   
     return stats;
   }
+
+
+export async function getLastUploadedAudios() {
+  const cancion = await prisma.audio.findMany({
+    where: {
+      esPodcast: false,
+    },
+    orderBy: {
+      fechaLanz: 'desc',
+    },
+    take: 10,
+  });
+
+  const podcast = await prisma.audio.findMany({
+    where: {
+      esPodcast: true,
+    },
+    orderBy: {
+      fechaLanz: 'desc',
+    },
+    take: 10,
+  });
+
+  return { cancion, podcast };
+}
+
+export async function getMostListenedAudios() {
+    const audios = await prisma.escucha.groupBy({
+      by: ['idAudio'],
+      where: {
+        Audio: {
+          esPodcast: false
+        }
+      },
+      _count: {
+        idAudio: true
+      },
+      orderBy: {
+        _count: {
+          idAudio: 'desc'
+        }
+      },
+      take: 10
+    });
+  
+    const podcasts = await prisma.escucha.groupBy({
+      by: ['idAudio'],
+      where: {
+        Audio: {
+          esPodcast: true
+        }
+      },
+      _count: {
+        idAudio: true
+      },
+      orderBy: {
+        _count: {
+          idAudio: 'desc'
+        }
+      },
+      take: 10
+    });
+  
+    const audio = audios.map(a => ({
+      count: a._count.idAudio,
+      idAudio: a.idAudio
+    }));
+  
+    const podcast = podcasts.map(p => ({
+      count: p._count.idAudio,
+      idAudio: p.idAudio
+    }));
+  
+    return { audio, podcast };
+  }
+
+
+  export async function getNRandomAudios(n: number) {
+    const totalAudios = await prisma.audio.count();
+    const randomSeed = Math.floor(Math.random() * totalAudios);
+
+    if (n > totalAudios) {
+      throw new Error('Not enough audios in the database');
+    }
+
+    const audios = await prisma.audio.findMany({
+      skip: randomSeed,
+      take: n,
+      include: {
+        Artistas: {
+          select: {
+            idUsuario: true,
+            nombreUsuario: true,
+          }
+        }
+      },
+    });
+
+
+    return audios;
+
+  }

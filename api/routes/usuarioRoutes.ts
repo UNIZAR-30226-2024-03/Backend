@@ -72,15 +72,15 @@
  *          type: object
  *          properties:
  *              idAudio:
- *                  type: boolean
+ *                  type: number
  *              titulo:
- *                  type: boolean
+ *                  type: string
  *              path:
- *                  type: boolean
+ *                  type: string
  *              fechaLanz:
  *                  type: date
  *              duracionSeg:
- *                  type: boolean
+ *                  type: number
  *              esAlbum:
  *                  type: boolean
  *              esPodcast:
@@ -88,16 +88,16 @@
  *              esPrivada:
  *                  type: boolean
  *              imgAudio:
- *                  type: boolean
+ *                  type: string
  *              vecesEscuchada:
  *                  type: number 
  *              Artistas:
  *                  type: object
  *                  properties:
  *                      idUsuario:
- *                          type: boolean
+ *                          type: number
  *                      nombreUsuario:
- *                          type: boolean
+ *                          type: string
  */
 import { Router } from "express";
 
@@ -428,6 +428,14 @@ router.put(
  *                           esPodcast:
  *                             type: boolean
  *                             description: Indica si el audio es un podcast
+ *                           artistas:
+ *                             type: array
+ *                             items:
+ *                               type: object
+ *                               properties:
+ *                                 idUsuario:
+ *                                   type: number
+ *                                   description: ID del usuario
  *                 podcast:
  *                   type: array
  *                   items:
@@ -474,6 +482,14 @@ router.put(
  *                           esPodcast:
  *                             type: boolean
  *                             description: Indica si el audio es un podcast
+ *                           artistas:
+ *                             type: array
+ *                             items:
+ *                               type: object
+ *                               properties:
+ *                                 idUsuario:
+ *                                   type: number
+ *                                   description: ID del usuario
  *       400:
  *         description: Error en la petición, faltan parámetros o el número de audios debe ser mayor que 0.
  *       500:

@@ -170,3 +170,64 @@ export async function existsTag (id: number): Promise<boolean> {
   }
 }
 
+
+// Devuelve la lista con los nombres de las etiquetas de las últimas nEscuchas del usuario
+export async function tagsNLastListened(userId: number, nEscuchas: number) {
+  console.log("userId: ", userId);
+  console.log("nEscuchas: ", nEscuchas);
+  const escuchas = await prisma.escucha.findMany({
+    where: {
+      idUsuario: userId,
+    },
+    orderBy: {
+      fecha: 'desc',
+    },
+    take: nEscuchas,
+    include: {
+      Audio: {
+        include: {
+          EtiquetasCancion: true,
+          EtiquetasPodcast: true,
+        },
+      },
+    },
+  });
+  //  escuchas = {idEscucha, fecha, Audio: {idAudio, nombre, EtiquetasCancion: [{idEtiqueta, nombre}], EtiquetasPodcast: [{idEtiqueta, nombre}]}
+  const tags = escuchas.flatMap(escucha => {
+    const etiquetas = escucha.Audio.EtiquetasCancion || escucha.Audio.EtiquetasPodcast;
+    return etiquetas.map(etiqueta => etiqueta.nombre);
+  });
+
+  return tags;
+}
+
+// Devuelve numAudios audios aleatorios que contengan las etiquetas
+export async function getNAudiosByTags(numAudios: number, tags: string[]) {
+  const audios = await prisma.audio.findMany({
+    where: {
+      OR: [
+        {
+          EtiquetasCancion: {
+            some: {
+              nombre: {
+                in: tags,
+              },
+            },
+          },
+        },
+        {
+          EtiquetasPodcast: {
+            some: {
+              nombre: {
+                in: tags,
+              },
+            },
+          },
+        },
+      ],
+    },
+    take: numAudios,
+  });
+
+  return audios;
+}
