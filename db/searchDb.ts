@@ -7,7 +7,7 @@ async function searchUsuarios(query: string)
 : Promise<{ usuarios: Partial<Usuario>[] }> {
     const res = await prisma.usuario.findMany({
         where: {
-            nombreUsuario: { startsWith: query, mode: 'insensitive'},
+            nombreUsuario: { contains: query, mode: 'insensitive'},
         },
         select: {
             idUsuario: true,
@@ -24,7 +24,7 @@ async function searchListas(idUsuarioQuery: number, query: string, lista: boolea
     const res = await prisma.lista.findMany({
         where: {
             AND: [
-                { nombre: { startsWith: query, mode: 'insensitive' } },
+                { nombre: { contains: query, mode: 'insensitive' } },
                 {
                 OR: [
                     { esPrivada: false },
@@ -45,7 +45,6 @@ async function searchListas(idUsuarioQuery: number, query: string, lista: boolea
         },
         // take: MAX_TAKE,
     });
-    console.log("res", res);
 
     const dividedListas = res.reduce<{ listas: typeof res; albums: typeof res }>((acc, lista) => {
         if (lista.esAlbum) {
@@ -64,7 +63,7 @@ async function searchAudios (idUsuarioQuery: number, query: string, cancion: boo
     const res = await prisma.audio.findMany({
         where: {
             AND: [
-                { titulo: { startsWith: query, mode: 'insensitive' } },
+                { titulo: { contains: query, mode: 'insensitive' } },
                 {
                 OR: [
                     { esPrivada: false },

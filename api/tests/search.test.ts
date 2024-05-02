@@ -95,7 +95,7 @@ describe("Search routes", () => {
       const response = await supertest(app)
         .get(SEARCH_ROUTE)
         .query({
-          q: " ",
+          q: "l",
         })
         .set("Authorization", `Bearer ${bearer}`)
         .expect(200);
@@ -113,7 +113,7 @@ describe("Search routes", () => {
         .get(SEARCH_ROUTE)
         .set("Authorization", `Bearer ${bearer2}`)
         .query({
-          q: " ",
+          q: "l",
         })
         .expect(200);
 
@@ -149,7 +149,7 @@ describe("Search routes", () => {
         .get(SEARCH_ROUTE)
         .set("Authorization", `Bearer ${bearer}`)
         .query({
-          q: " ",
+          q: "l",
           lista: true,
         })
         .expect(200);
