@@ -397,6 +397,20 @@ export async function getMostListenedAudios(req: Request, res: Response) {
     }
 }
 
+
+export async function getNRandomAudios(req: Request, res: Response) {
+    try {
+        const n = Number(req.params.nAudios);
+        if (!n || n <= 0) {
+            return res.status(400).send('Bad Parameters, nAudios must be a positive number');
+        }
+        const audios = await audioDatabase.getNRandomAudios(n);
+        res.json(audios);
+    } catch (error) {
+        res.status(500).send(error);
+    }
+}
+
 function deleteFile(filePath: string) {
     try {
         fs.unlinkSync(filePath); // Borra el archivo del servidor
@@ -418,3 +432,5 @@ async function isOwnerOrAdmin(req: Request){
         }
         return true;
 }
+
+

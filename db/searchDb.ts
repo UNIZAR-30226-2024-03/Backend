@@ -7,7 +7,7 @@ async function searchUsuarios(query: string)
 : Promise<{ usuarios: Partial<Usuario>[] }> {
     const res = await prisma.usuario.findMany({
         where: {
-            nombreUsuario: { contains: query },
+            nombreUsuario: { contains: query, mode: 'insensitive'},
         },
         select: {
             idUsuario: true,
@@ -21,25 +21,19 @@ async function searchUsuarios(query: string)
 
 async function searchListas(idUsuarioQuery: number, query: string, lista: boolean, album: boolean)
 : Promise<{ listas: Partial<Lista>[]; albums: Partial<Lista>[] }> {
-    const where = []
-    where.push({ nombre: { contains: query } })
-    where.push({ OR: [
-        { esPrivada: false }, 
-        { Propietarios: { 
-            some: { 
-                idUsuario: idUsuarioQuery
-            } 
-        } }
-    ] });
-    if (lista && !album) {
-        where.push({ esAlbum: false })
-    } else if (!lista && album) {
-        where.push({ esAlbum: true })
-    }
-
     const res = await prisma.lista.findMany({
         where: {
-            AND: where
+            AND: [
+                { nombre: { contains: query, mode: 'insensitive' } },
+                {
+                OR: [
+                    { esPrivada: false },
+                    { Propietarios: { some: { idUsuario: idUsuarioQuery } } }
+                ]
+                },
+                lista && !album ? { esAlbum: false } : {},
+                !lista && album ? { esAlbum: true } : {}
+            ]
         },
         include: {
             Propietarios: {
@@ -49,7 +43,7 @@ async function searchListas(idUsuarioQuery: number, query: string, lista: boolea
                 }
             },
         },
-        take: MAX_TAKE,
+        // take: MAX_TAKE,
     });
 
     const dividedListas = res.reduce<{ listas: typeof res; albums: typeof res }>((acc, lista) => {
@@ -66,25 +60,19 @@ async function searchListas(idUsuarioQuery: number, query: string, lista: boolea
 
 async function searchAudios (idUsuarioQuery: number, query: string, cancion: boolean, podcast: boolean)
 : Promise<{ canciones: Partial<Audio>[]; podcasts: Partial<Audio>[] }> {
-    const where = []
-    where.push({ titulo: { contains: query } })
-    where.push({ OR: [
-        { esPrivada: false }, 
-        { Artistas: { 
-            some: { 
-                idUsuario: idUsuarioQuery
-            } 
-        } }
-    ] });
-    if (cancion && !podcast) {
-        where.push({ esPodcast: false })
-    } else if (!cancion && podcast) {
-        where.push({ esPodcast: true })
-    }
-
     const res = await prisma.audio.findMany({
         where: {
-            AND: where
+            AND: [
+                { titulo: { contains: query, mode: 'insensitive' } },
+                {
+                OR: [
+                    { esPrivada: false },
+                    { Artistas: { some: { idUsuario: idUsuarioQuery } } }
+                ]
+                },
+                cancion && !podcast ? { esPodcast: false } : {},
+                !cancion && podcast ? { esPodcast: true } : {}
+            ]
         },
         include: {
             Artistas: {
