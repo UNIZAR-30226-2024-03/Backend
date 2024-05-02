@@ -82,6 +82,15 @@ const upload = multer(
  *                        type: boolean
  *                      esPodcast:
  *                        type: boolean
+ *                      artistas:
+ *                        type: array
+ *                        items:
+ *                          type: object
+ *                          properties:
+ *                            idUsuario:
+ *                              type: integer
+ *                            nombreUsuario:
+ *                              type: string
  *                podcast:
  *                  type: array
  *                  items:
@@ -106,6 +115,15 @@ const upload = multer(
  *                        type: boolean
  *                      esPodcast:
  *                        type: boolean
+ *                      artistas:
+ *                        type: array
+ *                        items:
+ *                          type: object
+ *                          properties:
+ *                            idUsuario:
+ *                              type: integer
+ *                            nombreUsuario:
+ *                              type: string
  *      403:
  *        description: No se tiene permiso para acceder a este recurso
  *      500:
