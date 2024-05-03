@@ -632,7 +632,6 @@ export const deleteAudioFromFavorites = catchAsync(async (req : Request, res : R
 export const getTopListasByEtiqueta = catchAsync(async (req : Request, res : Response) => {
   try {
     const nombreEtiqueta = req.params.nombreEtiqueta;
-    console.log("nombreEtiqueta", nombreEtiqueta);
   
     // El formato de las etiquetas en la base de datos es "Etiqueta", la primera mayúscula y el resto minúsculas
     // si son varias palabras, están separadas por espacio y la primera letra de cada palabra en mayúscula
@@ -653,6 +652,32 @@ export const getTopListasByEtiqueta = catchAsync(async (req : Request, res : Res
     }
 
     res.send(lista);
+  } catch (error) {
+    res.status(httpStatus.BAD_REQUEST).send(error);
+  }
+});
+
+
+
+/**
+ *Devuelve todas las listas Top que hay en la base de datos
+ */
+export const getTopListas = catchAsync(async (req : Request, res : Response) => {
+  try {
+    // Recorremos todas las variables de entorno que empiezan por LISTA_TOP_ y devolvemos las listas
+    const listas: { [key: string]: any } = {};
+    const promises = Object.entries(process.env)
+      .filter(([key]) => key.startsWith("LISTA_TOP_"))
+      .map(([key, value]) => {
+        const nombreEtiqueta = key.split("_").slice(2).join(" ");
+        return listasDb.getListaById(Number(value)).then((lista) => {
+          listas[nombreEtiqueta] = lista;
+        });
+      });
+
+    await Promise.all(promises);
+
+    res.send(listas);
   } catch (error) {
     res.status(httpStatus.BAD_REQUEST).send(error);
   }
