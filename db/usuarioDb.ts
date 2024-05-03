@@ -155,6 +155,7 @@ export async function usuarioModifyLastAudioPrisma(idUsuario: number,idUltimoAud
         segFinAudio: segFinAudio },
     });
   } catch (error) {
+    console.log(error);
     throw new Error("Error al modificar el último audio del usuario");
   }
 
