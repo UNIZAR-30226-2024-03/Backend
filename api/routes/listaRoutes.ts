@@ -867,9 +867,75 @@ listaRouter.delete("/favorites/:idAudio", auth.authenticate, listaController.del
  *      200:
  *        description: Lista obtenida correctamente.
  *        content:
- *          application/json:
- *            schema:
- *              $ref: '#/components/schemas/Lista'
+ *           application/json:
+ *              schema:
+ *                 type: object
+ *                 properties:
+ *                    idLista:
+ *                       type: number
+ *                       description: Identificador de la lista
+ *                    nombre:
+ *                       type: string
+ *                       description: Nombre de la lista
+ *                    esAlbum:
+ *                       type: boolean
+ *                       description: Indica si la lista es un album
+ *                    esPrivada:
+ *                       type: boolean
+ *                       description: Indica si la lista es privada
+ *                    descripcion:
+ *                       type: string
+ *                       description: Descripción de la lista
+ *                    imgLista:
+ *                       type: string
+ *                       description: uri de la imagen de la lista
+ *                    tipoLista:
+ *                       $ref: '#/components/schemas/TipoLista'
+ *                    fechaUltimaMod:
+ *                       type: string
+ *                       description: Fecha de última modificación de la lista
+ *                    Audios:
+ *                       type: array
+ *                       items:
+ *                         type: object
+ *                         properties:
+ *                            idAudio:
+ *                               type: number
+ *                               description: Identificador del audio
+ *                            titulo:
+ *                               type: string
+ *                               description: Título del audio
+ *                            path:
+ *                               type: string
+ *                               description: uri del audio
+ *                            duracion:
+ *                               type: number
+ *                               description: Duración del audio en segundos
+ *                            fechaLanz:
+ *                               type: string
+ *                               description: Fecha de subida del audio
+ *                            esAlbum:
+ *                               type: boolean
+ *                               description: Indica si el audio es un album
+ *                            imgAudio:
+ *                               type: string
+ *                               description: uri de la imagen del audio
+ *                            esPrivada:
+ *                               type: boolean
+ *                               description: Indica si el audio es privado
+ *                            Artistas:
+ *                               type: array
+ *                               items:
+ *                                  $ref: '#/components/schemas/Usuario'
+ *                    Propietarios:
+ *                       type: array
+ *                       items:
+ *                          $ref: '#/components/schemas/Usuario'
+ *                    Seguidores:
+ *                       type: array
+ *                       items:
+ *                          $ref: '#/components/schemas/SigueLista'
+ *                 
  *      400:
  *        description: Error en la petición.
  *      404:
