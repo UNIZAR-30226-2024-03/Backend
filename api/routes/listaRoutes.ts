@@ -817,4 +817,36 @@ listaRouter.post("/favorites/:idAudio", auth.authenticate, listaController.addAu
  *
  */
 listaRouter.delete("/favorites/:idAudio", auth.authenticate, listaController.deleteAudioFromFavorites);
+
+
+/**
+ * @swagger
+ * /lista/top/{nombreEtiqueta}:
+ *  get:
+ *    tags: [Listas]
+ *    summary: Devuelve la lista con los audios más reproducidos de una etiqueta.
+ *    description: Devuelve las lista con los audios públicos más reproducidos que contengan la etiqueta indicada (no es case sensitive, se puede poner el nombre como se quiera). Si {nombreEtiqueta} = "Global" (case insensitive), se devolverá la lista con los audios más escuchados independientemente de la etiqueta.
+ *    parameters:
+ *      - in: path
+ *        name: nombreEtiqueta
+ *        required: true
+ *        description: Nombre de la etiqueta a buscar. Si es "global" se devolverán los audios más escuchados independientemente de la etiqueta.
+ *        schema:
+ *          type: string
+ *    security:
+ *      - bearerAuth: []
+ *    responses:
+ *      200:
+ *        description: Lista obtenida correctamente.
+ *        content:
+ *          application/json:
+ *            schema:
+ *              $ref: '#/components/schemas/Lista'
+ *      400:
+ *        description: Error en la petición.
+ *      404:
+ *        description: No se ha encontrado la etiqueta.
+ */
+listaRouter.get("/top/:nombreEtiqueta", auth.authenticate, listaController.getTopListasByEtiqueta);
+
 export default listaRouter;
