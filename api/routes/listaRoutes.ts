@@ -251,6 +251,34 @@ listaRouter.delete("/:idLista", auth.authenticate, listaController.deleteLista);
  */
 listaRouter.put("/:idLista", auth.authenticate, listaController.updateLista);
 
+
+/**
+ * @swagger
+ * /lista/alltops/:
+ *   get:
+ *     tags: [Listas]
+ *     summary: Devuelve las listas con el top de cada etiqueta.
+ *     description: Devuelve un objeto con key el nombre de la etiqueta en mayúsculas y las palabras separadas con "_" y value la lista de ese top. "GLOBAL" se corresponde al top global.
+ *     responses:
+ *        200:
+ *           description: Listas obtenidas correctamente.
+ *           content:
+ *              application/json:
+ *                 schema:
+ *                    type: object
+ *                    properties:
+ *                       GLOBAL:
+ *                         $ref: '#/components/schemas/Lista'
+ *                       ETIQUETA_1:
+ *                         $ref: '#/components/schemas/Lista'
+ *                       ETIQUETA_2:
+ *                         $ref: '#/components/schemas/Lista'
+ *        400:
+ *           description: Error en la petición.
+ *
+ */
+listaRouter.get("/alltops/", auth.authenticate, listaController.getTopListas);
+
 //[GET]/lista/<idLista>/ : Devuelve la información de una lista (sin audios, propietarios ni seguidores)
 /**
  * @swagger
@@ -848,5 +876,9 @@ listaRouter.delete("/favorites/:idAudio", auth.authenticate, listaController.del
  *        description: No se ha encontrado la etiqueta.
  */
 listaRouter.get("/top/:nombreEtiqueta", auth.authenticate, listaController.getTopListasByEtiqueta);
+
+
+
+
 
 export default listaRouter;
