@@ -147,12 +147,17 @@ export async function usuarioDeleteEmailPrisma(email: string): Promise<void> {
 }
 
 export async function usuarioModifyLastAudioPrisma(idUsuario: number,idUltimoAudio: number,segFinAudio: number): Promise<void> {
-  await prisma.usuario.update({
-    where: { idUsuario: idUsuario },
-    data: { 
-      idUltimoAudio: idUltimoAudio,
-      segFinAudio: segFinAudio },
-  });
+  try {
+    await prisma.usuario.update({
+      where: { idUsuario: idUsuario },
+      data: { 
+        idUltimoAudio: idUltimoAudio,
+        segFinAudio: segFinAudio },
+    });
+  } catch (error) {
+    throw new Error("Error al modificar el último audio del usuario");
+  }
+
 }
 
 
