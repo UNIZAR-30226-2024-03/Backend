@@ -103,7 +103,7 @@ io.on("connection", (socket) => {
   });
 
 
-  socket.on('Sync', (message, room) => {
+  socket.on('Sync', async (message, room) => {
     try{
       console.log('Mensaje recibido: "' + message+ '" a la sala: '+room);
       message = JSON.parse(message);
