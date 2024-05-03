@@ -197,7 +197,9 @@ export async function usuarioGetAudios(userId: number, cancion: boolean, podcast
         idAudio: audio.idAudio,
       },
     });
-    return { ...audio, vecesEscuchada };
+
+    const { Artistas, ...restoAudio } = audio;
+    return { ...restoAudio, vecesEscuchada, artistas: Artistas };
   }));
 
   const dividedAudios = audiosWithCount.reduce<{ cancion: typeof audiosWithCount; podcast: typeof audiosWithCount }>((acc, lista) => {

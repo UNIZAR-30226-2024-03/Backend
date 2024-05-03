@@ -91,7 +91,7 @@
  *                  type: string
  *              vecesEscuchada:
  *                  type: number 
- *              Artistas:
+ *              artistas:
  *                  type: object
  *                  properties:
  *                      idUsuario:
