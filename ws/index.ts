@@ -111,7 +111,7 @@ io.on("connection", (socket) => {
         const idUsuario = authenticateWS(message.JWT);
         if(idUsuario != null){
           console.log(`Vamos a modificar el usuario`, idUsuario, message.idAudio, message.currentTime);
-          usuarioDatabase.usuarioModifyLastAudioPrisma(idUsuario, message.idAudio, message.currentTime);
+          await usuarioDatabase.usuarioModifyLastAudioPrisma(idUsuario, message.idAudio, message.currentTime);
         }else{
           console.log(`Socket ${socket.id} no autorizado, `+message.JWT+" no es un token valido, "+message.room);
         }
