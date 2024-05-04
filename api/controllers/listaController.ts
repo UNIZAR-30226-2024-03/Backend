@@ -6,6 +6,7 @@ import * as listasDb from '../../db/listaDb.js';
 import * as sigueListaDb from '../../db/sigueListaDb.js';
 import * as audioDb from '../../db/audioDb.js';
 import * as usuarioDb from '../../db/usuarioDb.js';
+import * as etiquetasDb from '../../db/etiquetasDb.js';
 import { Audio } from '@prisma/client';
 
 
@@ -617,6 +618,66 @@ export const deleteAudioFromFavorites = catchAsync(async (req : Request, res : R
 
     await listasDb.deleteAudioFromLista(listaFavs.idLista, parseInt(req.params.idAudio));
     res.status(httpStatus.NO_CONTENT).send();
+  } catch (error) {
+    res.status(httpStatus.BAD_REQUEST).send(error);
+  }
+});
+
+
+
+/**
+ * Devuelve la lista "Top <nombreEtiqueta>", si no se pasa etiqueta se devuelve la lista "Top global"
+ * @param {string} nombreEtiqueta
+ */
+export const getTopListasByEtiqueta = catchAsync(async (req : Request, res : Response) => {
+  try {
+    const nombreEtiqueta = req.params.nombreEtiqueta;
+  
+    // El formato de las etiquetas en la base de datos es "Etiqueta", la primera mayúscula y el resto minúsculas
+    // si son varias palabras, están separadas por espacio y la primera letra de cada palabra en mayúscula
+    const etiqueta = nombreEtiqueta.split(" ").map((palabra) => palabra.charAt(0).toUpperCase() + palabra.slice(1).toLowerCase()).join(" ");
+
+    // La lista de top global se guarda en la variable de entorno LISTA_TOP_GLOBAL
+    if(etiqueta !== "Global" && !await etiquetasDb.existsTagByName(etiqueta)) {
+      res.status(httpStatus.NOT_FOUND).send("Etiqueta no encontrada");
+      return;
+    }
+
+    const envVar = `LISTA_TOP_${nombreEtiqueta.toUpperCase().replace(" ", "_")}`;
+    const lista = await listasDb.getListaByIdWithExtras(Number(process.env[envVar]));
+
+    if (!lista) {
+      res.status(httpStatus.NOT_FOUND).send("Lista no encontrada");
+      return;
+    }
+
+    res.send(lista);
+  } catch (error) {
+    res.status(httpStatus.BAD_REQUEST).send(error);
+  }
+});
+
+
+
+/**
+ *Devuelve todas las listas Top que hay en la base de datos
+ */
+export const getTopListas = catchAsync(async (req : Request, res : Response) => {
+  try {
+    // Recorremos todas las variables de entorno que empiezan por LISTA_TOP_ y devolvemos las listas
+    const listas: { [key: string]: any } = {};
+    const promises = Object.entries(process.env)
+      .filter(([key]) => key.startsWith("LISTA_TOP_"))
+      .map(([key, value]) => {
+        const nombreEtiqueta = key.split("_").slice(2).join(" ");
+        return listasDb.getListaById(Number(value)).then((lista) => {
+          listas[nombreEtiqueta] = lista;
+        });
+      });
+
+    await Promise.all(promises);
+
+    res.send(listas);
   } catch (error) {
     res.status(httpStatus.BAD_REQUEST).send(error);
   }
