@@ -491,11 +491,7 @@ router.post('/stats/:idaudio', auth.authenticate, audioController.verifyAudio, a
  *               items:
  *                 $ref: '#/components/schemas/Audio'
  *       400:
- *         description: No se ha recibido el número de audios a devolver
- *       403:
- *         description: No se tiene permiso para acceder a este recurso
- *       500:
- *           description: Error interno del servidor
+ *         description:El número de audios a devolver no es válido
  */
 router.get('/random/:nAudios', auth.authenticate, audioController.getNRandomAudios);
 export default router;
