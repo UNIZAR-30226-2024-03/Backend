@@ -3,6 +3,7 @@ import * as etiquetasDbJs from "../../db/etiquetasDb.js";
 import e, { Request} from 'express-jwt';
 import { Response } from 'express';
 import httpStatus from 'http-status';
+import { getNRandomAudios } from "../../db/audioDb.js";
 
 
 
@@ -124,7 +125,9 @@ export const getNAudiosByTags = async (req: Request, res: Response) => {
 
     const tags = await etiquetasDbJs.tagsNLastListened(idUsuario, nAudiosToGetTagsFrom);
     // console.log(tags);
-    const audios = await etiquetasDbJs.getNAudiosByTags(nAudios, tags);
+    let audios;
+    if (tags.length === 0) audios =  await getNRandomAudios(nAudios);
+    else audios = await etiquetasDbJs.getNAudiosByTags(nAudios, tags);
 
     res.json(audios);
   } catch (error) {

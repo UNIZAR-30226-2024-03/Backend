@@ -202,7 +202,7 @@ router.post(
  * /etiquetas/infinite/{nAudiosToGetTagsFrom}/{nAudiosResult}:
  *   get:
  *     summary: Obtiene nAudiosResult audios que contengan etiquetas de las últimas nAudiosToGetTagsFrom escuchas
- *     description: Obtienes nAudiosResult audios que contengan etiquetas de las últimas nAudiosToGetTagsFrom escuchas del usuario.
+ *     description: Obtienes nAudiosResult audios que contengan etiquetas de las últimas nAudiosToGetTagsFrom escuchas del usuario. Si en esa escucha no hay etiquetas devuelve audios aleatorios.
  *     tags: [Etiquetas]
  *     security:
  *       - bearerAuth: []
