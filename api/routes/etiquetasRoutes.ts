@@ -233,7 +233,7 @@ router.post(
  *       '500':
  *         description: Error interno del servidor.
  */
-router.get("/infinite/:nAudiosToGetTagsFrom/:nAudiosResult", auth.authenticate, validate, etiquetas.getNAudiosByTags);
+router.get("/infinite/:nAudiosToGetTagsFrom/:nAudiosResult", auth.authenticate, etiquetas.getNAudiosByTags);
 
 
 /**
@@ -276,5 +276,5 @@ router.get("/infinite/:nAudiosToGetTagsFrom/:nAudiosResult", auth.authenticate, 
  *       '500':
  *         description: Error interno del servidor.
  */
-router.get("/tagsnlastlistened/:numEscuchas", auth.authenticate, validate, etiquetas.tagsNUltimasEscuchas);
+router.get("/tagsnlastlistened/:numEscuchas", auth.authenticate, etiquetas.tagsNUltimasEscuchas);
 export default router;
