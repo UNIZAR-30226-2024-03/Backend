@@ -258,8 +258,13 @@ export async function getNAudiosByTags(numAudios: number, tags: string[]) {
       ],
       esPrivada: false,
     },
-    take: numAudios,
   });
+  
+  let res = [];
+  for(let i = 0; i < numAudios; i++) {
+    res.push(audios[Math.floor(Math.random() * audios.length)]);
+  }
 
-  return audios;
+
+  return res;
 }
