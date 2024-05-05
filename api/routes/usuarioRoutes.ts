@@ -646,5 +646,40 @@ router.post("/historico", auth.authenticate, usuarioCon.historico);
 
 
 
+/**
+ * @swagger
+ * /usuario/idUsuario/{nombreUsuario}:
+ *   get:
+ *     summary: Obtiene el id de un usuario a partir de su nombre
+ *     tags: [Usuario]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: nombreUsuario
+ *         required: true
+ *         description: Nombre del usuario
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Éxito, devuelve el historico de escuchas
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 idUsuario:
+ *                   type: number
+ *                   description: Identificador del usuario.
+ *       403:
+ *         description: No se tiene permiso para acceder a este recurso
+ *       404:
+ *         description: No se ha encontrado el audio con el id indicado
+ */
+router.get("/idUsuario/:nombreUsuario", auth.authenticate, usuarioCon.getIdUsuario);
+
+
+
 
 export default router;
