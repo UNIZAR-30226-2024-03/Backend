@@ -221,3 +221,21 @@ export async function historico(
     return next(error);
   }
 }
+
+export async function getIdUsuario(  
+  req: Request,
+  res: Response,
+  next: NextFunction
+){
+    try {
+      const nombreUsu = req.params.nombreUsuario;
+      const idUsuario = await usuarioDbJs.usuarioGetId(nombreUsu);
+      if(!idUsuario){
+        return res.status(404).json({ message: "Usuario no encontrado" });
+      }
+      return res.status(200).json({ idUsuario });
+    } catch (error) {
+      return next(error);
+    }
+
+}

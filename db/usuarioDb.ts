@@ -495,3 +495,14 @@ export async function usuarioGetHistorico(userId: number, month: number, year: n
 
   return { alcanceMensual, escuchasUsuarioMensuales };
 }
+
+export async function usuarioGetId(userName: string) {
+
+  const usuario = await prisma.usuario.findFirst({
+    where: {
+      nombreUsuario: userName,
+    },
+  });
+
+  return usuario?.idUsuario;
+}
