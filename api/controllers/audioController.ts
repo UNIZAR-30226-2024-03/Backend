@@ -407,7 +407,7 @@ export async function getNRandomAudios(req: Request, res: Response) {
         const audios = await audioDatabase.getNRandomAudios(n);
         res.json(audios);
     } catch (error) {
-        res.status(500).send(error);
+        res.status(400).send(error);
     }
 }
 

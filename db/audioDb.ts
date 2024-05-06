@@ -316,15 +316,18 @@ export async function getMostListenedAudios() {
     }
 
     const audios = await prisma.audio.findMany({
+      where: {
+      esPrivada: false,
+      },
       skip: randomSeed,
       take: n,
       include: {
         Artistas: {
           select: {
-            idUsuario: true,
-            nombreUsuario: true,
+          idUsuario: true,
+          nombreUsuario: true,
           }
-        }
+      }
       },
     });
 

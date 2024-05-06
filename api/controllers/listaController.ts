@@ -96,7 +96,7 @@ export const deleteLista = catchAsync(async (req : Request, res : Response) => {
       return;
     }
     const propietarios = await listasDb.getPropietariosFromLista(parseInt(req.params.idLista));
-    if (propietarios.length > 1) {
+    if (propietarios.length > 1 && !req.auth?.esAdmin) {
       // Si hay más de un propietario, eliminamos al usuario del jwt de la lista y
       // los audios privados de los que es propietario en caso de que no haya ningun otro propietario
       // que sea propietario de esos audios
@@ -113,6 +113,7 @@ export const deleteLista = catchAsync(async (req : Request, res : Response) => {
       await listasDb.deletePropietarioFromLista(parseInt(req.params.idLista), parseInt(req.auth?.idUsuario));
       res.status(httpStatus.OK).send("Audios privados sin otros artistas propietarios de la misma lista y usuario como propietario eliminados de la lista");
     } else{
+      // Su el usuario es el único propietario o es admin, eliminamos la lista
       await listasDb.deleteListaById(parseInt(req.params.idLista));
       // Devolvermos el estado 204 (NO_CONTENT) porque no hay contenido que devolver y el mensaje de que se ha borrado correctamente
       res.status(httpStatus.NO_CONTENT).send("Lista borrada correctamente");
