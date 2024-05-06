@@ -3,6 +3,7 @@ import * as etiquetasDbJs from "../../db/etiquetasDb.js";
 import e, { Request} from 'express-jwt';
 import { Response } from 'express';
 import httpStatus from 'http-status';
+import { getNRandomAudios } from "../../db/audioDb.js";
 
 
 
@@ -94,6 +95,7 @@ export const tagsNUltimasEscuchas = async (req: Request, res: Response) => {
     const etiquetas = await etiquetasDbJs.tagsNLastListened(idUsuario, nAudios);
 
     res.json(etiquetas);
+    // res.status(httpStatus.NOT_IMPLEMENTED).json({ message: "Not implemented" });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Error obteniendo etiquetas de las últimas escuchas" });
@@ -110,9 +112,9 @@ export const getNAudiosByTags = async (req: Request, res: Response) => {
     const nAudiosToGetTagsFrom = Number(req.params.nAudiosToGetTagsFrom);
     const nAudios = Number(req.params.nAudiosResult);
 
-    console.log("idUsuario: ", idUsuario);
-    console.log("nAudiosToGetTagsFrom: ", nAudiosToGetTagsFrom);
-    console.log("nAudios: ", nAudios);
+    // console.log("idUsuario: ", idUsuario);
+    // console.log("nAudiosToGetTagsFrom: ", nAudiosToGetTagsFrom);
+    // console.log("nAudios: ", nAudios);
 
     if (!nAudiosToGetTagsFrom || nAudiosToGetTagsFrom <= 0) {
       return res.status(400).json({ message: 'Bad request. numEscuchas must be a positive number' });
@@ -122,8 +124,10 @@ export const getNAudiosByTags = async (req: Request, res: Response) => {
     }
 
     const tags = await etiquetasDbJs.tagsNLastListened(idUsuario, nAudiosToGetTagsFrom);
-    console.log(tags);
-    const audios = await etiquetasDbJs.getNAudiosByTags(nAudios, tags);
+    // console.log(tags);
+    let audios;
+    if (tags.length === 0) audios =  await getNRandomAudios(nAudios);
+    else audios = await etiquetasDbJs.getNAudiosByTags(nAudios, tags);
 
     res.json(audios);
   } catch (error) {

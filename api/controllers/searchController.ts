@@ -33,3 +33,7 @@ export async function searchGet(
         return next(error);
     }
 }
+function isOwnerOrAdmin(arg0: number, idUsuario: any, esAdmin: any) {
+    throw new Error("Function not implemented.");
+}
+
