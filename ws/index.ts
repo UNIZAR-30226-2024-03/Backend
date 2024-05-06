@@ -16,9 +16,13 @@ wsApp.use(cors({
   methods: ['GET', 'POST', 'PUT', 'OPTIONS'],
 }));
 
+if (!process.env.CLAVEPRIVADA || !process.env.CERTIFICADO) {
+  throw new Error("CLAVEPRIVADA o CERTIFICADO environment variable is not set.");
+}
+
 const httpsOptions = {
-  cert: fs.readFileSync('/var/lib/certificados/certificado.pem'), // Ruta al certificado SSL/TLS
-  key: fs.readFileSync('/var/lib/certificados/claveprivada.pem')   // Ruta a la clave privada
+  cert: fs.readFileSync(process.env.CERTIFICADO), // Ruta al certificado SSL/TLS
+  key: fs.readFileSync(process.env.CLAVEPRIVADA)   // Ruta a la clave privada
 };
 
 const httpsServer = https.createServer(httpsOptions, wsApp);
