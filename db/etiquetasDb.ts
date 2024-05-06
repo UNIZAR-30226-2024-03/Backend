@@ -170,11 +170,41 @@ export async function existsTag (id: number): Promise<boolean> {
   }
 }
 
+export async function existsTagByName (name: string): Promise<boolean> {
+  try {
+    const tagCancion = await prisma.etiquetaCancion.findFirst({
+      where: {
+        nombre: name,
+      },
+    });
+
+    if (tagCancion) {
+      return true;
+    } 
+
+    // Si la etiqueta no se encontró en EtiquetaCancion, intenta buscarla en EtiquetaPodcast
+    const tagPodcast = await prisma.etiquetaPodcast.findFirst({
+      where: {
+        nombre: name,
+      },
+    });
+
+    if (tagPodcast) {
+      return true;
+    }
+
+    return false;
+  } catch (error) {
+    console.error(error);
+    throw new Error("Error buscando la etiqueta en Base de Datos");
+  }
+}
+
 
 // Devuelve la lista con los nombres de las etiquetas de las últimas nEscuchas del usuario
 export async function tagsNLastListened(userId: number, nEscuchas: number) {
-  console.log("userId: ", userId);
-  console.log("nEscuchas: ", nEscuchas);
+  // console.log("userId: ", userId);
+  // console.log("nEscuchas: ", nEscuchas);
   const escuchas = await prisma.escucha.findMany({
     where: {
       idUsuario: userId,
@@ -195,8 +225,9 @@ export async function tagsNLastListened(userId: number, nEscuchas: number) {
   //  escuchas = {idEscucha, fecha, Audio: {idAudio, nombre, EtiquetasCancion: [{idEtiqueta, nombre}], EtiquetasPodcast: [{idEtiqueta, nombre}]}
   const tags = escuchas.flatMap(escucha => {
     const etiquetas = escucha.Audio.EtiquetasCancion || escucha.Audio.EtiquetasPodcast;
+    // console.log("Audio: ", escucha.Audio.idAudio, " Etiquetas: ", etiquetas);
     return etiquetas.map(etiqueta => etiqueta.nombre);
-  });
+  }).filter((tag, index, self) => self.indexOf(tag) === index);
 
   return tags;
 }
@@ -225,9 +256,15 @@ export async function getNAudiosByTags(numAudios: number, tags: string[]) {
           },
         },
       ],
+      esPrivada: false,
     },
-    take: numAudios,
   });
+  
+  let res = [];
+  for(let i = 0; i < numAudios; i++) {
+    res.push(audios[Math.floor(Math.random() * audios.length)]);
+  }
 
-  return audios;
+
+  return res;
 }

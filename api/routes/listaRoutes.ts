@@ -251,6 +251,34 @@ listaRouter.delete("/:idLista", auth.authenticate, listaController.deleteLista);
  */
 listaRouter.put("/:idLista", auth.authenticate, listaController.updateLista);
 
+
+/**
+ * @swagger
+ * /lista/alltops/:
+ *   get:
+ *     tags: [Listas]
+ *     summary: Devuelve las listas con el top de cada etiqueta.
+ *     description: Devuelve un objeto con key el nombre de la etiqueta en mayúsculas y las palabras separadas con "_" y value la lista de ese top. "GLOBAL" se corresponde al top global.
+ *     responses:
+ *        200:
+ *           description: Listas obtenidas correctamente.
+ *           content:
+ *              application/json:
+ *                 schema:
+ *                    type: object
+ *                    properties:
+ *                       GLOBAL:
+ *                         $ref: '#/components/schemas/Lista'
+ *                       ETIQUETA_1:
+ *                         $ref: '#/components/schemas/Lista'
+ *                       ETIQUETA_2:
+ *                         $ref: '#/components/schemas/Lista'
+ *        400:
+ *           description: Error en la petición.
+ *
+ */
+listaRouter.get("/alltops/", auth.authenticate, listaController.getTopListas);
+
 //[GET]/lista/<idLista>/ : Devuelve la información de una lista (sin audios, propietarios ni seguidores)
 /**
  * @swagger
@@ -817,4 +845,106 @@ listaRouter.post("/favorites/:idAudio", auth.authenticate, listaController.addAu
  *
  */
 listaRouter.delete("/favorites/:idAudio", auth.authenticate, listaController.deleteAudioFromFavorites);
+
+
+/**
+ * @swagger
+ * /lista/top/{nombreEtiqueta}:
+ *  get:
+ *    tags: [Listas]
+ *    summary: Devuelve la lista con los audios más reproducidos de una etiqueta.
+ *    description: Devuelve las lista con los audios públicos más reproducidos que contengan la etiqueta indicada (no es case sensitive, se puede poner el nombre como se quiera). Si {nombreEtiqueta} = "Global" (case insensitive), se devolverá la lista con los audios más escuchados independientemente de la etiqueta.
+ *    parameters:
+ *      - in: path
+ *        name: nombreEtiqueta
+ *        required: true
+ *        description: Nombre de la etiqueta a buscar. Si es "global" se devolverán los audios más escuchados independientemente de la etiqueta.
+ *        schema:
+ *          type: string
+ *    security:
+ *      - bearerAuth: []
+ *    responses:
+ *      200:
+ *        description: Lista obtenida correctamente.
+ *        content:
+ *           application/json:
+ *              schema:
+ *                 type: object
+ *                 properties:
+ *                    idLista:
+ *                       type: number
+ *                       description: Identificador de la lista
+ *                    nombre:
+ *                       type: string
+ *                       description: Nombre de la lista
+ *                    esAlbum:
+ *                       type: boolean
+ *                       description: Indica si la lista es un album
+ *                    esPrivada:
+ *                       type: boolean
+ *                       description: Indica si la lista es privada
+ *                    descripcion:
+ *                       type: string
+ *                       description: Descripción de la lista
+ *                    imgLista:
+ *                       type: string
+ *                       description: uri de la imagen de la lista
+ *                    tipoLista:
+ *                       $ref: '#/components/schemas/TipoLista'
+ *                    fechaUltimaMod:
+ *                       type: string
+ *                       description: Fecha de última modificación de la lista
+ *                    Audios:
+ *                       type: array
+ *                       items:
+ *                         type: object
+ *                         properties:
+ *                            idAudio:
+ *                               type: number
+ *                               description: Identificador del audio
+ *                            titulo:
+ *                               type: string
+ *                               description: Título del audio
+ *                            path:
+ *                               type: string
+ *                               description: uri del audio
+ *                            duracion:
+ *                               type: number
+ *                               description: Duración del audio en segundos
+ *                            fechaLanz:
+ *                               type: string
+ *                               description: Fecha de subida del audio
+ *                            esAlbum:
+ *                               type: boolean
+ *                               description: Indica si el audio es un album
+ *                            imgAudio:
+ *                               type: string
+ *                               description: uri de la imagen del audio
+ *                            esPrivada:
+ *                               type: boolean
+ *                               description: Indica si el audio es privado
+ *                            Artistas:
+ *                               type: array
+ *                               items:
+ *                                  $ref: '#/components/schemas/Usuario'
+ *                    Propietarios:
+ *                       type: array
+ *                       items:
+ *                          $ref: '#/components/schemas/Usuario'
+ *                    Seguidores:
+ *                       type: array
+ *                       items:
+ *                          $ref: '#/components/schemas/SigueLista'
+ *                 
+ *      400:
+ *        description: Error en la petición.
+ *      404:
+ *        description: No se ha encontrado la etiqueta.
+ */
+listaRouter.get("/top/:nombreEtiqueta", auth.authenticate, listaController.getTopListasByEtiqueta);
+
+
+
+
+
 export default listaRouter;

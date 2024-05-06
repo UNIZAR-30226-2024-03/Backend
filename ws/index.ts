@@ -3,8 +3,19 @@ import https from "http";  // Cambiar a https
 import { Server } from "socket.io"
 import * as usuarioDatabase from "../db/usuarioDb.js";
 import jwtws from "jsonwebtoken";
+import express from 'express';
+import cors from 'cors';
 
-const httpsServer = https.createServer(app);
+
+const wsApp = express();
+
+wsApp.use('/ws', app);
+const httpsServer = https.createServer(wsApp);
+
+wsApp.use(cors({
+  origin: '*',
+  methods: ['GET', 'POST', 'PUT', 'OPTIONS'],
+}));
 
 export const io = new Server(httpsServer, {
   cors: {
@@ -34,7 +45,7 @@ function authenticateWS(token: string) {
 httpsServer.listen(3001, () => console.log("WS.io server started on port 3001"));
 
 //WS
-io.on("connection", (socket) => {
+io.of('/ws').on("connection", (socket) => {
   console.log("a user connected");
   socket.on("disconnect", () => {
     console.log("user disconnected");
@@ -70,7 +81,7 @@ io.on("connection", (socket) => {
           console.log('Mensaje recibido a la sala: '+message.room+' desde el socket: '+socket.id);
 
           //broadcast a todos los sockets en la sala, incluyendo el que envió el mensaje
-          io.to(message.room).emit('message', 'Mensaje recibido: ' + message);
+          io.of('/ws').to(message.room).emit('message', 'Mensaje recibido: ' + message);
         }else{
           console.log(`Socket ${socket.id} no autorizado, `+message.JWT+" no es un token valido, "+message.room);
         }
@@ -90,7 +101,7 @@ io.on("connection", (socket) => {
         console.log(idUsuario);
         if(idUsuario != null){
           console.log('Recargar la sala: '+message.room);
-          io.to(message.room).emit('reload', 'actualizar');
+          io.of('/ws').to(message.room).emit('reload', 'actualizar');
         }else{
           console.log(`Socket ${socket.id} no autorizado, `+message.JWT+" no es un token valido, "+message.room);
         
@@ -103,7 +114,7 @@ io.on("connection", (socket) => {
   });
 
 
-  socket.on('Sync', (message, room) => {
+  socket.on('Sync', async (message, room) => {
     try{
       console.log('Mensaje recibido: "' + message+ '" a la sala: '+room);
       message = JSON.parse(message);
@@ -111,7 +122,7 @@ io.on("connection", (socket) => {
         const idUsuario = authenticateWS(message.JWT);
         if(idUsuario != null){
           console.log(`Vamos a modificar el usuario`, idUsuario, message.idAudio, message.currentTime);
-          usuarioDatabase.usuarioModifyLastAudioPrisma(idUsuario, message.idAudio, message.currentTime);
+          await usuarioDatabase.usuarioModifyLastAudioPrisma(idUsuario, message.idAudio, message.currentTime);
         }else{
           console.log(`Socket ${socket.id} no autorizado, `+message.JWT+" no es un token valido, "+message.room);
         }

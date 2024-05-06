@@ -202,7 +202,7 @@ router.post(
  * /etiquetas/infinite/{nAudiosToGetTagsFrom}/{nAudiosResult}:
  *   get:
  *     summary: Obtiene nAudiosResult audios que contengan etiquetas de las últimas nAudiosToGetTagsFrom escuchas
- *     description: Obtienes nAudiosResult audios que contengan etiquetas de las últimas nAudiosToGetTagsFrom escuchas del usuario.
+ *     description: Obtienes nAudiosResult audios que contengan etiquetas de las últimas nAudiosToGetTagsFrom escuchas del usuario. Si en esa escucha no hay etiquetas devuelve audios aleatorios.
  *     tags: [Etiquetas]
  *     security:
  *       - bearerAuth: []
@@ -233,7 +233,7 @@ router.post(
  *       '500':
  *         description: Error interno del servidor.
  */
-router.get("/infinite/:nAudiosToGetTagsFrom/:nAudiosResult", auth.authenticate, validate, etiquetas.getNAudiosByTags);
+router.get("/infinite/:nAudiosToGetTagsFrom/:nAudiosResult", auth.authenticate, etiquetas.getNAudiosByTags);
 
 
 /**
@@ -276,5 +276,5 @@ router.get("/infinite/:nAudiosToGetTagsFrom/:nAudiosResult", auth.authenticate, 
  *       '500':
  *         description: Error interno del servidor.
  */
-router.get("/tagsnlastlistened/:numEscuchas", auth.authenticate, validate, etiquetas.tagsNUltimasEscuchas);
+router.get("/tagsnlastlistened/:numEscuchas", auth.authenticate, etiquetas.tagsNUltimasEscuchas);
 export default router;

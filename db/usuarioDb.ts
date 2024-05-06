@@ -147,12 +147,18 @@ export async function usuarioDeleteEmailPrisma(email: string): Promise<void> {
 }
 
 export async function usuarioModifyLastAudioPrisma(idUsuario: number,idUltimoAudio: number,segFinAudio: number): Promise<void> {
-  await prisma.usuario.update({
-    where: { idUsuario: idUsuario },
-    data: { 
-      idUltimoAudio: idUltimoAudio,
-      segFinAudio: segFinAudio },
-  });
+  try {
+    await prisma.usuario.update({
+      where: { idUsuario: idUsuario },
+      data: { 
+        idUltimoAudio: idUltimoAudio,
+        segFinAudio: segFinAudio },
+    });
+  } catch (error) {
+    console.log(error);
+    throw new Error("Error al modificar el último audio del usuario");
+  }
+
 }
 
 
@@ -191,7 +197,9 @@ export async function usuarioGetAudios(userId: number, cancion: boolean, podcast
         idAudio: audio.idAudio,
       },
     });
-    return { ...audio, vecesEscuchada };
+
+    const { Artistas, ...restoAudio } = audio;
+    return { ...restoAudio, vecesEscuchada, artistas: Artistas };
   }));
 
   const dividedAudios = audiosWithCount.reduce<{ cancion: typeof audiosWithCount; podcast: typeof audiosWithCount }>((acc, lista) => {
@@ -486,4 +494,15 @@ export async function usuarioGetHistorico(userId: number, month: number, year: n
   }
 
   return { alcanceMensual, escuchasUsuarioMensuales };
+}
+
+export async function usuarioGetId(userName: string) {
+
+  const usuario = await prisma.usuario.findFirst({
+    where: {
+      nombreUsuario: userName,
+    },
+  });
+
+  return usuario?.idUsuario;
 }

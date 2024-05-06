@@ -208,9 +208,17 @@ export async function getLastUploadedAudios() {
     orderBy: {
       fechaLanz: 'desc',
     },
+    include: {
+      Artistas: {
+        select: {
+          idUsuario: true,
+          nombreUsuario: true,
+        },
+      },
+    },
     take: 10,
   });
-
+  
   const podcast = await prisma.audio.findMany({
     where: {
       esPodcast: true,
@@ -218,10 +226,34 @@ export async function getLastUploadedAudios() {
     orderBy: {
       fechaLanz: 'desc',
     },
+    include: {
+      Artistas: {
+        select: {
+          idUsuario: true,
+          nombreUsuario: true,
+        },
+      },
+    },
     take: 10,
   });
-
-  return { cancion, podcast };
+  
+  const cancionConArtistasEnMinuscula = cancion.map(audio => {
+    const { Artistas, ...restoAudio } = audio;
+    return {
+      ...restoAudio,
+      artistas: Artistas,
+    };
+  });
+  
+  const podcastConArtistasEnMinuscula = podcast.map(audio => {
+    const { Artistas, ...restoAudio } = audio;
+    return {
+      ...restoAudio,
+      artistas: Artistas,
+    };
+  });
+  
+  return { cancion: cancionConArtistasEnMinuscula, podcast: podcastConArtistasEnMinuscula };
 }
 
 export async function getMostListenedAudios() {
@@ -284,15 +316,18 @@ export async function getMostListenedAudios() {
     }
 
     const audios = await prisma.audio.findMany({
+      where: {
+      esPrivada: false,
+      },
       skip: randomSeed,
       take: n,
       include: {
         Artistas: {
           select: {
-            idUsuario: true,
-            nombreUsuario: true,
+          idUsuario: true,
+          nombreUsuario: true,
           }
-        }
+      }
       },
     });
 

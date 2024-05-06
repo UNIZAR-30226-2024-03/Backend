@@ -82,6 +82,15 @@ const upload = multer(
  *                        type: boolean
  *                      esPodcast:
  *                        type: boolean
+ *                      artistas:
+ *                        type: array
+ *                        items:
+ *                          type: object
+ *                          properties:
+ *                            idUsuario:
+ *                              type: integer
+ *                            nombreUsuario:
+ *                              type: string
  *                podcast:
  *                  type: array
  *                  items:
@@ -106,6 +115,15 @@ const upload = multer(
  *                        type: boolean
  *                      esPodcast:
  *                        type: boolean
+ *                      artistas:
+ *                        type: array
+ *                        items:
+ *                          type: object
+ *                          properties:
+ *                            idUsuario:
+ *                              type: integer
+ *                            nombreUsuario:
+ *                              type: string
  *      403:
  *        description: No se tiene permiso para acceder a este recurso
  *      500:
@@ -473,11 +491,7 @@ router.post('/stats/:idaudio', auth.authenticate, audioController.verifyAudio, a
  *               items:
  *                 $ref: '#/components/schemas/Audio'
  *       400:
- *         description: No se ha recibido el número de audios a devolver
- *       403:
- *         description: No se tiene permiso para acceder a este recurso
- *       500:
- *           description: Error interno del servidor
+ *         description:El número de audios a devolver no es válido
  */
 router.get('/random/:nAudios', auth.authenticate, audioController.getNRandomAudios);
 export default router;
