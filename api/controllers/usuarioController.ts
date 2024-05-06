@@ -95,7 +95,7 @@ export async function usuarioGetAudios(
       ? Number(req.auth?.idUsuario) 
       : Number(req.query.idUsuario);
     if (idUsuario == undefined) return res.status(400).json({ message: "Bad request. Missing idUsuario" });
-    const privada = req.query.idUsuario == undefined;
+    const privada = req.query.idUsuario == undefined || Number.isNaN(req.query.idUsuario);
 
     let cancion, podcast;
     try {
@@ -107,6 +107,7 @@ export async function usuarioGetAudios(
     } catch (error: any) {
       return res.status(400).json({ message: error.message });
     }
+    console.log(req.query.idUsuario, privada)
     const audios = await usuarioDbJs.usuarioGetAudios(idUsuario, cancion as boolean, podcast as boolean, privada);
 
     return res.status(200).json(audios);
