@@ -17,7 +17,6 @@ export async function usuarioModify(
       return res.sendStatus(404);
 
     const { contrasegna, imgPerfil, idUltimoAudio, segFinAudio } = req.body;
-    console.log(contrasegna)
     const hashed = contrasegna == null ? 
       null :
       hashPassword(contrasegna);
@@ -95,7 +94,7 @@ export async function usuarioGetAudios(
       ? Number(req.auth?.idUsuario) 
       : Number(req.query.idUsuario);
     if (idUsuario == undefined) return res.status(400).json({ message: "Bad request. Missing idUsuario" });
-    const privada = req.query.idUsuario == undefined;
+    const privada = req.query.idUsuario == undefined || Number.isNaN(req.query.idUsuario);
 
     let cancion, podcast;
     try {

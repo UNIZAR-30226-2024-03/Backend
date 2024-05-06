@@ -14,22 +14,30 @@ async function searchUsuarios(query: string)
             nombreUsuario: true,
             imgPerfil: true,
         },
-        take: MAX_TAKE,
+        take: MAX_TAKE/2,
     });
     return { usuarios: res };
 }
 
 async function searchListas(idUsuarioQuery: number, query: string, lista: boolean, album: boolean)
 : Promise<{ listas: Partial<Lista>[]; albums: Partial<Lista>[] }> {
+    const admin = await prisma.usuario.findFirst({
+        where: {
+            idUsuario: idUsuarioQuery,
+            esAdmin: true,
+        }
+    });
+    const isAdmin = Boolean(admin);
+    const where = isAdmin ? [] : [
+        { esPrivada: false },
+        { Propietarios: { some: { idUsuario: idUsuarioQuery } } }
+    ];
     const res = await prisma.lista.findMany({
         where: {
             AND: [
                 { nombre: { contains: query, mode: 'insensitive' } },
                 {
-                OR: [
-                    { esPrivada: false },
-                    { Propietarios: { some: { idUsuario: idUsuarioQuery } } }
-                ]
+                    OR: where,
                 },
                 lista && !album ? { esAlbum: false } : {},
                 !lista && album ? { esAlbum: true } : {}
@@ -43,7 +51,7 @@ async function searchListas(idUsuarioQuery: number, query: string, lista: boolea
                 }
             },
         },
-        // take: MAX_TAKE,
+        take: MAX_TAKE,
     });
 
     const dividedListas = res.reduce<{ listas: typeof res; albums: typeof res }>((acc, lista) => {
@@ -60,15 +68,24 @@ async function searchListas(idUsuarioQuery: number, query: string, lista: boolea
 
 async function searchAudios (idUsuarioQuery: number, query: string, cancion: boolean, podcast: boolean)
 : Promise<{ canciones: Partial<Audio>[]; podcasts: Partial<Audio>[] }> {
+    const admin = await prisma.usuario.findFirst({
+        where: {
+            idUsuario: idUsuarioQuery,
+            esAdmin: true,
+        }
+    });
+    const isAdmin = Boolean(admin);
+    const where = isAdmin ? [] : [
+        { esPrivada: false },
+        { Artistas: { some: { idUsuario: idUsuarioQuery } } }
+    ];
+    console.log(isAdmin, where)
     const res = await prisma.audio.findMany({
         where: {
             AND: [
                 { titulo: { contains: query, mode: 'insensitive' } },
                 {
-                OR: [
-                    { esPrivada: false },
-                    { Artistas: { some: { idUsuario: idUsuarioQuery } } }
-                ]
+                    OR: where,
                 },
                 cancion && !podcast ? { esPodcast: false } : {},
                 !cancion && podcast ? { esPodcast: true } : {}
