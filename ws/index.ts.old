@@ -1,27 +1,21 @@
-import fs from "fs";
-import https from "https";
-import { Server } from "socket.io";
+import app from "../api/app.js";
+import https from "http";  // Cambiar a https
+import { Server } from "socket.io"
+import * as usuarioDatabase from "../db/usuarioDb.js";
+import jwtws from "jsonwebtoken";
 import express from 'express';
 import cors from 'cors';
-import jwtws from "jsonwebtoken";
-import * as usuarioDatabase from "../db/usuarioDb.js";
-import app from "../api/app.js";
+
 
 const wsApp = express();
 
 wsApp.use('/ws', app);
+const httpsServer = https.createServer(wsApp);
 
 wsApp.use(cors({
   origin: '*',
   methods: ['GET', 'POST', 'PUT', 'OPTIONS'],
 }));
-
-const httpsOptions = {
-  cert: fs.readFileSync('/var/lib/certificados/certificado.pem'), // Ruta al certificado SSL/TLS
-  key: fs.readFileSync('/var/lib/certificados/claveprivada.pem')   // Ruta a la clave privada
-};
-
-const httpsServer = https.createServer(httpsOptions, wsApp);
 
 export const io = new Server(httpsServer, {
   cors: {
@@ -47,32 +41,35 @@ function authenticateWS(token: string) {
   }
 }
 
+
 httpsServer.listen(3001, () => console.log("WS.io server started on port 3001"));
 
+//WS
 io.of('/ws').on("connection", (socket) => {
-  console.log("Un usuario se ha conectado al WebSocket");
+  console.log("a user connected");
   socket.on("disconnect", () => {
-    console.log("Usuario desconectado del WebSocket");
+    console.log("user disconnected");
   });
 
   socket.on('join', (message) => {
-    try {
+    try{
       message = JSON.parse(message);
       if (('JWT' in message) && ('room' in message)) {
-        console.log("Mensaje recibido: " + message.JWT + " en la sala: " + message.room);
+        console.log("Mensaje recibido: "+message.JWT+" a la sala: "+message.room);
         const idUsuario = authenticateWS(message.JWT);
         console.log(idUsuario);
-        if (idUsuario != null) {
-          console.log(`Socket ${socket.id} unido a la sala ${message.room}`);
+        if(idUsuario != null){
+          console.log(`Socket ${socket.id} joining ${message.room}`);
           socket.join(message.room);
-        } else {
-          console.log(`Socket ${socket.id} no autorizado, ` + message.JWT + " no es un token válido, " + message.room);
+        }else{
+          console.log(`Socket ${socket.id} no autorizado, `+message.JWT+" no es un token valido, "+message.room);
         }
       }
-    } catch (e) {
+    }catch(e){
       console.log(e);
     }
-  });
+
+ });
  
   socket.on('message', (message) => {
     try{
