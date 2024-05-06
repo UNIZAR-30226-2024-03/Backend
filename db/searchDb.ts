@@ -14,7 +14,7 @@ async function searchUsuarios(query: string)
             nombreUsuario: true,
             imgPerfil: true,
         },
-        take: MAX_TAKE,
+        take: MAX_TAKE/2,
     });
     return { usuarios: res };
 }
@@ -28,11 +28,10 @@ async function searchListas(idUsuarioQuery: number, query: string, lista: boolea
         }
     });
     const isAdmin = Boolean(admin);
-    
-    const where = isAdmin ? [] : [{
-        esPrivada: false,
-        Propietarios: { some: { idUsuario: idUsuarioQuery } }
-    }];
+    const where = isAdmin ? [] : [
+        { esPrivada: false },
+        { Propietarios: { some: { idUsuario: idUsuarioQuery } } }
+    ];
     const res = await prisma.lista.findMany({
         where: {
             AND: [
@@ -52,7 +51,7 @@ async function searchListas(idUsuarioQuery: number, query: string, lista: boolea
                 }
             },
         },
-        // take: MAX_TAKE,
+        take: MAX_TAKE,
     });
 
     const dividedListas = res.reduce<{ listas: typeof res; albums: typeof res }>((acc, lista) => {
@@ -76,10 +75,11 @@ async function searchAudios (idUsuarioQuery: number, query: string, cancion: boo
         }
     });
     const isAdmin = Boolean(admin);
-    const where = isAdmin ? [] : [{
-        esPrivada: false,
-        Artistas: { some: { idUsuario: idUsuarioQuery } }
-    }];
+    const where = isAdmin ? [] : [
+        { esPrivada: false },
+        { Artistas: { some: { idUsuario: idUsuarioQuery } } }
+    ];
+    console.log(isAdmin, where)
     const res = await prisma.audio.findMany({
         where: {
             AND: [

@@ -17,7 +17,6 @@ export async function usuarioModify(
       return res.sendStatus(404);
 
     const { contrasegna, imgPerfil, idUltimoAudio, segFinAudio } = req.body;
-    console.log(contrasegna)
     const hashed = contrasegna == null ? 
       null :
       hashPassword(contrasegna);
@@ -107,7 +106,6 @@ export async function usuarioGetAudios(
     } catch (error: any) {
       return res.status(400).json({ message: error.message });
     }
-    console.log(req.query.idUsuario, privada)
     const audios = await usuarioDbJs.usuarioGetAudios(idUsuario, cancion as boolean, podcast as boolean, privada);
 
     return res.status(200).json(audios);

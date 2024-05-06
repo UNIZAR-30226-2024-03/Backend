@@ -3,7 +3,6 @@ import { Request } from 'express-jwt';
 
 import { searchInDb } from "../../db/searchDb.js";
 import { toBoolean } from "../utils/toBoolean.js";
-import httpStatus from "http-status";
 
 export async function searchGet(
     req: Request,
