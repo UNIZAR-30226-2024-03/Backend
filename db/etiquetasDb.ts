@@ -170,6 +170,36 @@ export async function existsTag (id: number): Promise<boolean> {
   }
 }
 
+export async function existsTagByName (name: string): Promise<boolean> {
+  try {
+    const tagCancion = await prisma.etiquetaCancion.findFirst({
+      where: {
+        nombre: name,
+      },
+    });
+
+    if (tagCancion) {
+      return true;
+    } 
+
+    // Si la etiqueta no se encontró en EtiquetaCancion, intenta buscarla en EtiquetaPodcast
+    const tagPodcast = await prisma.etiquetaPodcast.findFirst({
+      where: {
+        nombre: name,
+      },
+    });
+
+    if (tagPodcast) {
+      return true;
+    }
+
+    return false;
+  } catch (error) {
+    console.error(error);
+    throw new Error("Error buscando la etiqueta en Base de Datos");
+  }
+}
+
 
 // Devuelve la lista con los nombres de las etiquetas de las últimas nEscuchas del usuario
 export async function tagsNLastListened(userId: number, nEscuchas: number) {
