@@ -21,8 +21,8 @@ if (!process.env.CLAVEPRIVADA || !process.env.CERTIFICADO) {
 }
 
 const httpsOptions = {
-  cert: fs.readFileSync(process.env.CERTIFICADO), // Ruta al certificado SSL/TLS
-  key: fs.readFileSync(process.env.CLAVEPRIVADA)   // Ruta a la clave privada
+  cert: process.env.CERTIFICADO, // Ruta al certificado SSL/TLS
+  key: process.env.CLAVEPRIVADA   // Ruta a la clave privada
 };
 
 const httpsServer = https.createServer(httpsOptions, wsApp);
