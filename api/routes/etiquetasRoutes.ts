@@ -156,7 +156,7 @@ router.get(
  *                 type: array
  *                 items:
  *                   type: string
- *                 example: ["id_audio_1", "id_audio_2"]
+ *                 example: ['id_audio_1', 'id_audio_2']
  *     responses:
  *       '200':
  *         description: Éxito, devuelve las etiquetas de los audios proporcionados.
