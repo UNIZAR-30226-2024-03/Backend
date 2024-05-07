@@ -300,6 +300,11 @@ export async function updateAudio(req: Request, res: Response) {
             return res.status(400).send('Bad Parameters, faltan las etiquetas');
         }
 
+        if(req.body.idsUsuarios){
+            const idsUsuarios = req.body.idsUsuarios.split(',').map(Number);
+            await audioDatabase.addPropietariosToAudio(Number(req.params.idaudio), idsUsuarios);
+        }
+
         res.json( { message: 'Audio updated successfully' } );
     } catch (error) {
         if (error instanceof Error) {
@@ -407,6 +412,7 @@ export async function getNRandomAudios(req: Request, res: Response) {
         const audios = await audioDatabase.getNRandomAudios(n);
         res.json(audios);
     } catch (error) {
+        console.log(error);
         res.status(400).send(error);
     }
 }
