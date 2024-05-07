@@ -328,6 +328,7 @@ export async function playAudio(req: Request, res: Response) {
             return res.status(403).send("Permission denied, unsifficient permissions");
         }
     } catch (err) {
+        console.log(err);
         res.status(404).send('File not found');
     }
 }
