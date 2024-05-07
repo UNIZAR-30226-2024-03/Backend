@@ -282,16 +282,10 @@ export async function updateAudio(req: Request, res: Response) {
 
         if (req.body.etiquetas) {
             if (req.body.tipoEtiqueta=='Podcast' || req.body.tipoEtiqueta=='Cancion') {
-                if (req.body.eliminarEtiquetas) {
-                    const etiquetas = req.body.eliminarEtiquetas.split(',').map(Number);
-                    for (const idEtiqueta of etiquetas) {
-                        await audioDatabase.unlinkLabelToAudio(Number(req.params.idaudio), idEtiqueta, req.body.tipoEtiqueta);
-                    }
-                }else{
-                    const etiquetas = req.body.etiquetas.split(',').map(Number);
-                    for (const idEtiqueta of etiquetas) {
-                        await audioDatabase.linkLabelToAudio(Number(req.params.idaudio), idEtiqueta, req.body.tipoEtiqueta);
-                    }
+                await audioDatabase.unlinkAllLabelsFromAudio(Number(req.params.idaudio), req.body.tipoEtiqueta);
+                const etiquetas = req.body.etiquetas.split(',').map(Number);
+                for (const idEtiqueta of etiquetas) {
+                    await audioDatabase.linkLabelToAudio(Number(req.params.idaudio), idEtiqueta, req.body.tipoEtiqueta);
                 }
             }else{
                 return res.status(400).send('Bad Parameters,  tipo de etiqueta no válida');
