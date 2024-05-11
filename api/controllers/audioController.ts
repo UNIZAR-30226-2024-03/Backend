@@ -282,22 +282,30 @@ export async function updateAudio(req: Request, res: Response) {
 
         if (req.body.etiquetas) {
             if (req.body.tipoEtiqueta=='Podcast' || req.body.tipoEtiqueta=='Cancion') {
-                if (req.body.eliminarEtiquetas) {
-                    const etiquetas = req.body.eliminarEtiquetas.split(',').map(Number);
-                    for (const idEtiqueta of etiquetas) {
-                        await audioDatabase.unlinkLabelToAudio(Number(req.params.idaudio), idEtiqueta, req.body.tipoEtiqueta);
-                    }
-                }else{
-                    const etiquetas = req.body.etiquetas.split(',').map(Number);
-                    for (const idEtiqueta of etiquetas) {
-                        await audioDatabase.linkLabelToAudio(Number(req.params.idaudio), idEtiqueta, req.body.tipoEtiqueta);
-                    }
+                await audioDatabase.unlinkAllLabelsFromAudio(Number(req.params.idaudio), req.body.tipoEtiqueta);
+                const etiquetas = req.body.etiquetas.split(',').map(Number);
+                for (const idEtiqueta of etiquetas) {
+                    await audioDatabase.linkLabelToAudio(Number(req.params.idaudio), idEtiqueta, req.body.tipoEtiqueta);
                 }
             }else{
                 return res.status(400).send('Bad Parameters,  tipo de etiqueta no válida');
             }
         }else if (!req.body.etiquetas && req.body.tipoEtiqueta) {
             return res.status(400).send('Bad Parameters, faltan las etiquetas');
+        }
+
+        if(req.body.idsUsuarios){
+            const idsUsuarios = req.body.idsUsuarios.split(',').map(Number);
+            if (idsUsuarios.length === 0) {
+                const audioDel =await audioDatabase.findAudioById(Number(req.params.idaudio));
+                await audioDatabase.deleteAudioById(Number(req.params.idaudio));
+                if (audioDel) {
+                    deleteFile(path.join(projectRootPath,audioDel.path));
+                }
+            }else{
+                await audioDatabase.addPropietariosToAudio(Number(req.params.idaudio), idsUsuarios);
+
+            }
         }
 
         res.json( { message: 'Audio updated successfully' } );
@@ -329,6 +337,7 @@ export async function playAudio(req: Request, res: Response) {
             return res.status(403).send("Permission denied, unsifficient permissions");
         }
     } catch (err) {
+        console.log(err);
         res.status(404).send('File not found');
     }
 }

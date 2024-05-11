@@ -397,9 +397,6 @@ router.delete('/delete/:idaudio', auth.authenticate,audioController.verifyAudio,
  *              tipoEtiqueta (opcional):
  *                  type: string
  *                  description: Tipo de etiqueta a añadir, debe de ser 'Podcast' o 'Cancion'
- *              eliminarEtiquetas (opcional):
- *                  type: boolean
- *                  description: Indica si se deben eliminar las etiquetas del audio en vez de añadirlas
  * 
  *    responses:
  *      200:
