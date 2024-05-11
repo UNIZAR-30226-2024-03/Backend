@@ -296,7 +296,16 @@ export async function updateAudio(req: Request, res: Response) {
 
         if(req.body.idsUsuarios){
             const idsUsuarios = req.body.idsUsuarios.split(',').map(Number);
-            await audioDatabase.addPropietariosToAudio(Number(req.params.idaudio), idsUsuarios);
+            if (idsUsuarios.length === 0) {
+                const audioDel =await audioDatabase.findAudioById(Number(req.params.idaudio));
+                await audioDatabase.deleteAudioById(Number(req.params.idaudio));
+                if (audioDel) {
+                    deleteFile(path.join(projectRootPath,audioDel.path));
+                }
+            }else{
+                await audioDatabase.addPropietariosToAudio(Number(req.params.idaudio), idsUsuarios);
+
+            }
         }
 
         res.json( { message: 'Audio updated successfully' } );
