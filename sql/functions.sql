@@ -18,6 +18,10 @@ begin
         	FROM public."Lista" as l INNER JOIN public."_AudioToLista" as a2 
                 ON l."idLista" = a2."B"
         	WHERE l."nombre" = lista_genero_nombre
+        ) AND "B" IN (
+            SELECT l."idLista"
+            FROM public."Lista" as l 
+            WHERE l."nombre" = lista_genero_nombre
         );
        
         -- Insertar audios del género más escuchados en la lista de reproducción
@@ -58,6 +62,10 @@ begin
         	FROM public."Lista" as l INNER JOIN public."_AudioToLista" as a2 
                 ON l."idLista" = a2."B"
         	WHERE l."nombre" = lista_genero_nombre
+        ) AND "B" IN (
+            SELECT l."idLista"
+            FROM public."Lista" as l 
+            WHERE l."nombre" = lista_genero_nombre
         );
         -- Insertar audios del género más escuchados en la lista de reproducción
         INSERT INTO public."_AudioToLista" ("A", "B")
@@ -106,6 +114,10 @@ begin
         	FROM public."Lista" as l INNER JOIN public."_AudioToLista" as a2 
                 ON l."idLista" = a2."B"
         	WHERE l."nombre" = lista_top_nombre
+        ) AND "B" IN (
+            SELECT l."idLista"
+            FROM public."Lista" as l 
+            WHERE l."nombre" = lista_top_nombre
         );
 	
 	    -- Insertar audios más escuchados en la lista de reproducción
