@@ -91,17 +91,73 @@ export async function getArtistasAudioById(id: number) {
     return artistas;
 }
 
-//PRE: Se recibe un id de audio correcto y un array de ids de usuarios
-//POST: Se añaden los usuarios con los ids correspondientes al audio con el id correspondiente
 export async function addPropietariosToAudio(id: number, idUsuarios: number[]) {
-    await prisma.audio.update({
-        where: { idAudio: id },
+  // Primero, obtén la lista actual de propietarios del audio
+  const audio = await prisma.audio.findUnique({
+      where: { idAudio: id },
+      include: { Artistas: true },
+  });
+  if (!audio) {
+      throw new Error('Audio not found');
+  }
+  const currentPropietariosIds = audio.Artistas.map(artista => artista.idUsuario);
+
+  // Encuentra los propietarios que necesitan ser desconectados y los que necesitan ser conectados
+  const propietariosToDisconnect = currentPropietariosIds.filter(idUsuario => !idUsuarios.includes(idUsuario));
+  const propietariosToConnect = idUsuarios.filter(idUsuario => !currentPropietariosIds.includes(idUsuario));
+
+  // Desconecta los propietarios que ya no están en la lista
+  for (const idUsuario of propietariosToDisconnect) {
+      await prisma.audio.update({
+          where: { idAudio: id },
+          data: {
+              Artistas: {
+                  disconnect: [{ idUsuario }],
+              },
+          },
+      });
+  }
+
+  // Conecta los nuevos propietarios
+  if (propietariosToConnect.length > 0) {
+      await prisma.audio.update({
+          where: { idAudio: id },
+          data: {
+              Artistas: {
+                  connect: propietariosToConnect.map(idUsuario => ({ idUsuario })),
+              },
+          },
+      });
+  }
+}
+
+export async function unlinkAllLabelsFromAudio(idAudio: number, tipoEtiqueta: string) {
+  const audio = await prisma.audio.findUnique({
+    where: { idAudio: idAudio },
+    include: { EtiquetasPodcast: true, EtiquetasCancion: true },
+  });
+
+  if (audio) {
+    if (tipoEtiqueta === 'Podcast') {
+      await prisma.audio.update({
+        where: { idAudio: idAudio },
         data: {
-            Artistas: {
-                connect: idUsuarios.map(idUsuario => ({ idUsuario })),
-            },
+          EtiquetasPodcast: {
+            disconnect: audio.EtiquetasPodcast.map(etiqueta => ({ idEtiqueta: etiqueta.idEtiqueta })),
+          },
         },
-    });
+      });
+    } else {
+      await prisma.audio.update({
+        where: { idAudio: idAudio },
+        data: {
+          EtiquetasCancion: {
+            disconnect: audio.EtiquetasCancion.map(etiqueta => ({ idEtiqueta: etiqueta.idEtiqueta })),
+          },
+        },
+      });
+    }
+  }
 }
 
 export async function linkLabelToAudio(idAudio: number, idLabel: number,tipoEtiqueta: string) {
@@ -257,81 +313,84 @@ export async function getLastUploadedAudios() {
 }
 
 export async function getMostListenedAudios() {
-    const audios = await prisma.escucha.groupBy({
-      by: ['idAudio'],
-      where: {
-        Audio: {
-          esPodcast: false
-        }
-      },
-      _count: {
-        idAudio: true
-      },
-      orderBy: {
-        _count: {
-          idAudio: 'desc'
-        }
-      },
-      take: 10
-    });
-  
-    const podcasts = await prisma.escucha.groupBy({
-      by: ['idAudio'],
-      where: {
-        Audio: {
-          esPodcast: true
-        }
-      },
-      _count: {
-        idAudio: true
-      },
-      orderBy: {
-        _count: {
-          idAudio: 'desc'
-        }
-      },
-      take: 10
-    });
-  
-    const audio = audios.map(a => ({
-      count: a._count.idAudio,
-      idAudio: a.idAudio
-    }));
-  
-    const podcast = podcasts.map(p => ({
-      count: p._count.idAudio,
-      idAudio: p.idAudio
-    }));
-  
-    return { audio, podcast };
-  }
-
-
-  export async function getNRandomAudios(n: number) {
-    const totalAudios = await prisma.audio.count();
-    const randomSeed = Math.floor(Math.random() * totalAudios);
-
-    if (n > totalAudios) {
-      throw new Error('Not enough audios in the database');
-    }
-
-    const audios = await prisma.audio.findMany({
-      where: {
-      esPrivada: false,
-      },
-      skip: randomSeed,
-      take: n,
-      include: {
-        Artistas: {
-          select: {
-          idUsuario: true,
-          nombreUsuario: true,
-          }
+  const audios = await prisma.escucha.groupBy({
+    by: ['idAudio'],
+    where: {
+      Audio: {
+        esPodcast: false
       }
-      },
-    });
+    },
+    _count: {
+      idAudio: true
+    },
+    orderBy: {
+      _count: {
+        idAudio: 'desc'
+      }
+    },
+    take: 10
+  });
+
+  const podcasts = await prisma.escucha.groupBy({
+    by: ['idAudio'],
+    where: {
+      Audio: {
+        esPodcast: true
+      }
+    },
+    _count: {
+      idAudio: true
+    },
+    orderBy: {
+      _count: {
+        idAudio: 'desc'
+      }
+    },
+    take: 10
+  });
+
+  const audio = audios.map(a => ({
+    count: a._count.idAudio,
+    idAudio: a.idAudio
+  }));
+
+  const podcast = podcasts.map(p => ({
+    count: p._count.idAudio,
+    idAudio: p.idAudio
+  }));
+
+  return { audio, podcast };
+}
 
 
-    return audios;
+export async function getNRandomAudios(n: number) {
+  const totalAudios = await prisma.audio.count();
 
+  // Se repetirán audios 
+  // if (n > totalAudios) {
+  //   throw new Error('Not enough audios in the database');
+  // }
+
+  const audios = await prisma.audio.findMany({
+    where: {
+    esPrivada: false,
+    },
+    include: {
+      Artistas: {
+        select: {
+        idUsuario: true,
+        nombreUsuario: true,
+        }
+      }
+    },
+  });
+
+  let result = [];
+  for (let i = 0; i < n; i++) {
+    let randomAudio = audios[Math.floor(Math.random() * audios.length)];
+    const { Artistas, ...restoAudio } = randomAudio;
+    result.push({ ...restoAudio, artistas: Artistas });
   }
+
+  return result;
+}

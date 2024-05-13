@@ -500,11 +500,6 @@ export const addCollaboratorToLista = catchAsync(async (req : Request, res : Res
       return;
     }
 
-    if (!await isOwnerOrAdmin(parseInt(req.params.idLista), req.auth?.idUsuario, req.auth?.esAdmin)) {
-      res.status(httpStatus.UNAUTHORIZED).send("No tienes permisos para añadir un colaborador a esta lista");
-      return;
-    }
-
     const lista = await listasDb.addPropietarioToLista(parseInt(req.params.idLista), parseInt(req.params.idUsuario));
     res.send(lista);
   } catch (error) {
