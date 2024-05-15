@@ -151,8 +151,9 @@ export async function createAudio(req: Request, res: Response) {
                     },
                 },
             });
-            await audioDatabase.addPropietariosToAudio(audio.idAudio, idsUsuarios2);
         }
+        await audioDatabase.addPropietariosToAudio(audio.idAudio, idsUsuarios2);
+
 
         res.status(200).json( { message: 'Audio added successfully' ,idaudio: audio.idAudio});
 
