@@ -83,22 +83,26 @@ export async function verifyLabelList(req: Request, res: Response, next: NextFun
     }
 }
 
-async function addAudioToListaPriv( idUsuario: number, idAudio: number, req: Request){
-    const listas = await listasDb.getListasByPropietario(idUsuario);
-    let idLista = -1;
-    for (const lista of listas) {
-        if(req.body.esPodcast == 'true' && lista.tipoLista === 'MIS_PODCAST'){
-            idLista = lista.idLista;
-        }else if(req.body.esPodcast == 'false' && lista.tipoLista === 'MIS_AUDIOS'){
-            idLista = lista.idLista;
+async function addAudioToListaPriv( idAudio: number ,req : Request){
+    const idUsuarios = await audioDatabase.getIdArtistaAudioById(idAudio);
+    for(const idUsuario of idUsuarios){
+        const listas = await listasDb.getListasByPropietario(idUsuario);
+        let idLista = -1;
+        for (const lista of listas) {
+            if(req.body.esPodcast == 'true' && lista.tipoLista === 'MIS_PODCAST'){
+                idLista = lista.idLista;
+            }else if(req.body.esPodcast == 'false' && lista.tipoLista === 'MIS_AUDIOS'){
+                idLista = lista.idLista;
+            }
+        }
+        if (idLista != -1) {
+            await listasDb.addAudioToLista(idLista, idAudio);
+            return true;
+        }else{
+            return false;
         }
     }
-    if (idLista != -1) {
-        await listasDb.addAudioToLista(idLista, idAudio);
-        return true;
-    }else{
-        return false;
-    }
+
 }
 
 export async function createAudio(req: Request, res: Response) {
@@ -157,7 +161,6 @@ export async function createAudio(req: Request, res: Response) {
 
 
         }
-        let listaPriv;
         for (const idUsuario of idsUsuarios2) {
             await prisma.usuario.update({
                 where: {
@@ -170,10 +173,11 @@ export async function createAudio(req: Request, res: Response) {
                 },
             });
             await audioDatabase.addPropietariosToAudio(audio.idAudio, idsUsuarios2);
-            listaPriv = await addAudioToListaPriv(idUsuario, audio.idAudio, req);
-            if (listaPriv == false) {
-                return res.status(500).send('No existe una lista de MIS_AUDIOS para el usuario actual');
-            }
+        }
+        const listaPriv = await addAudioToListaPriv(audio.idAudio, req);
+
+        if (listaPriv == false) {
+            return res.status(500).send('No existe una lista de MIS_AUDIOS para el usuario actual');
         }
 
         res.status(200).json( { message: 'Audio added successfully' ,idaudio: audio.idAudio});
@@ -313,14 +317,11 @@ export async function updateAudio(req: Request, res: Response) {
             }else{
                 await audioDatabase.addPropietariosToAudio(Number(req.params.idaudio), idsUsuarios);
             }
-            let listaPriv;
-            for (const idUsuario of idsUsuarios) {
-                listaPriv = await addAudioToListaPriv(idUsuario, Number(req.params.idaudio), req);
-                if (listaPriv == false) {
-                    return res.status(500).send('No existe una lista de MIS_AUDIOS para el usuario actual');
-                }
+            const listaPriv = await addAudioToListaPriv(Number(req.params.idaudio),req);
+            if (listaPriv == false) {
+                return res.status(500).send('No existe una lista de MIS_AUDIOS para el usuario actual');
             }
-
+            
         }
         res.json( { message: 'Audio updated successfully' } );
     } catch (error) {
