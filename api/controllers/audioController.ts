@@ -138,8 +138,20 @@ export async function createAudio(req: Request, res: Response) {
                 await audioDatabase.linkLabelToAudio(audio.idAudio, idEtiqueta, req.body.tipoEtiqueta);
             }
         }
-
-        await audioDatabase.addPropietariosToAudio(audio.idAudio, idsUsuarios2);
+        for (const idUsuario of idsUsuarios2) {
+            const listas = await listasDb.getListasByPropietario(idUsuario);
+            let idLista = -1;
+            for (const lista of listas) {
+                if(audio.esPodcast == true && lista.tipoLista === 'MIS_PODCAST'){
+                    idLista = lista.idLista;
+                    break;
+                }else if(audio.esPodcast == false && lista.tipoLista === 'MIS_AUDIOS'){
+                    idLista = lista.idLista;
+                    break;
+                }
+            }
+            await listasDb.addAudioToLista(idLista, audio.idAudio);
+        }
         
 
         res.status(200).json( { message: 'Audio added successfully' ,idaudio: audio.idAudio});
