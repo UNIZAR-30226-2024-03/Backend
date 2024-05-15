@@ -9,7 +9,6 @@ import * as etiquetasDatabase from "../../db/etiquetasDb.js";
 import * as audioDatabase from "../../db/audioDb.js";
 import * as listasDb from '../../db/listaDb.js';
 import { promisify } from 'util';
-import { json } from "stream/consumers";
 const projectRootPath = process.cwd(); // Devuelve el directorio raíz del proyecto y se almacena en una constante
 
 
@@ -83,27 +82,7 @@ export async function verifyLabelList(req: Request, res: Response, next: NextFun
     }
 }
 
-async function addAudioToListaPriv( idAudio: number ,req : Request){
-    const idUsuarios = await audioDatabase.getIdArtistaAudioById(idAudio);
-    for(const idUsuario of idUsuarios){
-        const listas = await listasDb.getListasByPropietario(idUsuario);
-        let idLista = -1;
-        for (const lista of listas) {
-            if(req.body.esPodcast == 'true' && lista.tipoLista === 'MIS_PODCAST'){
-                idLista = lista.idLista;
-            }else if(req.body.esPodcast == 'false' && lista.tipoLista === 'MIS_AUDIOS'){
-                idLista = lista.idLista;
-            }
-        }
-        if (idLista != -1) {
-            await listasDb.addAudioToLista(idLista, idAudio);
-            return true;
-        }else{
-            return false;
-        }
-    }
 
-}
 
 export async function createAudio(req: Request, res: Response) {
     try {
@@ -173,11 +152,6 @@ export async function createAudio(req: Request, res: Response) {
                 },
             });
             await audioDatabase.addPropietariosToAudio(audio.idAudio, idsUsuarios2);
-        }
-        const listaPriv = await addAudioToListaPriv(audio.idAudio, req);
-
-        if (listaPriv == false) {
-            return res.status(500).send('No existe una lista de MIS_AUDIOS para el usuario actual');
         }
 
         res.status(200).json( { message: 'Audio added successfully' ,idaudio: audio.idAudio});
@@ -316,10 +290,6 @@ export async function updateAudio(req: Request, res: Response) {
                 }
             }else{
                 await audioDatabase.addPropietariosToAudio(Number(req.params.idaudio), idsUsuarios);
-            }
-            const listaPriv = await addAudioToListaPriv(Number(req.params.idaudio),req);
-            if (listaPriv == false) {
-                return res.status(500).send('No existe una lista de MIS_AUDIOS para el usuario actual');
             }
             
         }

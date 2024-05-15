@@ -1,5 +1,7 @@
 import prisma from "../prisma/client.js";
 import * as etiquetasDb from "../db/etiquetasDb.js";
+import * as listasDb from "../db/listaDb.js";
+
 
 //PRE: Se recibe un id de audio correcto
 //POST: Se devuelve el audio con el id correspondiente
@@ -116,6 +118,19 @@ export async function addPropietariosToAudio(id: number, idUsuarios: number[]) {
               },
           },
       });
+      const listas = await listasDb.getListasByPropietario(idUsuario);
+      let idLista = -1;
+      for (const lista of listas) {
+          if(audio.esPodcast == true && lista.tipoLista === 'MIS_PODCAST'){
+              idLista = lista.idLista;
+              break;
+          }else if(audio.esPodcast == false && lista.tipoLista === 'MIS_AUDIOS'){
+              idLista = lista.idLista;
+              break;
+          }
+      }
+      await listasDb.deleteAudioFromLista(idLista, audio.idAudio);
+
   }
 
   // Conecta los nuevos propietarios
@@ -128,6 +143,21 @@ export async function addPropietariosToAudio(id: number, idUsuarios: number[]) {
               },
           },
       });
+  }
+
+  for (const idUsuario of propietariosToConnect) {
+      const listas = await listasDb.getListasByPropietario(idUsuario);
+      let idLista = -1;
+      for (const lista of listas) {
+          if(audio.esPodcast == true && lista.tipoLista === 'MIS_PODCAST'){
+              idLista = lista.idLista;
+              break;
+          }else if(audio.esPodcast == false && lista.tipoLista === 'MIS_AUDIOS'){
+              idLista = lista.idLista;
+              break;
+          }
+      }
+      await listasDb.addAudioToLista(idLista, audio.idAudio);
   }
 }
 
