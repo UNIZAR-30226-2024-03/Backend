@@ -463,7 +463,7 @@ export async function usuarioGetHistorico(userId: number, month: number, year: n
             _all: true,
         },
     });
-    const alcance = escuchas.length > 0 ? escuchas[0]._count._all : 0;
+    const alcance = escuchas.length;
     alcanceMensual.push({ month, year, alcance });
   }
 
