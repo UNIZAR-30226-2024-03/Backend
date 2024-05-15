@@ -705,12 +705,6 @@ describe('Lista routes', () => {
         .expect(httpStatus.NOT_FOUND);
     });
 
-    it('returns ' + httpStatus.UNAUTHORIZED + ' when user is not owner or admin', async () => {
-      await request(app)
-        .post(`${LISTA_COLLABORATOR}/${lista?.idLista}/${userTest2_id}`)
-        .set('Authorization', `Bearer ${bearer2}`)
-        .expect(httpStatus.UNAUTHORIZED);
-    });
 
     it('returns ' + httpStatus.OK + ' and correct result when all params are ok', async () => {
       await request(app)

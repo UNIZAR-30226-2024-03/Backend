@@ -18,6 +18,10 @@ begin
         	FROM public."Lista" as l INNER JOIN public."_AudioToLista" as a2 
                 ON l."idLista" = a2."B"
         	WHERE l."nombre" = lista_genero_nombre
+        ) AND "B" IN (
+            SELECT l."idLista"
+            FROM public."Lista" as l 
+            WHERE l."nombre" = lista_genero_nombre
         );
        
         -- Insertar audios del género más escuchados en la lista de reproducción
@@ -58,6 +62,10 @@ begin
         	FROM public."Lista" as l INNER JOIN public."_AudioToLista" as a2 
                 ON l."idLista" = a2."B"
         	WHERE l."nombre" = lista_genero_nombre
+        ) AND "B" IN (
+            SELECT l."idLista"
+            FROM public."Lista" as l 
+            WHERE l."nombre" = lista_genero_nombre
         );
         -- Insertar audios del género más escuchados en la lista de reproducción
         INSERT INTO public."_AudioToLista" ("A", "B")
@@ -106,6 +114,10 @@ begin
         	FROM public."Lista" as l INNER JOIN public."_AudioToLista" as a2 
                 ON l."idLista" = a2."B"
         	WHERE l."nombre" = lista_top_nombre
+        ) AND "B" IN (
+            SELECT l."idLista"
+            FROM public."Lista" as l 
+            WHERE l."nombre" = lista_top_nombre
         );
 	
 	    -- Insertar audios más escuchados en la lista de reproducción
@@ -123,37 +135,28 @@ $$ LANGUAGE plpgsql;
 select generar_listas_reproduccion();
 
 
-
-
 -- Por defecto las listas son publicas. ¡ Añadir propiertario e imagen, fecha !
 CREATE OR REPLACE FUNCTION crear_lista_si_no_existe(nombre_lista TEXT) RETURNS VOID AS $$
 BEGIN
-	INSERT INTO public."Lista" (nombre, "tipoLista") 
-	    SELECT nombre_lista, 'NORMAL' -- Comprobar que tipo de lista es
-	    WHERE NOT EXISTS (
-	        SELECT 1 
-	        FROM public."Lista" 
-	        WHERE nombre = nombre_lista
-	    );
+    INSERT INTO public."Lista" (nombre, "tipoLista") 
+    SELECT nombre_lista, 'NORMAL'
+    WHERE NOT EXISTS (
+        SELECT 1 
+        FROM public."Lista" 
+        WHERE nombre = nombre_lista
+    );
+    
+    INSERT INTO public."_ListaToUsuario" ("A", "B")
+    SELECT "idLista", '524'
+    FROM public."Lista" as l
+    WHERE l."nombre" = nombre_lista
+    AND NOT EXISTS (
+        SELECT 1 
+        FROM public."_ListaToUsuario" 
+        WHERE "A" = l."idLista" AND "B" = '524'
+    );
 END;
 $$ LANGUAGE plpgsql;
-
-
-
-
-
--- Por defecto las listas son publicas. ¡ Añadir propiertario e imagen, fecha !
-CREATE OR REPLACE FUNCTION crear_lista_si_no_existe(nombre_lista TEXT) RETURNS VOID AS $$
-BEGIN
-	INSERT INTO public."Lista" (nombre, "tipoLista") 
-	    SELECT nombre_lista, 'NORMAL' -- Comprobar que tipo de lista es
-	    WHERE NOT EXISTS (
-	        SELECT 1 
-	        FROM public."Lista" 
-	        WHERE nombre = nombre_lista
-	    );
-END;
-$$ LANGUAGE plpgsql;	
 
 -- Función que se desencadena con la llamada de un trigger y válida si la asignación de etiquetas
 -- es correcta o no.
