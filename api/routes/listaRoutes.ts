@@ -679,7 +679,7 @@ listaRouter.delete("/audio/:idLista/:idAudio", auth.authenticate, listaControlle
  *        404:
  *           description: No se ha encontrado la lista o el usuario.
  */
-listaRouter.post("/collaborator/:idLista/:idUsuario", auth.authenticate, listaController.addCollaboratorToLista);
+listaRouter.post("/collaborator/:idLista/:idUsuario", auth.optionalAuthenticate, listaController.addCollaboratorToLista);
 
 //[DELETE]lista/collaborator/<idLista>/<idUsuario>/: Elimina un colaborador de la lista.
 /**
