@@ -409,8 +409,7 @@ export async function usuarioGetPersonasHanEscuchado(userId: number) {
       _all: true,
     },
   });
-  const newpersonas = personas.length > 0 ? personas[0]._count._all : 0;
-  return newpersonas;
+  return personas.length;
 }
 
 export async function usuarioGetPersonasHanEscuchadoUltimoMes(userId: number) {
@@ -434,8 +433,7 @@ export async function usuarioGetPersonasHanEscuchadoUltimoMes(userId: number) {
       _all: true,
     },
   });
-  const newpersonas = personas.length > 0 ? personas[0]._count._all : 0;
-  return newpersonas;
+  return personas.length;
 }
 
 
