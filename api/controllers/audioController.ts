@@ -137,23 +137,10 @@ export async function createAudio(req: Request, res: Response) {
                 console.log("Se va a linkar etiqueta a audio con tipo "+req.body.tipoEtiqueta+" y id "+idEtiqueta+" y id audio "+audio.idAudio);
                 await audioDatabase.linkLabelToAudio(audio.idAudio, idEtiqueta, req.body.tipoEtiqueta);
             }
-
-
         }
-        for (const idUsuario of idsUsuarios2) {
-            await prisma.usuario.update({
-                where: {
-                    idUsuario: idUsuario,
-                },
-                data: {
-                    Audios: {
-                        connect: { idAudio: audio.idAudio },
-                    },
-                },
-            });
-        }
+
         await audioDatabase.addPropietariosToAudio(audio.idAudio, idsUsuarios2);
-
+        
 
         res.status(200).json( { message: 'Audio added successfully' ,idaudio: audio.idAudio});
 

@@ -109,6 +109,7 @@ export async function addPropietariosToAudio(id: number, idUsuarios: number[]) {
   const propietariosToConnect = idUsuarios.filter(idUsuario => !currentPropietariosIds.includes(idUsuario));
 
   // Desconecta los propietarios que ya no están en la lista
+  console.log("Los usuarios a desconectar son: "+propietariosToDisconnect);
   for (const idUsuario of propietariosToDisconnect) {
       await prisma.audio.update({
           where: { idAudio: id },
@@ -145,6 +146,7 @@ export async function addPropietariosToAudio(id: number, idUsuarios: number[]) {
       });
   }
 
+  console.log("Los usuarios a conectar son: "+propietariosToConnect);
   for (const idUsuario of propietariosToConnect) {
       const listas = await listasDb.getListasByPropietario(idUsuario);
       let idLista = -1;
