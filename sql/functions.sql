@@ -49,7 +49,6 @@ begin
 
     END LOOP;
    
-   
    FOR genero IN SELECT nombre FROM public."EtiquetaPodcast" LOOP
         -- Generar nombre de lista basado en el género
         lista_genero_nombre := 'Top ' || genero.nombre;
@@ -91,9 +90,16 @@ begin
         LIMIT 10;
 
     END LOOP;
+   
+   -- Limpiamos la lista Top 10 Global
+   DELETE FROM public."_AudioToLista" WHERE 
+	 "B" IN (
+        SELECT l."idLista"
+        FROM public."Lista" as l 
+        WHERE l."nombre" = 'Top 10 Global'
+    );
 
 	-- Crear lista de reproducción basada en los audios más escuchados
-    -- Comprobar que son públicas.
 	FOR audio_mas_escuchado IN SELECT "idAudio" FROM (
 	    SELECT e."idAudio", COUNT(*) as escuchas
 	    FROM public."Escucha" AS e
@@ -103,22 +109,9 @@ begin
 	    ORDER BY escuchas DESC
 	    LIMIT 10
 	) AS subquery LOOP
-	    -- Generar nombre de lista
 	    lista_top_nombre := 'Top 10 Global';
-	
 	    -- Insertar lista de reproducción si no existe
 	    PERFORM crear_lista_si_no_existe(lista_top_nombre);
-
-        DELETE FROM public."_AudioToLista" WHERE "A" IN (
-        	SELECT a2."A"
-        	FROM public."Lista" as l INNER JOIN public."_AudioToLista" as a2 
-                ON l."idLista" = a2."B"
-        	WHERE l."nombre" = lista_top_nombre
-        ) AND "B" IN (
-            SELECT l."idLista"
-            FROM public."Lista" as l 
-            WHERE l."nombre" = lista_top_nombre
-        );
 	
 	    -- Insertar audios más escuchados en la lista de reproducción
 	    INSERT INTO public."_AudioToLista" ("A", "B")
@@ -131,6 +124,8 @@ begin
 	END LOOP;
 END;
 $$ LANGUAGE plpgsql;
+
+
 
 select generar_listas_reproduccion();
 
